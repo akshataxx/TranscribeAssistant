@@ -37,8 +37,7 @@ moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
 moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttpLogging" }
 material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version = "materialIconsExtended" }
-retrofit-scalars = { group = "com.squareup.retrofit2", name = "converter-scalars", version = "retrofit" }
-
+retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version = "2.9.0" }
 
 
 [plugins]

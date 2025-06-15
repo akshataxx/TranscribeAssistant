@@ -1,10 +1,10 @@
 package com.example.transcribeassistant.network
 
-import okhttp3.Request
+import com.example.transcribeassistant.model.Transcript
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-interface ApiService {
+interface TranscriptApi {
 
     /**
      * Sends a request to the server to transcribe a video URL.
@@ -12,5 +12,5 @@ interface ApiService {
      * @return The transcript as a String.
      */
     @POST("video/url")
-    suspend fun getTranscriptFromVideo(@Body request: Map<String, String>): String
+    suspend fun getTranscriptFromVideo(@Body request: Map<String, String>): Transcript
 }
