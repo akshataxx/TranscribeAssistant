@@ -1,9 +1,14 @@
 package com.example.transcribeassistant.data.network
 
-import com.example.transcribeassistant.domain.model.Transcript
+import com.example.transcribeassistant.data.dto.TranscriptDto
 import retrofit2.http.Body
 import retrofit2.http.POST
 
+/**
+ * Interface for the Transcript API.
+ * This interface defines the endpoints for the transcript service.
+ * It uses Retrofit annotations to specify HTTP methods and request bodies.
+ */
 interface TranscriptApi {
 
     /**
@@ -12,5 +17,5 @@ interface TranscriptApi {
      * @return The transcript as a String.
      */
     @POST("video/url")
-    suspend fun getTranscriptFromVideo(@Body request: Map<String, String>): Transcript
+    suspend fun getTranscriptFromVideo(@Body request: Map<String, String>): TranscriptDto
 }

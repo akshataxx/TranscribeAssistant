@@ -3,12 +3,13 @@ package com.example.transcribeassistant.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.transcribeassistant.data.RetrofitClient
 import com.example.transcribeassistant.domain.model.Transcript
 import com.example.transcribeassistant.domain.repository.TranscriptRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 /**
@@ -17,9 +18,11 @@ import kotlinx.coroutines.launch
  * Calls the API service to get the transcript and exposes it as a StateFlow.
  * On error, it updates the StateFlow with an error message.
  */
-class TranscriptViewModel: ViewModel() {
 
-    private val repository = TranscriptRepository(RetrofitClient.apiService)
+@HiltViewModel
+class TranscriptViewModel @Inject constructor(
+    private val repository: TranscriptRepository
+): ViewModel() {
 
     private val _transcript = MutableStateFlow<Transcript?>(null)
     val transcript: StateFlow<Transcript?> = _transcript

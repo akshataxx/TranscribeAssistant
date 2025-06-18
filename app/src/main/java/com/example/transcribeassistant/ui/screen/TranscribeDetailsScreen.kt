@@ -21,11 +21,17 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.hilt.navigation.compose.hiltViewModel
 
-
+/**
+ * TranscribeDetailsScreen displays the details of a transcript including the title, source, notes,
+ * transcript summary, full transcript, and categories.
+ * It also allows users to read the transcript aloud using TextToSpeech.
+ * Part of the UI/Presentation layer of the Transcribe Assistant app.
+ */
 @Composable
 fun TranscribeDetailsScreen(transcriptId: String) {
-    val viewModel: TranscriptViewModel = viewModel()
+    val viewModel: TranscriptViewModel = hiltViewModel()
     val transcriptState = viewModel.transcript.collectAsState()
     val transcript= transcriptState.value
 

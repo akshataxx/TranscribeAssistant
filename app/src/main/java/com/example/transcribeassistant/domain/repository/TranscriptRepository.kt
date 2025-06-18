@@ -1,15 +1,14 @@
 package com.example.transcribeassistant.domain.repository
 
 import com.example.transcribeassistant.domain.model.Transcript
-import com.example.transcribeassistant.data.network.TranscriptApi
 
 /**
- * Repository for fetching transcripts from a video URL.
- * This repository uses the TranscriptApi to make network requests.
- * It provides a method to get the transcript for a given video URL.
+ * Interface for managing transcripts.
+ * This interface defines methods for fetching transcripts from a video URL and retrieving cached transcripts.
+ * Implementation of this interface(data.repository.TranscriptRepositoryImpl) should handle the actual data fetching and caching logic.
  */
-class TranscriptRepository (private val api: TranscriptApi) {
-    suspend fun getTranscript(videoUrl: String): Transcript {
-        return api.getTranscriptFromVideo(mapOf("videoUrl" to videoUrl))
-    }
+interface TranscriptRepository {
+    suspend fun getTranscript(videoUrl: String): Transcript
+
+    suspend fun getCachedTranscripts(): List<Transcript>
 }
