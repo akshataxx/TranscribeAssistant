@@ -1,6 +1,6 @@
-package com.example.transcribeassistant.network
+package com.example.transcribeassistant.data
 
-import com.squareup.moshi.Moshi
+import com.example.transcribeassistant.data.network.TranscriptApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

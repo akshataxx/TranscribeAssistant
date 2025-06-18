@@ -1,4 +1,4 @@
-package com.example.transcribeassistant.model
+package com.example.transcribeassistant.domain.model
 
 data class Transcript (
     val id: String,

@@ -1,6 +1,6 @@
-package com.example.transcribeassistant.network
+package com.example.transcribeassistant.data.network
 
-import com.example.transcribeassistant.model.Transcript
+import com.example.transcribeassistant.domain.model.Transcript
 import retrofit2.http.Body
 import retrofit2.http.POST
 

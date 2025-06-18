@@ -1,11 +1,11 @@
-package com.example.transcribeassistant.viewmodel
+package com.example.transcribeassistant.ui.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.transcribeassistant.model.Transcript
-import com.example.transcribeassistant.network.*
-import com.example.transcribeassistant.repository.TranscriptRepository
+import com.example.transcribeassistant.data.RetrofitClient
+import com.example.transcribeassistant.domain.model.Transcript
+import com.example.transcribeassistant.domain.repository.TranscriptRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

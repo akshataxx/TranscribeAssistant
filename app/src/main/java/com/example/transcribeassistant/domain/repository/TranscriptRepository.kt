@@ -1,7 +1,7 @@
-package com.example.transcribeassistant.repository
+package com.example.transcribeassistant.domain.repository
 
-import com.example.transcribeassistant.model.Transcript
-import com.example.transcribeassistant.network.TranscriptApi
+import com.example.transcribeassistant.domain.model.Transcript
+import com.example.transcribeassistant.data.network.TranscriptApi
 
 /**
  * Repository for fetching transcripts from a video URL.
