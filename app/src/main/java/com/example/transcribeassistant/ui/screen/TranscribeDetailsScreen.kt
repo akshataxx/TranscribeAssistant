@@ -137,15 +137,11 @@ fun TranscribeDetailsScreen(transcriptId: String) {
 
         // Categories
         Text("Categories", fontWeight = FontWeight.Bold)
-        /*Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            CategoryChip("🍗 Recipes")
-            CategoryChip("👨‍🍳 Meal Prep")
-            CategoryChip("💡 Tips")
-        }*/
+
         transcript?.categories?.let { categories ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                categories.forEach { category ->
-                    CategoryChip("• $category")
+                categories.forEach { categoryName ->
+                    CategoryChip("• ${categoryName}")
                 }
             }
         }
@@ -160,6 +156,9 @@ fun TranscribeDetailsScreen(transcriptId: String) {
     }
 }
 
+/**
+ * TODO: Add emojis next to each categoryName
+ */
 @Composable
 fun CategoryChip(label: String) {
     Surface(
