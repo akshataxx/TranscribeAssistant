@@ -1,4 +1,4 @@
-package com.example.transcribeassistant.model
+package com.example.transcribeassistant.data.dto
 
 data class Category(
     val id: String,

@@ -1,6 +1,6 @@
-package com.example.transcribeassistant.network
+package com.example.transcribeassistant.data
 
-import com.squareup.moshi.Moshi
+import com.example.transcribeassistant.data.network.TranscriptApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -23,6 +23,9 @@ object RetrofitClient {
 
     private val client = OkHttpClient.Builder()
         .addInterceptor(logging)
+        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
         .build()
 
     val apiService: TranscriptApi = Retrofit.Builder()

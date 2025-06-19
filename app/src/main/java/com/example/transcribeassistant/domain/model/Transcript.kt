@@ -1,5 +1,10 @@
-package com.example.transcribeassistant.model
+package com.example.transcribeassistant.domain.model
 
+/**
+ * Data class representing a transcript of a video.
+ * This class contains all the necessary information about a video transcript,
+ * It is part of the business logic layer of the application.
+ */
 data class Transcript (
     val id: String,
     val videoUrl: String,
@@ -13,5 +18,4 @@ data class Transcript (
     val identifierId: String,
     val identifier: String,
     val categories: List<String>?, // nullable
-    val createdAt: String
-)
+    val createdAt: String)
