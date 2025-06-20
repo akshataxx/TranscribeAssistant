@@ -40,5 +40,4 @@ class TranscriptViewModel @Inject constructor(
             }
         }
     }
-
 }
