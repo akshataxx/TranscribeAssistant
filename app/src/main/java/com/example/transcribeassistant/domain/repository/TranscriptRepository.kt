@@ -10,15 +10,5 @@ import com.example.transcribeassistant.domain.model.Transcript
 interface TranscriptRepository {
     suspend fun getTranscript(videoUrl: String): Transcript
 
-    suspend fun getAllTranscripts(
-        id: String? = null,
-        categories: List<String>? = null,
-        account: String? = null,
-        from: String? = null, // ISO 8601 string
-        to: String? = null      // ISO 8601 string
-    ): List<Transcript>
-
     suspend fun getCachedTranscripts(): List<Transcript>
-
-
 }

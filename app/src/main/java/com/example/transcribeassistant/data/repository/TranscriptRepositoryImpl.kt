@@ -26,19 +26,6 @@ class TranscriptRepositoryImpl (
         return model
     }
 
-    override suspend fun getAllTranscripts(
-        id: String?,
-        categories: List<String>?,
-        account: String?,
-        from: String?,
-        to: String?
-    ): List<Transcript> {
-        val dtoList = api.getAllTranscripts(id, categories, account, from, to)
-        val modelList = dtoList.map { it.toDomain() }
-        modelList.forEach { it.toEntity()?.let { entity -> dao.insert(entity) } }
-        return modelList
-    }
-
     override suspend fun getCachedTranscripts(): List<Transcript>{
         return dao.getAll().map{it.toDomain()}
     }

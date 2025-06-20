@@ -2,9 +2,7 @@ package com.example.transcribeassistant.data.network
 
 import com.example.transcribeassistant.data.dto.TranscriptDto
 import retrofit2.http.Body
-import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.Query
 
 /**
  * Interface for the Transcript API.
@@ -20,13 +18,4 @@ interface TranscriptApi {
      */
     @POST("video/url")
     suspend fun getTranscriptFromVideo(@Body request: Map<String, String>): TranscriptDto
-
-    @GET("transcript")
-    suspend fun getAllTranscripts(
-        @Query("id") id: String? = null,
-        @Query("categories") categories: List<String>? = null,
-        @Query("account") account: String? = null,
-        @Query("from") from: String? = null, // ISO 8601 string
-        @Query("to") to: String? = null      // ISO 8601 string
-    ): List<TranscriptDto>
 }
