@@ -1,5 +1,7 @@
 package com.example.transcribeassistant.domain.model
 
+import java.time.Instant
+
 /**
  * Data class representing a transcript of a video.
  * This class contains all the necessary information about a video transcript,
@@ -12,10 +14,10 @@ data class Transcript (
     val description: String,
     val title: String,
     val duration: Int,
-    val uploadedAt: String,
+    val uploadedAt: Instant,
     val accountId: String,
     val account: String,
     val identifierId: String,
     val identifier: String,
     val categories: List<String>?, // nullable
-    val createdAt: String)
+    val createdAt: Instant)

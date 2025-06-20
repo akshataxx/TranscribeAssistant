@@ -1,6 +1,7 @@
 package com.example.transcribeassistant.data.dto
 
 import com.google.gson.annotations.SerializedName
+import java.time.Instant
 
 /**
  * Data Transfer Object (DTO) representing a transcript.
@@ -27,11 +28,11 @@ data class TranscriptDto(
     @SerializedName("description") val description: String,
     @SerializedName("title") val title: String,
     @SerializedName("duration") val duration: Int,
-    @SerializedName("uploadedAt") val uploadedAt: String,
+    @SerializedName("uploadedAt") val uploadedAt: Instant,
     @SerializedName("accountId") val accountId: String,
     @SerializedName("account") val account: String,
     @SerializedName("identifierId") val identifierId: String,
     @SerializedName("identifier") val identifier: String,
     @SerializedName("categories") val categories: List<String>?,
-    @SerializedName("createdAt") val createdAt: String
+    @SerializedName("createdAt") val createdAt: Instant
 )

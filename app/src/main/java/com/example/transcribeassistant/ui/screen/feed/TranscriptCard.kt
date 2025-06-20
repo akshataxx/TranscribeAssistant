@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.example.transcribeassistant.domain.model.Transcript
+import com.example.transcribeassistant.ui.screen.components.CategoryChip
+import com.example.transcribeassistant.utils.TimeUtils
 
 @Composable
 fun TranscriptCard(transcript: Transcript) {
@@ -29,9 +31,9 @@ fun TranscriptCard(transcript: Transcript) {
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // TODO
+            // TODO: add source to Transcript model
             Text("Source TikTok • @${transcript.account}", style = MaterialTheme.typography.bodySmall)
-            Text("⏱ ${transcript.duration}   •   ${transcript.createdAt}", style = MaterialTheme.typography.bodySmall)
+            Text("⏱ ${TimeUtils.formatDuration(transcript.duration)}   •   ${TimeUtils.timeAgo(transcript.uploadedAt)}", style = MaterialTheme.typography.bodySmall)
 
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -46,7 +48,7 @@ fun TranscriptCard(transcript: Transcript) {
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 transcript.categories?.forEach { category ->
-                    CategoryChip("• $category")
+                    CategoryChip(category)
                 }
             }
         }
