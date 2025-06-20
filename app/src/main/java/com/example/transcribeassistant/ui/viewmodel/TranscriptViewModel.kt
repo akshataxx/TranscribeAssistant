@@ -27,12 +27,12 @@ class TranscriptViewModel @Inject constructor(
     private val _transcript = MutableStateFlow<Transcript?>(null)
     val transcript: StateFlow<Transcript?> = _transcript
 
-    fun fetchTranscript(videoUrl: String) {
+    fun fetchTranscriptById(transcriptId: String) {
         viewModelScope.launch {
             try{
                 /*val result = RetrofitClient.apiService.getTranscriptFromVideo(mapOf("videoUrl" to videoUrl))
                 _transcript.value = result*/
-                val response = repository.getTranscript(videoUrl)
+                val response = repository.getTranscript(transcriptId)
                 Log.d("TranscriptVM", "Transcript fetched: ${response.transcript}")
                 _transcript.value = response
             }catch(e: Exception) {

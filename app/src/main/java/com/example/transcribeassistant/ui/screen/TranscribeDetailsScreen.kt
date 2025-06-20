@@ -39,9 +39,7 @@ fun TranscribeDetailsScreen(transcriptId: String) {
     val scroll = rememberScrollState()
     var notes by remember { mutableStateOf("") }
 
-    val videoUrl = "https://www.tiktok.com/@simple.home.edit/video/7309754078010051841?q=recipe&t=1749454564398"
-
-    // setup for TextToSpeech
+    // Setup for TextToSpeech
     val textToSpeech = remember {
         TextToSpeech(context, null).apply {
             language = Locale.US
@@ -50,9 +48,10 @@ fun TranscribeDetailsScreen(transcriptId: String) {
     Log.d("TTS", "Initialized: ${textToSpeech.isLanguageAvailable(Locale.US)}")
 
 
+    // Fetch the transcript by ID when the screen is launched
     LaunchedEffect(Unit) {
-        Log.d("TranscribeDetails", "Fetching transcript for $videoUrl")
-        viewModel.fetchTranscript(videoUrl)
+        Log.d("TranscribeDetails", "Fetching transcript for $transcriptId")
+        viewModel.fetchTranscriptById(transcriptId)
     }
 
     Column(
@@ -80,6 +79,7 @@ fun TranscribeDetailsScreen(transcriptId: String) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
+        // TODO: another parameter to be added to backend for source - eg tiktok or ig or youtube or facebook etc
         Text("Source TikTok • @${transcript?.account?: "..."}", style = MaterialTheme.typography.bodyMedium)
         Text("⏱ 00:45   •   3 days ago", style = MaterialTheme.typography.bodySmall)
 
