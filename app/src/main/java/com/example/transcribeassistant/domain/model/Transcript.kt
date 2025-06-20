@@ -20,4 +20,5 @@ data class Transcript (
     val identifierId: String,
     val identifier: String,
     val categories: List<String>?, // nullable
-    val createdAt: Instant)
+    val createdAt: Instant
+)

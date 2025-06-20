@@ -1,10 +1,12 @@
 package com.example.transcribeassistant.data.network
 
+import androidx.compose.runtime.IntState
 import com.example.transcribeassistant.data.dto.TranscriptDto
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
+import java.time.Instant
 
 /**
  * Interface for the Transcript API.
@@ -26,7 +28,7 @@ interface TranscriptApi {
         @Query("id") id: String? = null,
         @Query("categories") categories: List<String>? = null,
         @Query("account") account: String? = null,
-        @Query("from") from: String? = null, // ISO 8601 string
-        @Query("to") to: String? = null      // ISO 8601 string
+        @Query("from") from: Instant? = null,
+        @Query("to") to: Instant? = null
     ): List<TranscriptDto>
 }

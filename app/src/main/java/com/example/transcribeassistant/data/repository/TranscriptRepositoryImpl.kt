@@ -6,6 +6,7 @@ import com.example.transcribeassistant.domain.model.Transcript
 import com.example.transcribeassistant.domain.mapper.toDomain
 import com.example.transcribeassistant.domain.mapper.toEntity
 import com.example.transcribeassistant.domain.repository.TranscriptRepository
+import java.time.Instant
 
 /**
  * Repository implementation for managing transcripts.
@@ -30,8 +31,8 @@ class TranscriptRepositoryImpl (
         id: String?,
         categories: List<String>?,
         account: String?,
-        from: String?,
-        to: String?
+        from: Instant?,
+        to: Instant?
     ): List<Transcript> {
         val dtoList = api.getAllTranscripts(id, categories, account, from, to)
         val modelList = dtoList.map { it.toDomain() }
