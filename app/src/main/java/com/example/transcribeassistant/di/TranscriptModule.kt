@@ -32,7 +32,7 @@ object TranscriptModule {
             context,
             AppDatabase::class.java,
             "transcribe_db"
-        ).build()
+        ).fallbackToDestructiveMigration().build()
     }
 
 

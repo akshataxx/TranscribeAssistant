@@ -8,7 +8,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.transcribeassistant.ui.viewmodel.TranscriptViewModel
 import java.util.Locale
 import androidx.compose.foundation.layout.*
@@ -33,7 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun TranscribeDetailsScreen(transcriptId: String) {
     val viewModel: TranscriptViewModel = hiltViewModel()
     val transcriptState = viewModel.transcript.collectAsState()
-    val transcript= transcriptState.value
+    val transcript = transcriptState.value
 
     val context = LocalContext.current
     val scroll = rememberScrollState()
@@ -81,7 +80,7 @@ fun TranscribeDetailsScreen(transcriptId: String) {
         Spacer(modifier = Modifier.height(4.dp))
 
         Text("Source TikTok • @${transcript?.account?: "..."}", style = MaterialTheme.typography.bodyMedium)
-        Text("⏱ 00:45   •   3 days ago", style = MaterialTheme.typography.bodySmall)
+        Text("⏱ ${transcript?.duration?: "..."}   •   ${transcript?.createdAt?: "..."}", style = MaterialTheme.typography.bodySmall)
 
 
         Spacer(modifier = Modifier.height(16.dp))
