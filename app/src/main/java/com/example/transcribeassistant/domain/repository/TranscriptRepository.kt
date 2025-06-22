@@ -1,6 +1,7 @@
 package com.example.transcribeassistant.domain.repository
 
 import com.example.transcribeassistant.domain.model.Transcript
+import java.time.Instant
 
 /**
  * Interface for managing transcripts.
@@ -9,6 +10,14 @@ import com.example.transcribeassistant.domain.model.Transcript
  */
 interface TranscriptRepository {
     suspend fun getTranscript(videoUrl: String): Transcript
+
+    suspend fun getAllTranscripts(
+        id: String? = null,
+        categories: List<String>? = null,
+        account: String? = null,
+        from: Instant? = null,
+        to: Instant? = null
+    ): List<Transcript>
 
     suspend fun getCachedTranscripts(): List<Transcript>
 }

@@ -6,6 +6,7 @@ import com.example.transcribeassistant.domain.model.Transcript
 import com.example.transcribeassistant.domain.mapper.toDomain
 import com.example.transcribeassistant.domain.mapper.toEntity
 import com.example.transcribeassistant.domain.repository.TranscriptRepository
+import java.time.Instant
 
 /**
  * Repository implementation for managing transcripts.
@@ -24,6 +25,19 @@ class TranscriptRepositoryImpl (
         val model = dto.toDomain()
         model.toEntity()?.let { dao.insert(it) } //cache it
         return model
+    }
+
+    override suspend fun getAllTranscripts(
+        id: String?,
+        categories: List<String>?,
+        account: String?,
+        from: Instant?,
+        to: Instant?
+    ): List<Transcript> {
+        val dtoList = api.getAllTranscripts(id, categories, account, from, to)
+        val modelList = dtoList.map { it.toDomain() }
+        modelList.forEach { it.toEntity()?.let { entity -> dao.insert(entity) } }
+        return modelList
     }
 
     override suspend fun getCachedTranscripts(): List<Transcript>{

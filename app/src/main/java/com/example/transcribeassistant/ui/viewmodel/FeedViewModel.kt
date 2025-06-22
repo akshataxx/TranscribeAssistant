@@ -20,21 +20,19 @@ import javax.inject.Inject
  */
 
 @HiltViewModel
-class TranscriptViewModel @Inject constructor(
+class FeedViewModel @Inject constructor(
     private val repository: TranscriptRepository
 ): ViewModel() {
 
-    private val _transcript = MutableStateFlow<Transcript?>(null)
-    val transcript: StateFlow<Transcript?> = _transcript
+    private val _transcripts = MutableStateFlow<List<Transcript>>(emptyList())
+    val transcripts: StateFlow<List<Transcript>> = _transcripts
 
-    fun fetchTranscriptById(transcriptId: String) {
+    fun fetchTranscript(videoUrl: String) {
         viewModelScope.launch {
             try{
-                /*val result = RetrofitClient.apiService.getTranscriptFromVideo(mapOf("videoUrl" to videoUrl))
-                _transcript.value = result*/
-                val response = repository.getTranscript(transcriptId)
-                Log.d("TranscriptVM", "Transcript fetched: ${response.transcript}")
-                _transcript.value = response
+                val response = repository.getAllTranscripts()
+                Log.d("TranscriptVM", "Transcripts fetched: ${response}")
+                _transcripts.value = response
             }catch(e: Exception) {
                 Log.e("TranscriptVM", "Error: ${e.message}")
             }
