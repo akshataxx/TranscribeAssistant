@@ -10,7 +10,7 @@ import com.example.transcribeassistant.data.cache.entity.TranscriptEntity
 
 @Database(
     entities = [TranscriptEntity::class, Category::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
