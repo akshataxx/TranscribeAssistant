@@ -1,10 +1,14 @@
 package com.example.transcribeassistant.data
 
 import com.example.transcribeassistant.data.network.TranscriptApi
+import com.example.transcribeassistant.data.network.adapter.InstantAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 
 /**
  * Singleton class that provides an instance of the ApiService
@@ -15,7 +19,10 @@ object RetrofitClient {
 
     private val BASE_URL = "http://10.0.2.2:8080/"
 
-    //private val moshi = Moshi.Builder().build()
+    private val moshi = Moshi.Builder()
+        .add(InstantAdapter())
+        .add(KotlinJsonAdapterFactory())
+        .build()
 
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -31,7 +38,7 @@ object RetrofitClient {
     val apiService: TranscriptApi = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .client(client)
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
         .create(TranscriptApi::class.java)
 }

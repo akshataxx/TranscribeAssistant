@@ -8,9 +8,9 @@ import com.example.transcribeassistant.data.cache.entity.Category
 
 @Dao
 interface CategoryDao {
-        @Insert(onConflict = OnConflictStrategy.REPLACE)
-        suspend fun insert(categoryEntity: Category)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(categoryEntity: Category)
 
-        @Query("SELECT * FROM category")
-        suspend fun getAll(): List<Category>
+    @Query("SELECT * FROM category")
+    suspend fun getAll(): List<Category>
 }

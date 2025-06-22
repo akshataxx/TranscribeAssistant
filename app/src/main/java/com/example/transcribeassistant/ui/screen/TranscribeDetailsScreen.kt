@@ -8,7 +8,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.transcribeassistant.ui.viewmodel.TranscriptViewModel
 import java.util.Locale
 import androidx.compose.foundation.layout.*
@@ -22,6 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.transcribeassistant.ui.screen.components.CategoryChip
+import com.example.transcribeassistant.utils.TimeUtils
 
 /**
  * TranscribeDetailsScreen displays the details of a transcript including the title, source, notes,
@@ -33,7 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun TranscribeDetailsScreen(transcriptId: String) {
     val viewModel: TranscriptViewModel = hiltViewModel()
     val transcriptState = viewModel.transcript.collectAsState()
-    val transcript= transcriptState.value
+    val transcript = transcriptState.value
 
     val context = LocalContext.current
     val scroll = rememberScrollState()
@@ -80,8 +81,9 @@ fun TranscribeDetailsScreen(transcriptId: String) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
+        // TODO: add source to Transcript model
         Text("Source TikTok • @${transcript?.account?: "..."}", style = MaterialTheme.typography.bodyMedium)
-        Text("⏱ 00:45   •   3 days ago", style = MaterialTheme.typography.bodySmall)
+        Text("⏱ ${transcript?.let { TimeUtils.formatDuration(it.duration) } ?: "..."}   •   ${transcript?.let { TimeUtils.timeAgo(it.uploadedAt) } ?: "..."}", style = MaterialTheme.typography.bodySmall)
 
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -147,7 +149,7 @@ fun TranscribeDetailsScreen(transcriptId: String) {
         transcript?.categories?.let { categories ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 categories.forEach { categoryName ->
-                    CategoryChip("• ${categoryName}")
+                    CategoryChip(categoryName)
                 }
             }
         }
@@ -159,22 +161,5 @@ fun TranscribeDetailsScreen(transcriptId: String) {
             textToSpeech.stop()
             textToSpeech.shutdown()
         }
-    }
-}
-
-/**
- * TODO: Add emojis next to each categoryName
- */
-@Composable
-fun CategoryChip(label: String) {
-    Surface(
-        color = Color.White.copy(alpha = 0.3f),
-        shape = RoundedCornerShape(20.dp)
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.bodySmall
-        )
     }
 }
