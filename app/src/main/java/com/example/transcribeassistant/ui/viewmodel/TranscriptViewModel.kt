@@ -12,13 +12,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-/**
- * ViewModel for managing the transcript data.
- * This ViewModel fetches the transcript from a video URL using Retrofit.
- * Calls the API service to get the transcript and exposes it as a StateFlow.
- * On error, it updates the StateFlow with an error message.
- */
-
 @HiltViewModel
 class TranscriptViewModel @Inject constructor(
     private val repository: TranscriptRepository

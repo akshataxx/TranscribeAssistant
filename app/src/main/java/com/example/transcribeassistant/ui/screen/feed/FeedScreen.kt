@@ -20,7 +20,7 @@ fun FeedScreen(viewModel: FeedViewModel = hiltViewModel()) {
 
     // Fetch data once on screen load
     LaunchedEffect(Unit) {
-        viewModel.fetchTranscript("placeholder") // pass any dummy url if needed, or refactor method name
+        viewModel.fetchTranscripts()
     }
 
     Column(
