@@ -53,7 +53,7 @@ fun TranscribeDetailsScreen(transcriptId: String) {
 
     LaunchedEffect(Unit) {
         Log.d("TranscribeDetails", "Fetching transcript for $videoUrl")
-        viewModel.fetchTranscript(videoUrl)
+        viewModel.loadExistingTranscript(videoUrl)
     }
 
     Column(
