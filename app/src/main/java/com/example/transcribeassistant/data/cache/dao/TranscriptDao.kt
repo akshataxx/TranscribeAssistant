@@ -15,4 +15,7 @@ interface TranscriptDao {
 
     @Query("SELECT * FROM transcripts")
     suspend fun getAll(): List<TranscriptEntity>
+
+    @Query("SELECT * FROM transcripts WHERE id = :transcriptId")
+    suspend fun getById(transcriptId: String): TranscriptEntity?
 }

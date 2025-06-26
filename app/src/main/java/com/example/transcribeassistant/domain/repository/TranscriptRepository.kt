@@ -20,4 +20,6 @@ interface TranscriptRepository {
     ): List<Transcript>
 
     suspend fun getCachedTranscripts(): List<Transcript>
+
+    suspend fun getTranscriptById(id: String): Transcript
 }

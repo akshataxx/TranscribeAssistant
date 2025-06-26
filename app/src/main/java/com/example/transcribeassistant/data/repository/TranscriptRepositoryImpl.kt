@@ -43,4 +43,15 @@ class TranscriptRepositoryImpl (
     override suspend fun getCachedTranscripts(): List<Transcript>{
         return dao.getAll().map{it.toDomain()}
     }
+
+    override suspend fun getTranscriptById(transcriptId: String): Transcript {
+        // First try to fetch from cache
+        dao.getById(transcriptId)?.let{
+            return it.toDomain()
+        }
+        val dto = api.getTranscriptById(transcriptId)
+        val model = dto.toDomain()
+        model.toEntity()?.let { dao.insert(it) } // cache it
+        return model
+    }
 }

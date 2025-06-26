@@ -14,7 +14,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.transcribeassistant.ui.viewmodel.FeedViewModel
 
 @Composable
-fun FeedScreen(viewModel: FeedViewModel = hiltViewModel()) {
+fun FeedScreen(
+    viewModel: FeedViewModel = hiltViewModel(),
+    onTranscriptClick: (String) -> Unit
+) {
     val transcriptList by viewModel.transcripts.collectAsState()
     val scrollState = rememberScrollState()
 
@@ -34,7 +37,9 @@ fun FeedScreen(viewModel: FeedViewModel = hiltViewModel()) {
         Spacer(modifier = Modifier.height(12.dp))
 
         transcriptList.forEach { transcript ->
-            TranscriptCard(transcript)
+            TranscriptCard(
+                transcript = transcript,
+                onClick = {onTranscriptClick(transcript.id)})
             Spacer(modifier = Modifier.height(12.dp))
         }
 

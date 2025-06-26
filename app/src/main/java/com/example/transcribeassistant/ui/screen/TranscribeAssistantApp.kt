@@ -5,6 +5,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
+import com.example.transcribeassistant.navigation.TranscribeNavGraph
 import com.example.transcribeassistant.ui.screen.feed.FeedScreen
 
 @Composable
@@ -13,8 +15,8 @@ fun TranscribeAssistantApp() {
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        // For now, we directly show the detail screen with a test ID
-//        TranscribeDetailsScreen(transcriptId = "test-id")
-        FeedScreen()
+        val navController = rememberNavController()
+        TranscribeNavGraph(navController = navController)
+
     }
 }

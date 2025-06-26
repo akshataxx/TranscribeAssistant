@@ -4,6 +4,7 @@ import com.example.transcribeassistant.data.dto.TranscriptDto
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 import java.time.Instant
 
@@ -30,4 +31,9 @@ interface TranscriptApi {
         @Query("from") from: Instant? = null,
         @Query("to") to: Instant? = null
     ): List<TranscriptDto>
+
+    @GET("transcript/{id}")
+    suspend fun getTranscriptById(
+        @Path("id") transcriptId: String
+    ): TranscriptDto
 }

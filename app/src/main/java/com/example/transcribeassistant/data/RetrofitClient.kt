@@ -17,7 +17,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
  */
 object RetrofitClient {
 
-    private val BASE_URL = "http://10.0.2.2:8080/"
+    private val BASE_URL = "http://10.0.2.2:8080"
 
     private val moshi = Moshi.Builder()
         .add(InstantAdapter())
