@@ -51,9 +51,16 @@ fun TranscribeDetailsScreen(transcriptId: String) {
     Log.d("TTS", "Initialized: ${textToSpeech.isLanguageAvailable(Locale.US)}")
 
 
-    LaunchedEffect(Unit) {
-        Log.d("TranscribeDetails", "Fetching transcript for $videoUrl")
-        viewModel.loadExistingTranscript(videoUrl)
+    LaunchedEffect(transcriptId) {
+        if (transcriptId.isNotEmpty()) {
+            // Fetch transcript using transcriptId
+            Log.d("TranscribeDetails", "Fetching transcript for ID: $transcriptId")
+            viewModel.loadExistingTranscript(transcriptId)
+        } else {
+            // Fetch transcript using videoUrl for the first time
+            Log.d("TranscribeDetails", "Fetching transcript for video URL: $videoUrl")
+            viewModel.submitNewVideo(videoUrl)
+        }
     }
 
     Column(

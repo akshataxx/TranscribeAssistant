@@ -43,7 +43,6 @@ class TranscriptViewModel @Inject constructor(
         }
     }
 
-
     // For For fetching existing transcript by ID and displaying it on TranscribeDetailsScreen
     fun loadExistingTranscript(transcriptId: String) {
         viewModelScope.launch {
@@ -57,17 +56,4 @@ class TranscriptViewModel @Inject constructor(
         }
     }
 
-    /*fun fetchTranscript(videoUrl: String) {
-        viewModelScope.launch {
-            try{
-                *//*val result = RetrofitClient.apiService.getTranscriptFromVideo(mapOf("videoUrl" to videoUrl))
-                _transcript.value = result*//*
-                val response = repository.getTranscript(videoUrl)
-                Log.d("TranscriptVM", "Transcript fetched: ${response.transcript}")
-                _transcript.value = response
-            }catch(e: Exception) {
-                Log.e("TranscriptVM", "Error: ${e.message}")
-            }
-        }
-    }*/
 }
