@@ -12,6 +12,16 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+/**
+ * ViewModel for managing the transcript data.
+ * This ViewModel fetches the transcript from a video URL using Retrofit.
+ * Calls the API service to get the transcript and exposes it as a StateFlow.
+ * On error, it updates the StateFlow with an error message.
+ *
+ * Use submitVideo(videoUrl) when user first shares the video
+ * Use getTranscriptById(transcriptId) in TranscribeDetailsScreen to fetch the stored transcript
+ */
+
 @HiltViewModel
 class TranscriptViewModel @Inject constructor(
     private val repository: TranscriptRepository
@@ -20,17 +30,30 @@ class TranscriptViewModel @Inject constructor(
     private val _transcript = MutableStateFlow<Transcript?>(null)
     val transcript: StateFlow<Transcript?> = _transcript
 
-    fun fetchTranscript(videoUrl: String) {
+    // For initial video submission
+    fun submitNewVideo(videoUrl: String) {
         viewModelScope.launch {
-            try{
-                /*val result = RetrofitClient.apiService.getTranscriptFromVideo(mapOf("videoUrl" to videoUrl))
-                _transcript.value = result*/
+            try {
                 val response = repository.getTranscript(videoUrl)
-                Log.d("TranscriptVM", "Transcript fetched: ${response.transcript}")
+                Log.d("TranscriptVM", "Transcript created: ${response.transcript}")
                 _transcript.value = response
-            }catch(e: Exception) {
+            } catch(e: Exception) {
                 Log.e("TranscriptVM", "Error: ${e.message}")
             }
         }
     }
+
+    // For For fetching existing transcript by ID and displaying it on TranscribeDetailsScreen
+    fun loadExistingTranscript(transcriptId: String) {
+        viewModelScope.launch {
+            try {
+                val response = repository.getTranscriptById(transcriptId)
+                Log.d("TranscriptVM", "Transcript fetched by ID: ${response.transcript}")
+                _transcript.value = response
+            } catch(e: Exception) {
+                Log.e("TranscriptVM", "Error: ${e.message}")
+            }
+        }
+    }
+
 }
