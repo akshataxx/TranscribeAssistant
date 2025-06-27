@@ -16,9 +16,7 @@ fun TranscribeAssistantApp() {
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        DashboardScreen()
         val navController = rememberNavController()
         TranscribeNavGraph(navController = navController)
-
     }
 }
