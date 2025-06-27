@@ -19,8 +19,8 @@ fun BottomNavBar(
     onTabSelected: (String) -> Unit
 ) {
     val items = listOf(
-        BottomNavItem("Feed", Screen.Feed.route, Icons.Default.Home),
-        BottomNavItem("Library", Screen.Dashboard.route, Icons.AutoMirrored.Filled.List)
+        BottomNavItem("Dashboard", Screen.Dashboard.route, Icons.Default.Home),
+        BottomNavItem("Feed", Screen.Feed.route, Icons.AutoMirrored.Filled.List)
     )
 
     NavigationBar(

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,24 +27,24 @@ data class CategoryTile(
 @Composable
 fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
     val categories = listOf(
-        CategoryTile("recipes", Color(0xFFCFF4F6)),
-        CategoryTile("lifestyle", Color(0xFFFFD6D6)),
-        CategoryTile("meal prep", Color(0xFFCFF4F6)),
-        CategoryTile("makeup", Color(0xFFFFD6D6)),
+        CategoryTile("Recipes", Color(0xFFCFF4F6)),
+        CategoryTile("Lifestyle", Color(0xFFFFD6D6)),
+        CategoryTile("Gossip", Color(0xFFCFF4F6)),
+        CategoryTile("Makeup", Color(0xFFFFD6D6)),
         CategoryTile("DIY", Color(0xFFFFD6D6)),
-        CategoryTile("home", Color(0xFFCFF4F6)),
-        CategoryTile("DIY", Color(0xFFCFF4F6)),
-        CategoryTile("home", Color(0xFFFFD6D6))
+        CategoryTile("Tech", Color(0xFFCFF4F6)),
+        CategoryTile("Career", Color(0xFFCFF4F6)),
+        CategoryTile("Psychology", Color(0xFFFFD6D6))
     )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.verticalGradient(listOf(Color(0xFFFFDEE9), Color(0xFFB5FFFC))))
-            .padding(horizontal = 16.dp)
+            .padding(16.dp)
     ) {
-        TopBar()
-        Spacer(modifier = Modifier.height(16.dp))
+        Text("Dashboard", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(12.dp))
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -58,49 +59,3 @@ fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
     }
 }
 
-@Composable
-fun TopBar() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "Categories",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(Color.White)
-        ) {
-            // Placeholder for profile image
-        }
-    }
-}
-
-@Composable
-fun CategoryCard(category: CategoryTile) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(16.dp))
-            .background(category.backgroundColor)
-            .clickable { /* onClick */ }
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(Color.White)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = category.label, color = Color.Black, fontWeight = FontWeight.Medium)
-    }
-}
