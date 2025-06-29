@@ -17,7 +17,7 @@ import com.example.transcribeassistant.domain.model.Transcript
     fun TranscriptDto.toDomain() = Transcript(
         id, videoUrl, transcript, description, title,
         duration, uploadedAt, accountId, account,
-        identifierId, identifier, categories, createdAt
+        identifierId, identifier, categoryId, category, alias, createdAt
     )
 
     /**
@@ -26,14 +26,13 @@ import com.example.transcribeassistant.domain.model.Transcript
      * @param domain The Transcript domain model to map.
      * @return The mapped TranscriptEntity for database storage.
      */
-    fun Transcript.toEntity() = categories?.let {
-        TranscriptEntity(
+    fun Transcript.toEntity() = TranscriptEntity(
         id, videoUrl, transcript, description, title,
         duration, uploadedAt, accountId, account,
-        identifierId, identifier, it.joinToString(","),
+        identifierId, identifier, categoryId, category, alias,
         createdAt
     )
-    }
+
 
     /**
      * Maps a TranscriptEntity to a Transcript domain model.
@@ -43,5 +42,5 @@ import com.example.transcribeassistant.domain.model.Transcript
     fun TranscriptEntity.toDomain() = Transcript(
         id, videoUrl, transcript, description, title,
         duration, uploadedAt, accountId, account,
-        identifierId, identifier, categories.split(","), createdAt
+        identifierId, identifier, categoryId, category, alias, createdAt
     )
