@@ -1,10 +1,14 @@
 package com.example.transcribeassistant.ui.screen.components
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -23,17 +27,19 @@ fun BottomNavBar(
         BottomNavItem("Feed", Screen.Feed.route, Icons.AutoMirrored.Filled.List)
     )
 
-    NavigationBar(
-        containerColor = pastelCyan,
-        tonalElevation = 0.dp
-    ) {
-        items.forEach { item ->
-            NavigationBarItem(
-                icon = { Icon(item.icon, contentDescription = item.label) },
-                label = { Text(item.label) },
-                selected = currentRoute == item.route,
-                onClick = { onTabSelected(item.route) }
-            )
+    Box(modifier = Modifier.height(65.dp)) {
+        NavigationBar(
+            containerColor = pastelCyan,
+            tonalElevation = 0.dp,
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            items.forEach { item ->
+                NavigationBarItem(
+                    icon = { Icon(item.icon, contentDescription = item.label) },
+                    selected = currentRoute == item.route,
+                    onClick = { onTabSelected(item.route) }
+                )
+            }
         }
     }
 }

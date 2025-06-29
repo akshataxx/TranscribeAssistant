@@ -52,9 +52,8 @@ fun TranscriptCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                transcript.categories?.forEach { category ->
-                    CategoryChip(category)
-                }
+                CategoryChip(transcript.category)
+                if (!transcript.alias.isNullOrEmpty()) CategoryChip(transcript.alias)
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.example.transcribeassistant.domain.model
 
+import com.google.gson.annotations.SerializedName
 import java.time.Instant
 
 /**
@@ -19,6 +20,8 @@ data class Transcript (
     val account: String,
     val identifierId: String,
     val identifier: String,
-    val categories: List<String>?, // nullable
+    val categoryId: String,
+    val category: String,
+    val alias: String?,
     val createdAt: Instant
 )

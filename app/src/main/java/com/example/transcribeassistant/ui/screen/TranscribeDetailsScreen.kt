@@ -152,12 +152,13 @@ fun TranscribeDetailsScreen(transcriptId: String) {
 
         // Categories
         Text("Categories", fontWeight = FontWeight.Bold)
-
-        transcript?.categories?.let { categories ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                categories.forEach { categoryName ->
-                    CategoryChip(categoryName)
-                }
+        Spacer(modifier = Modifier.height(6.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (transcript != null) {
+                CategoryChip(transcript.category)
+            }
+            if (transcript?.alias != null &&  transcript.alias.isNotEmpty()) {
+                CategoryChip(transcript.alias)
             }
         }
     }

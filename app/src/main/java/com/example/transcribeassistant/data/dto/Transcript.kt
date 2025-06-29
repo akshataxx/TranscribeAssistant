@@ -33,6 +33,8 @@ data class TranscriptDto(
     @SerializedName("account") val account: String,
     @SerializedName("identifierId") val identifierId: String,
     @SerializedName("identifier") val identifier: String,
-    @SerializedName("categories") val categories: List<String>?,
+    @SerializedName("categoryId") val categoryId: String,
+    @SerializedName("category") val category: String,
+    @SerializedName("alias") val alias: String?,
     @SerializedName("createdAt") val createdAt: Instant
 )

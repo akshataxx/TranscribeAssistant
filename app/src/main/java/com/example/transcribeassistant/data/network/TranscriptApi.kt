@@ -33,7 +33,7 @@ interface TranscriptApi {
     ): List<TranscriptDto>
 
     @GET("transcript/{id}")
-    suspend fun getTranscriptById(
+    suspend fun     getTranscriptById(
         @Path("id") transcriptId: String
     ): TranscriptDto
 }
