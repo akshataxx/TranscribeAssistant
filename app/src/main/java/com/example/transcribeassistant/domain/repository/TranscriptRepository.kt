@@ -12,14 +12,14 @@ interface TranscriptRepository {
     suspend fun getTranscript(videoUrl: String): Transcript
 
     suspend fun getAllTranscripts(
-        id: String? = null,
         categories: List<String>? = null,
         account: String? = null,
         from: Instant? = null,
-        to: Instant? = null
+        to: Instant? = null,
+        userId: String? = null
     ): List<Transcript>
 
     suspend fun getCachedTranscripts(): List<Transcript>
 
-    suspend fun getTranscriptById(id: String): Transcript
+    suspend fun getTranscriptById(id: String, userId: String?): Transcript
 }

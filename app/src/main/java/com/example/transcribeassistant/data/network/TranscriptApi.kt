@@ -25,15 +25,16 @@ interface TranscriptApi {
 
     @GET("transcript")
     suspend fun getAllTranscripts(
-        @Query("id") id: String? = null,
         @Query("categories") categories: List<String>? = null,
         @Query("account") account: String? = null,
         @Query("from") from: Instant? = null,
-        @Query("to") to: Instant? = null
+        @Query("to") to: Instant? = null,
+        @Query("userId") userId: String? = null
     ): List<TranscriptDto>
 
     @GET("transcript/{id}")
-    suspend fun     getTranscriptById(
-        @Path("id") transcriptId: String
+    suspend fun getTranscriptById(
+        @Path("id") transcriptId: String,
+        @Query("userId") userId: String? = null
     ): TranscriptDto
 }

@@ -23,20 +23,20 @@ class TranscriptRepositoryImpl (
     override suspend fun getTranscript(videoUrl: String): Transcript {
         val dto = api.getTranscriptFromVideo(mapOf("videoUrl" to videoUrl))
         val model = dto.toDomain()
-        model.toEntity()?.let { dao.insert(it) } //cache it
+        model.toEntity().let { dao.insert(it) } //cache it
         return model
     }
 
     override suspend fun getAllTranscripts(
-        id: String?,
         categories: List<String>?,
         account: String?,
         from: Instant?,
-        to: Instant?
+        to: Instant?,
+        userId: String?
     ): List<Transcript> {
-        val dtoList = api.getAllTranscripts(id, categories, account, from, to)
+        val dtoList = api.getAllTranscripts(categories, account, from, to, userId)
         val modelList = dtoList.map { it.toDomain() }
-        modelList.forEach { it.toEntity()?.let { entity -> dao.insert(entity) } }
+        modelList.forEach { it.toEntity().let { entity -> dao.insert(entity) } }
         return modelList
     }
 
@@ -44,14 +44,14 @@ class TranscriptRepositoryImpl (
         return dao.getAll().map{it.toDomain()}
     }
 
-    override suspend fun getTranscriptById(transcriptId: String): Transcript {
+    override suspend fun getTranscriptById(id: String, userId: String?): Transcript {
         // First try to fetch from cache
-        dao.getById(transcriptId)?.let{
+        dao.getById(id)?.let{
             return it.toDomain()
         }
-        val dto = api.getTranscriptById(transcriptId)
+        val dto = api.getTranscriptById(id, userId)
         val model = dto.toDomain()
-        model.toEntity()?.let { dao.insert(it) } // cache it
+        model.toEntity().let { dao.insert(it) } // cache it
         return model
     }
 }
