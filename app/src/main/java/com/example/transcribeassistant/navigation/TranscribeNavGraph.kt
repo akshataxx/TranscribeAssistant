@@ -1,9 +1,13 @@
 package com.example.transcribeassistant.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -30,11 +34,13 @@ fun TranscribeNavGraph(
 
     Scaffold(
         bottomBar = {
-            BottomNavBar(currentRoute = currentRoute ?: "") {
-                if (it != currentRoute) {
-                    navController.navigate(it) {
-                        popUpTo(Screen.Feed.route) { inclusive = false }
-                        launchSingleTop = true
+            if (currentRoute != Screen.TranscribeDetails.route) {
+                BottomNavBar(currentRoute = currentRoute ?: "") {
+                    if (it != currentRoute) {
+                        navController.navigate(it) {
+                            popUpTo(Screen.Feed.route) { inclusive = false }
+                            launchSingleTop = true
+                        }
                     }
                 }
             }
@@ -42,7 +48,7 @@ fun TranscribeNavGraph(
     ){ paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Feed.route,
+            startDestination = Screen.Dashboard.route,
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(Screen.Feed.route) {
@@ -55,6 +61,21 @@ fun TranscribeNavGraph(
             }
             composable(Screen.Dashboard.route) {
                 DashboardScreen(viewModel = hiltViewModel())
+            }
+            composable(Screen.Notifications.route) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Notifications Screen")
+                }
+            }
+            composable(Screen.Profile.route) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Profile Screen")
+                }
+            }
+            composable("add") {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Add Screen")
+                }
             }
             composable(
                 route = Screen.TranscribeDetails.route,

@@ -13,17 +13,44 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
-fun CategoryCard(category: CategoryTile) {
+fun CategoryCard(
+    category: CategoryTile,
+    onEmojiChange: (String) -> Unit
+) {
+    var showEmojiDialog by remember { mutableStateOf(false) }
+
+    if (showEmojiDialog) {
+        EmojiDialog(
+            onDismiss = { showEmojiDialog = false },
+            onEmojiSelected = {
+                onEmojiChange(it)
+                showEmojiDialog = false
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -37,11 +64,69 @@ fun CategoryCard(category: CategoryTile) {
     ) {
         Box(
             modifier = Modifier
-                .size(36.dp)
+                .size(48.dp)
                 .clip(CircleShape)
-                .background(Color.White)
+                .clickable { showEmojiDialog = true },
+            contentAlignment = Alignment.Center
+        ) {
+            if (category.emoji.isNotEmpty()) {
+                Text(
+                    text = category.emoji,
+                    fontSize = 32.sp
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add Emoji",
+                    modifier = Modifier.size(32.dp),
+                    tint = Color.White.copy(alpha = 0.8f)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = category.label,
+            color = Color.White,
+            fontWeight = FontWeight.Medium,
+            fontSize = 18.sp
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = category.label, color = Color.Black, fontWeight = FontWeight.Medium)
     }
+}
+
+@Composable
+fun EmojiDialog(
+    onDismiss: () -> Unit,
+    onEmojiSelected: (String) -> Unit
+) {
+    var emojiText by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Enter an Emoji") },
+        text = {
+            TextField(
+                value = emojiText,
+                onValueChange = { emojiText = it },
+                label = { Text("Emoji") },
+                singleLine = true,
+                textStyle = TextStyle(fontSize = 24.sp)
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (emojiText.isNotBlank()) {
+                        onEmojiSelected(emojiText)
+                    }
+                }
+            ) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

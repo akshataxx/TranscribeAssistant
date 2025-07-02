@@ -3,19 +3,24 @@ package com.example.transcribeassistant.ui.screen.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Article
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.transcribeassistant.navigation.Screen
-import com.example.transcribeassistant.ui.theme.pastelCyan
 
-data class BottomNavItem(val label: String, val route: String, val icon: ImageVector)
+data class BottomNavItem(val label: String, val route: String, val icon: ImageVector, val size: Int = 24)
 
 @Composable
 fun BottomNavBar(
@@ -24,22 +29,27 @@ fun BottomNavBar(
 ) {
     val items = listOf(
         BottomNavItem("Dashboard", Screen.Dashboard.route, Icons.Default.Home),
-        BottomNavItem("Feed", Screen.Feed.route, Icons.AutoMirrored.Filled.List)
+        BottomNavItem("Notifications", Screen.Notifications.route, Icons.Default.Notifications),
+        BottomNavItem("Add", "add", Icons.Default.Add, size = 48),
+        BottomNavItem("Feed", Screen.Feed.route, Icons.Outlined.Article),
+        BottomNavItem("Profile", Screen.Profile.route, Icons.Default.Person)
     )
 
-    Box(modifier = Modifier.height(65.dp)) {
-        NavigationBar(
-            containerColor = pastelCyan,
-            tonalElevation = 0.dp,
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            items.forEach { item ->
-                NavigationBarItem(
-                    icon = { Icon(item.icon, contentDescription = item.label) },
-                    selected = currentRoute == item.route,
-                    onClick = { onTabSelected(item.route) }
+    NavigationBar(
+        containerColor = Color(0xFF3A3958),
+        tonalElevation = 0.dp,
+    ) {
+        items.forEach { item ->
+            NavigationBarItem(
+                icon = { Icon(item.icon, contentDescription = item.label, modifier = Modifier.size(item.size.dp)) },
+                selected = currentRoute == item.route,
+                onClick = { onTabSelected(item.route) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color.White,
+                    unselectedIconColor = Color.Gray,
+                    indicatorColor = Color.Transparent
                 )
-            }
+            )
         }
     }
 }
