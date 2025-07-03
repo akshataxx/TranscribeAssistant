@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -33,14 +34,13 @@ fun TranscribeNavGraph(
     val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
+        containerColor = Color(0xFF2C2B3E),
         bottomBar = {
-            if (currentRoute != Screen.TranscribeDetails.route) {
-                BottomNavBar(currentRoute = currentRoute ?: "") {
-                    if (it != currentRoute) {
-                        navController.navigate(it) {
-                            popUpTo(Screen.Feed.route) { inclusive = false }
-                            launchSingleTop = true
-                        }
+            BottomNavBar(currentRoute = currentRoute ?: "") {
+                if (it != currentRoute) {
+                    navController.navigate(it) {
+                        popUpTo(Screen.Feed.route) { inclusive = false }
+                        launchSingleTop = true
                     }
                 }
             }

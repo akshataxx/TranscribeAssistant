@@ -66,15 +66,14 @@ fun TranscribeDetailsScreen(transcriptId: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(Color(0xFFFFDEE9), Color(0xFFB5FFFC))))
             .padding(16.dp)
             .verticalScroll(scroll)
     ) {
         // Back row
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
             Spacer(modifier = Modifier.weight(1f))
-            Text("Back", style = MaterialTheme.typography.bodyMedium)
+            Text("Back", style = MaterialTheme.typography.bodyMedium, color = Color.White)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -83,14 +82,15 @@ fun TranscribeDetailsScreen(transcriptId: String) {
         Text(
             text = transcript?.title ?: "Loading...",
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = Color.White
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
         // TODO: add source to Transcript model
-        Text("Source TikTok • @${transcript?.account?: "..."}", style = MaterialTheme.typography.bodyMedium)
-        Text("⏱ ${transcript?.let { TimeUtils.formatDuration(it.duration) } ?: "..."}   •   ${transcript?.let { TimeUtils.timeAgo(it.uploadedAt) } ?: "..."}", style = MaterialTheme.typography.bodySmall)
+        Text("Source TikTok • @${transcript?.account?: "..."}", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+        Text("⏱ ${transcript?.let { TimeUtils.formatDuration(it.duration) } ?: "..."}   •   ${transcript?.let { TimeUtils.timeAgo(it.uploadedAt) } ?: "..."}", style = MaterialTheme.typography.bodySmall, color = Color.White)
 
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -101,16 +101,29 @@ fun TranscribeDetailsScreen(transcriptId: String) {
             onValueChange = { notes = it },
             label = { Text("Notes") },
             placeholder = { Text("Write your thoughts or action points here…") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.White,
+                unfocusedIndicatorColor = Color.Gray,
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                cursorColor = Color.White,
+                focusedLabelColor = Color.White,
+                unfocusedLabelColor = Color.Gray,
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Transcript Summary
-        Text("Transcript Summary", fontWeight = FontWeight.Bold)
+        Text("Transcript Summary", fontWeight = FontWeight.Bold, color = Color.White)
         Text(
             text = "“${transcript?.transcript?.take(120) ?: ""}...”",
-            fontStyle = FontStyle.Italic)
+            fontStyle = FontStyle.Italic,
+            color = Color.White
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -119,7 +132,7 @@ fun TranscribeDetailsScreen(transcriptId: String) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Full Transcript", fontWeight = FontWeight.Medium)
+            Text("Full Transcript", fontWeight = FontWeight.Medium, color = Color.White)
             Spacer(modifier = Modifier.weight(1f))
             Button(
                 onClick = {
@@ -144,14 +157,15 @@ fun TranscribeDetailsScreen(transcriptId: String) {
         } else {
             Text(
                 text = transcript.transcript,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // Categories
-        Text("Categories", fontWeight = FontWeight.Bold)
+        Text("Categories", fontWeight = FontWeight.Bold, color = Color.White)
         Spacer(modifier = Modifier.height(6.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (transcript != null) {

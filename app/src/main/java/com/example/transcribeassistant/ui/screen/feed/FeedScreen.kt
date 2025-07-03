@@ -29,11 +29,10 @@ fun FeedScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(Color(0xFFFFDEE9), Color(0xFFB5FFFC))))
             .padding(16.dp)
             .verticalScroll(scrollState)
     ) {
-        Text("Feed", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text("Feed", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Color.White)
         Spacer(modifier = Modifier.height(12.dp))
 
         transcriptList.forEach { transcript ->
