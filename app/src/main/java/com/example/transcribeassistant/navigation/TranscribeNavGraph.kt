@@ -83,7 +83,10 @@ fun TranscribeNavGraph(
             ) { backStackEntry ->
                 val transcriptId =
                     backStackEntry.arguments?.getString("transcriptId") ?: return@composable
-                TranscribeDetailsScreen(transcriptId = transcriptId)
+                TranscribeDetailsScreen(
+                    transcriptId = transcriptId,
+                    onBackClick = { navController.popBackStack() }
+                )
             }
         }
     }

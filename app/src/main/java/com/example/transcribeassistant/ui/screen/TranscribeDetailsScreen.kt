@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.transcribeassistant.ui.screen.components.CategoryChip
 import com.example.transcribeassistant.utils.TimeUtils
@@ -30,8 +31,12 @@ import com.example.transcribeassistant.utils.TimeUtils
  * It also allows users to read the transcript aloud using TextToSpeech.
  * Part of the UI/Presentation layer of the Transcribe Assistant app.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TranscribeDetailsScreen(transcriptId: String) {
+fun TranscribeDetailsScreen(
+    transcriptId: String,
+    onBackClick: () -> Unit
+) {
     val viewModel: TranscriptViewModel = hiltViewModel()
     val transcriptState = viewModel.transcript.collectAsState()
     val transcript = transcriptState.value
@@ -63,119 +68,130 @@ fun TranscribeDetailsScreen(transcriptId: String) {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(scroll)
-    ) {
-        // Back row
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
-            Spacer(modifier = Modifier.weight(1f))
-            Text("Back", style = MaterialTheme.typography.bodyMedium, color = Color.White)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Title
-        Text(
-            text = transcript?.title ?: "Loading...",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        // TODO: add source to Transcript model
-        Text("Source TikTok • @${transcript?.account?: "..."}", style = MaterialTheme.typography.bodyMedium, color = Color.White)
-        Text("⏱ ${transcript?.let { TimeUtils.formatDuration(it.duration) } ?: "..."}   •   ${transcript?.let { TimeUtils.timeAgo(it.uploadedAt) } ?: "..."}", style = MaterialTheme.typography.bodySmall, color = Color.White)
-
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Notes
-        OutlinedTextField(
-            value = notes,
-            onValueChange = { notes = it },
-            label = { Text("Notes") },
-            placeholder = { Text("Write your thoughts or action points here…") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.White,
-                unfocusedIndicatorColor = Color.Gray,
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                cursorColor = Color.White,
-                focusedLabelColor = Color.White,
-                unfocusedLabelColor = Color.Gray,
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent
-            )
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Transcript Summary
-        Text("Transcript Summary", fontWeight = FontWeight.Bold, color = Color.White)
-        Text(
-            text = "“${transcript?.transcript?.take(120) ?: ""}...”",
-            fontStyle = FontStyle.Italic,
-            color = Color.White
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Full Transcript + Read Aloud
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Full Transcript", fontWeight = FontWeight.Medium, color = Color.White)
-            Spacer(modifier = Modifier.weight(1f))
-            Button(
-                onClick = {
-                    transcript?.transcript?.let{text ->
-                        Log.d("TTS", "Speaking: $text")
-                        textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = transcript?.title ?: "Details",
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
                     }
                 },
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFA8A8))
-            ) {
-                Icon(Icons.Default.VolumeUp, contentDescription = null)
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Read Aloud")
-            }
-        }
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
+            )
+        },
+        containerColor = Color.Transparent
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp)
+                .verticalScroll(scroll)
+        ) {
+            // TODO: add source to Transcript model
+            Text("Source TikTok • @${transcript?.account?: "..."}", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+            Text("⏱ ${transcript?.let { TimeUtils.formatDuration(it.duration) } ?: "..."}   •   ${transcript?.let { TimeUtils.timeAgo(it.uploadedAt) } ?: "..."}", style = MaterialTheme.typography.bodySmall, color = Color.White)
 
-        Spacer(modifier = Modifier.height(16.dp))
 
-        if (transcript == null) {
-            CircularProgressIndicator()
-        } else {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Notes
+            OutlinedTextField(
+                value = notes,
+                onValueChange = { notes = it },
+                label = { Text("Notes") },
+                placeholder = { Text("Write your thoughts or action points here…") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.White,
+                    unfocusedIndicatorColor = Color.Gray,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    cursorColor = Color.White,
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.Gray,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Transcript Summary
+            Text("Transcript Summary", fontWeight = FontWeight.Bold, color = Color.White)
             Text(
-                text = transcript.transcript,
-                style = MaterialTheme.typography.bodyLarge,
+                text = "“${transcript?.transcript?.take(120) ?: ""}...”",
+                fontStyle = FontStyle.Italic,
                 color = Color.White
             )
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Categories
-        Text("Categories", fontWeight = FontWeight.Bold, color = Color.White)
-        Spacer(modifier = Modifier.height(6.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (transcript != null) {
-                CategoryChip(transcript.category)
+            // Full Transcript + Read Aloud
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Full Transcript", fontWeight = FontWeight.Medium, color = Color.White)
+                Spacer(modifier = Modifier.weight(1f))
+                Button(
+                    onClick = {
+                        transcript?.transcript?.let{text ->
+                            Log.d("TTS", "Speaking: $text")
+                            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+                        }
+                    },
+                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFA8A8))
+                ) {
+                    Icon(Icons.Default.VolumeUp, contentDescription = null)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Read Aloud")
+                }
             }
-            if (transcript?.alias != null &&  transcript.alias.isNotEmpty()) {
-                CategoryChip(transcript.alias)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (transcript == null) {
+                CircularProgressIndicator()
+            } else {
+                Text(
+                    text = transcript.transcript,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Categories
+            Text("Categories", fontWeight = FontWeight.Bold, color = Color.White)
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (transcript != null) {
+                    CategoryChip(transcript.category)
+                }
+                if (transcript?.alias != null &&  transcript.alias.isNotEmpty()) {
+                    CategoryChip(transcript.alias)
+                }
             }
         }
     }
+
 
     // Cleanup
     DisposableEffect(Unit) {
