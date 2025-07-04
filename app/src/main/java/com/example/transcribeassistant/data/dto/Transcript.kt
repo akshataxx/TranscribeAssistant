@@ -18,7 +18,9 @@ import java.time.Instant
  * @property account Name of the account that uploaded the video.
  * @property identifierId Unique identifier for the transcript.
  * @property identifier Identifier for the transcript, often used for search or reference.
- * @property categories List of categories associated with the transcript, can be null if not applicable.
+ * @property categoryId The special, predefined categoryId
+ * @property category The special, predefined category name (e.g., "Recipe").
+ * @property alias The final, user-visible alias for the transcript (e.g., "Big-Back", "Tech-Tok").
  * @property createdAt Timestamp when the transcript was created.
  */
 data class TranscriptDto(
@@ -27,7 +29,7 @@ data class TranscriptDto(
     @SerializedName("transcript") val transcript: String,
     @SerializedName("description") val description: String,
     @SerializedName("title") val title: String,
-    @SerializedName("duration") val duration: Int,
+    @SerializedName("duration") val duration: Double,
     @SerializedName("uploadedAt") val uploadedAt: Instant,
     @SerializedName("accountId") val accountId: String,
     @SerializedName("account") val account: String,

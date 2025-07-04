@@ -35,7 +35,7 @@ class TranscriptViewModel @Inject constructor(
     fun submitNewVideo(videoUrl: String) {
         viewModelScope.launch {
             try {
-                val response = repository.getTranscript(videoUrl)
+                val response = repository.transcribeVideo(videoUrl, userId)
                 Log.d("TranscriptVM", "Transcript created: ${response.transcript}")
                 _transcript.value = response
             } catch(e: Exception) {

@@ -2,53 +2,67 @@ package com.example.transcribeassistant.ui.screen.dashboard
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.transcribeassistant.R
+import com.example.transcribeassistant.ui.viewmodel.CategoryGroup
 import com.example.transcribeassistant.ui.viewmodel.DashboardViewModel
 
-data class CategoryTile(
-    val id: Int,
-    val label: String,
-    val emoji: String,
-    val backgroundColor: Color
+val cardColors = listOf(
+    Color(0xFF3A3958),
+    Color(0xFFD9725B)
 )
 
 @Composable
 fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
-    var categories by remember {
-        mutableStateOf(
-            listOf(
-                CategoryTile(1, "recipes", "", Color(0xFF3A3958)),
-                CategoryTile(2, "lifestyle", "", Color(0xFFD9725B)),
-                CategoryTile(3, "meal prep", "", Color(0xFF3A3958)),
-                CategoryTile(4, "makeup", "", Color(0xFFD9725B)),
-                CategoryTile(5, "DIY", "", Color(0xFFD9725B)),
-                CategoryTile(6, "home", "", Color(0xFF3A3958)),
-                CategoryTile(7, "fixing", "", Color(0xFF3A3958)),
-                CategoryTile(8, "interior", "", Color(0xFFD9725B))
-            )
+    val categoryGroups by viewModel.categoryGroups.collectAsState()
+    var showRenameDialog by remember { mutableStateOf(false) }
+    var renamingCategoryGroup by remember { mutableStateOf<CategoryGroup?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchTranscripts()
+    }
+
+    if (showRenameDialog && renamingCategoryGroup != null) {
+        RenameDialog(
+            categoryGroup = renamingCategoryGroup!!,
+            onDismiss = { showRenameDialog = false },
+            onConfirm = { newAlias ->
+                viewModel.updateAlias(renamingCategoryGroup!!.categoryId, newAlias)
+                showRenameDialog = false
+            }
         )
     }
 
@@ -86,21 +100,49 @@ fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            items(categories) { category ->
+            itemsIndexed(categoryGroups) { index, group ->
                 CategoryCard(
-                    category = category,
-                    onEmojiChange = { newEmoji ->
-                        categories = categories.map {
-                            if (it.id == category.id) {
-                                it.copy(emoji = newEmoji)
-                            } else {
-                                it
-                            }
-                        }
+                    categoryGroup = group,
+                    backgroundColor = cardColors[index % cardColors.size],
+                    onClick = { /* TODO: Navigate to category details */ },
+                    onLongClick = {
+                        renamingCategoryGroup = group
+                        showRenameDialog = true
                     }
                 )
             }
         }
     }
+}
+
+@Composable
+fun RenameDialog(
+    categoryGroup: CategoryGroup,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var text by remember { mutableStateOf(categoryGroup.displayName) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Rename ${categoryGroup.categoryName}") },
+        text = {
+            TextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text("New Alias") }
+            )
+        },
+        confirmButton = {
+            Button(onClick = { onConfirm(text) }) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 

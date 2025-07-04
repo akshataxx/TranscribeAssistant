@@ -11,6 +11,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class CategoryGroup(
+    val displayName: String, // This will be alias if available, otherwise category name
+    val categoryId: String,
+    val categoryName: String,
+    val transcripts: List<Transcript>
+)
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
@@ -18,17 +24,52 @@ class DashboardViewModel @Inject constructor(
 ): ViewModel() {
     private val _transcripts = MutableStateFlow<List<Transcript>>(emptyList())
     val transcripts: StateFlow<List<Transcript>> = _transcripts
+
+    private val _categoryGroups = MutableStateFlow<List<CategoryGroup>>(emptyList())
+    val categoryGroups: StateFlow<List<CategoryGroup>> = _categoryGroups
+
+    // For a real app, this should be fetched from a user session or preferences
     val userId: String = "1c9a16ba-1e25-4de0-bc8f-4414669bc0de"
 
     fun fetchTranscripts() {
         viewModelScope.launch {
             try{
                 val response = repository.getAllTranscripts(userId = userId)
-                Log.d("TranscriptVM", "Transcripts fetched: ${response}")
                 _transcripts.value = response
+                _categoryGroups.value = groupTranscripts(response)
+                Log.d("DashboardVM", "Transcripts fetched and grouped: ${_categoryGroups.value}")
             }catch(e: Exception) {
-                Log.e("TranscriptVM", "Error: ${e.message}")
+                Log.e("DashboardVM", "Error fetching transcripts: ${e.message}")
             }
         }
+    }
+
+    fun updateAlias(categoryId: String, newAlias: String) {
+        viewModelScope.launch {
+            try {
+                repository.upsertAlias(userId = userId, categoryId = categoryId, newAlias = newAlias)
+                // After updating the alias, we refetch the transcripts to get the updated aliases.
+                fetchTranscripts()
+                Log.d("DashboardVM", "Alias updated and transcripts refetched.")
+            } catch (e: Exception) {
+                Log.e("DashboardVM", "Error updating alias: ${e.message}")
+            }
+        }
+    }
+
+    private fun groupTranscripts(transcripts: List<Transcript>): List<CategoryGroup> {
+        if (transcripts.isEmpty()) {
+            return emptyList()
+        }
+        return transcripts.groupBy { it.categoryId }
+            .map { (_, transcriptsInGroup) ->
+                val first = transcriptsInGroup.first()
+                CategoryGroup(
+                    displayName = first.alias ?: first.category,
+                    categoryId = first.categoryId,
+                    categoryName = first.category,
+                    transcripts = transcriptsInGroup
+                )
+            }
     }
 }
