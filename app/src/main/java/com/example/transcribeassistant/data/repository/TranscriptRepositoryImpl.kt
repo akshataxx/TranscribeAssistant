@@ -20,10 +20,10 @@ class TranscriptRepositoryImpl (
     private val dao: TranscriptDao
 ): TranscriptRepository {
 
-    override suspend fun getTranscript(videoUrl: String): Transcript {
-        val dto = api.getTranscriptFromVideo(mapOf("videoUrl" to videoUrl))
+    override suspend fun transcribeVideo(videoUrl: String, userId: String): Transcript {
+        val dto = api.transcribeVideo(mapOf("videoUrl" to videoUrl, "userId" to userId))
         val model = dto.toDomain()
-        model.toEntity().let { dao.insert(it) } //cache it
+        model.toEntity().let { dao.insert(it) } // cache it
         return model
     }
 
