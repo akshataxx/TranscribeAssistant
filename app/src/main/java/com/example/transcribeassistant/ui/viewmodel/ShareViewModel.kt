@@ -1,5 +1,6 @@
 package com.example.transcribeassistant.ui.viewmodel
 
+
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,26 +13,17 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-/**
- * ViewModel for managing the transcript data.
- * This ViewModel fetches the transcript from a video URL using Retrofit.
- * Calls the API service to get the transcript and exposes it as a StateFlow.
- * On error, it updates the StateFlow with an error message.
- *
- * Use submitVideo(videoUrl) when user first shares the video
- * Use getTranscriptById(transcriptId) in TranscribeDetailsScreen to fetch the stored transcript
- */
-
 @HiltViewModel
-class TranscriptViewModel @Inject constructor(
+class ShareViewModel @Inject constructor(
     private val repository: TranscriptRepository
 ): ViewModel() {
 
     private val _transcript = MutableStateFlow<Transcript?>(null)
     val transcript: StateFlow<Transcript?> = _transcript
-    val userId: String   = "1c9a16ba-1e25-4de0-bc8f-4414669bc0de"
+    val userId: String = "1c9a16ba-1e25-4de0-bc8f-4414669bc0de"
 
-    // For initial video submission
+
+    // For initial video submission when user shares a video with the app
     fun submitNewVideo(videoUrl: String) {
         viewModelScope.launch {
             try {
@@ -43,18 +35,4 @@ class TranscriptViewModel @Inject constructor(
             }
         }
     }
-
-    // For For fetching existing transcript by ID and displaying it on TranscribeDetailsScreen
-    fun loadExistingTranscript(transcriptId: String) {
-        viewModelScope.launch {
-            try {
-                val response = repository.getTranscriptById(transcriptId, userId)
-                Log.d("TranscriptVM", "Transcript fetched by ID: ${response.transcript}")
-                _transcript.value = response
-            } catch(e: Exception) {
-                Log.e("TranscriptVM", "Error: ${e.message}")
-            }
-        }
-    }
-
 }

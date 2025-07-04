@@ -20,8 +20,8 @@ interface TranscriptApi {
      * @param request A map containing the video URL.
      * @return The transcript as a String.
      */
-    @POST("video/url")
-    suspend fun getTranscriptFromVideo(@Body request: Map<String, String>): TranscriptDto
+    @POST("api/video/transcribe")
+    suspend fun transcribeVideo(@Body request: Map<String, String>): TranscriptDto
 
     @GET("transcript")
     suspend fun getAllTranscripts(

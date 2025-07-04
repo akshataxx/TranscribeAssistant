@@ -9,7 +9,7 @@ import java.time.Instant
  * Implementation of this interface(data.repository.TranscriptRepositoryImpl) should handle the actual data fetching and caching logic.
  */
 interface TranscriptRepository {
-    suspend fun getTranscript(videoUrl: String): Transcript
+    suspend fun transcribeVideo(videoUrl: String, userId: String): Transcript
 
     suspend fun getAllTranscripts(
         categories: List<String>? = null,
