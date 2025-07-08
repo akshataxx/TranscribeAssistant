@@ -1,4 +1,4 @@
-package com.example.transcribeassistant
+package com.example.transcribeassistant.activity
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

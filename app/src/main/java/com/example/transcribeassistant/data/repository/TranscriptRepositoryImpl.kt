@@ -1,7 +1,6 @@
 package com.example.transcribeassistant.data.repository
 
 import com.example.transcribeassistant.data.cache.dao.TranscriptDao
-import com.example.transcribeassistant.data.dto.RenameAliasRequest
 import com.example.transcribeassistant.data.network.TranscriptApi
 import com.example.transcribeassistant.domain.model.Transcript
 import com.example.transcribeassistant.domain.mapper.toDomain
@@ -22,10 +21,9 @@ class TranscriptRepositoryImpl (
 ): TranscriptRepository {
 
     override suspend fun transcribeVideo(videoUrl: String, userId: String): Transcript {
-        val request = mapOf("videoUrl" to videoUrl, "userId" to userId)
-        val dto = api.transcribeVideo(request)
+        val dto = api.transcribeVideo(mapOf("videoUrl" to videoUrl, "userId" to userId))
         val model = dto.toDomain()
-        model.toEntity().let { dao.insert(it) } //cache it
+        model.toEntity().let { dao.insert(it) } // cache it
         return model
     }
 
@@ -55,10 +53,5 @@ class TranscriptRepositoryImpl (
         val model = dto.toDomain()
         model.toEntity().let { dao.insert(it) } // cache it
         return model
-    }
-
-    override suspend fun upsertAlias(userId: String, categoryId: String, newAlias: String) {
-        val request = RenameAliasRequest(userId = userId, categoryId = categoryId, newAlias = newAlias)
-        api.upsertAlias(request)
     }
 }
