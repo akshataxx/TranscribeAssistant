@@ -40,18 +40,33 @@ class TranscriptRepositoryImpl (
         return modelList
     }
 
-    override suspend fun getCachedTranscripts(): List<Transcript>{
-        return dao.getAll().map{it.toDomain()}
+    override suspend fun getCachedTranscripts(): List<Transcript> {
+        return dao.getAll().map { it.toDomain() }
     }
 
     override suspend fun getTranscriptById(id: String, userId: String?): Transcript {
         // First try to fetch from cache
-        dao.getById(id)?.let{
+        dao.getById(id)?.let {
             return it.toDomain()
         }
         val dto = api.getTranscriptById(id, userId)
         val model = dto.toDomain()
         model.toEntity().let { dao.insert(it) } // cache it
         return model
+    }
+
+    override suspend fun upsertAlias(
+        userId: String,
+        categoryId: String,
+        newAlias: String
+    ) {
+        val response = api.upsertAlias(
+            mapOf<String, String>(
+                "userId" to userId,
+                "categoryId" to categoryId,
+                "alias" to newAlias
+            )
+        )
+        // If you need to cache the response, you can do it here
     }
 }

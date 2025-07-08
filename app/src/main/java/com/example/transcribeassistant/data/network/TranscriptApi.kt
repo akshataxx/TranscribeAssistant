@@ -1,7 +1,6 @@
 package com.example.transcribeassistant.data.network
 
 import com.example.transcribeassistant.data.dto.CategoryAliasDto
-import com.example.transcribeassistant.data.dto.RenameAliasRequest
 import com.example.transcribeassistant.data.dto.TranscriptDto
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -42,5 +41,5 @@ interface TranscriptApi {
     ): TranscriptDto
 
     @PUT("api/v1/aliases/upsert")
-    suspend fun upsertAlias(@Body request: RenameAliasRequest): CategoryAliasDto
+    suspend fun upsertAlias(@Body request: Map<String, String>): CategoryAliasDto
 }
