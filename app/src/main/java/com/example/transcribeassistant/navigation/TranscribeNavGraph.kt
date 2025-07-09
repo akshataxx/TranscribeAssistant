@@ -88,6 +88,19 @@ fun TranscribeNavGraph(
                     onBackClick = { navController.popBackStack() }
                 )
             }
+            composable(
+                route = "transcripts/{categoryId}",
+                arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val categoryId = backStackEntry.arguments?.getString("categoryId")
+                FeedScreen(
+                    viewModel = hiltViewModel(),
+                    onTranscriptClick = { transcriptId ->
+                        navController.navigate(Screen.TranscribeDetails.createRoute(transcriptId))
+                    },
+                    categoryId = categoryId
+                )
+            }
         }
     }
 }

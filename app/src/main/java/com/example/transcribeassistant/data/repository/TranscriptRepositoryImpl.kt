@@ -55,6 +55,10 @@ class TranscriptRepositoryImpl (
         return model
     }
 
+    override suspend fun getTranscriptsByCategoryId(categoryId: String): List<Transcript> {
+        return dao.getByCategoryId(categoryId).map { it.toDomain() }
+    }
+
     override suspend fun upsertAlias(
         userId: String,
         categoryId: String,

@@ -39,6 +39,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.transcribeassistant.R
 import com.example.transcribeassistant.ui.viewmodel.CategoryGroup
 import com.example.transcribeassistant.ui.viewmodel.DashboardViewModel
+import androidx.navigation.NavHostController
+import com.example.transcribeassistant.navigation.Screen
+import com.example.transcribeassistant.ui.navigation.Screen
 
 val cardColors = listOf(
     Color(0xFF3A3958),
@@ -104,7 +107,11 @@ fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
                 CategoryCard(
                     categoryGroup = group,
                     backgroundColor = cardColors[index % cardColors.size],
-                    onClick = { /* TODO: Navigate to category details */ },
+                    onClick = { 
+                        // Navigate to TranscriptsScreen with the categoryId
+                        // Assuming a navigation function navigateToTranscriptsScreen is available
+                        navigateToTranscriptsScreen(group.categoryId)
+                    },
                     onLongClick = {
                         renamingCategoryGroup = group
                         showRenameDialog = true
@@ -113,6 +120,10 @@ fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
             }
         }
     }
+}
+
+fun navigateToTranscriptsScreen(navController: NavHostController, categoryId: String) {
+    navController.navigate(Screen.Transcripts.createRoute(categoryId))
 }
 
 @Composable

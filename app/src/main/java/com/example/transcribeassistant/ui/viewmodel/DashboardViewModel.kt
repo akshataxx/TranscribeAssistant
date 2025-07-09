@@ -28,6 +28,9 @@ class DashboardViewModel @Inject constructor(
     private val _categoryGroups = MutableStateFlow<List<CategoryGroup>>(emptyList())
     val categoryGroups: StateFlow<List<CategoryGroup>> = _categoryGroups
 
+    private val _transcriptsByCategory = MutableStateFlow<List<Transcript>>(emptyList())
+    val transcriptsByCategory: StateFlow<List<Transcript>> = _transcriptsByCategory
+
     // For a real app, this should be fetched from a user session or preferences
     val userId: String = "1c9a16ba-1e25-4de0-bc8f-4414669bc0de"
 
@@ -53,6 +56,19 @@ class DashboardViewModel @Inject constructor(
                 Log.d("DashboardVM", "Alias updated and transcripts refetched.")
             } catch (e: Exception) {
                 Log.e("DashboardVM", "Error updating alias: ${e.message}")
+            }
+        }
+    }
+
+    // Fetch transcripts by category ID
+    fun fetchTranscriptsByCategory(categoryId: String) {
+        viewModelScope.launch {
+            try {
+                val transcripts = repository.getTranscriptsByCategoryId(categoryId)
+                _transcriptsByCategory.value = transcripts
+                Log.d("DashboardVM", "Transcripts fetched for category $categoryId: ${transcripts.size} items")
+            } catch (e: Exception) {
+                Log.e("DashboardVM", "Error fetching transcripts by category: ${e.message}")
             }
         }
     }

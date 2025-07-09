@@ -29,6 +29,8 @@ class TranscriptViewModel @Inject constructor(
 
     private val _transcript = MutableStateFlow<Transcript?>(null)
     val transcript: StateFlow<Transcript?> = _transcript
+    private val _transcriptsByCategory = MutableStateFlow<List<Transcript>>(emptyList())
+    val transcriptsByCategory: StateFlow<List<Transcript>> = _transcriptsByCategory
     val userId: String   = "1c9a16ba-1e25-4de0-bc8f-4414669bc0de"
 
     // For initial video submission
@@ -57,4 +59,15 @@ class TranscriptViewModel @Inject constructor(
         }
     }
 
+    // Fetch transcripts by category ID
+    fun fetchTranscriptsByCategory(categoryId: String) {
+        viewModelScope.launch {
+            try {
+                val transcripts = repository.getTranscriptsByCategoryId(categoryId)
+                _transcriptsByCategory.value = transcripts
+            } catch (e: Exception) {
+                Log.e("TranscriptVM", "Error fetching transcripts by category: ${e.message}")
+            }
+        }
+    }
 }
