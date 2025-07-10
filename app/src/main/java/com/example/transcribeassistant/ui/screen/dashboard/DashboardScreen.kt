@@ -61,7 +61,7 @@ fun DashboardScreen(
     }
 
     if (showRenameDialog && renamingCategoryGroup != null) {
-        RenameDialog(
+        RenameCategoryDialog(
             categoryGroup = renamingCategoryGroup!!,
             onDismiss = { showRenameDialog = false },
             onConfirm = { newAlias ->
@@ -109,10 +109,9 @@ fun DashboardScreen(
                 CategoryCard(
                     categoryGroup = group,
                     backgroundColor = cardColors[index % cardColors.size],
-                    onClick = { 
-                        // Navigate to TranscriptsScreen with the categoryId
-                        // Assuming a navigation function navigateToTranscriptsScreen is available
-                        navigateToTranscriptsScreen(navController, group.categoryId)
+                    onClick = {
+                        renamingCategoryGroup = group
+                        showRenameDialog = true
                     },
                     onLongClick = {
                         renamingCategoryGroup = group
@@ -130,6 +129,37 @@ fun navigateToTranscriptsScreen(navController: NavHostController, categoryId: St
 
 @Composable
 fun RenameDialog(
+    categoryGroup: CategoryGroup,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var text by remember { mutableStateOf(categoryGroup.displayName) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Rename ${categoryGroup.categoryName}") },
+        text = {
+            TextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text("New Alias") }
+            )
+        },
+        confirmButton = {
+            Button(onClick = { onConfirm(text) }) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+fun RenameCategoryDialog(
     categoryGroup: CategoryGroup,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit

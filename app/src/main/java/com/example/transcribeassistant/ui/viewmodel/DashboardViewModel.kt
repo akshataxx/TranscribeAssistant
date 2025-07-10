@@ -50,8 +50,9 @@ class DashboardViewModel @Inject constructor(
     fun updateAlias(categoryId: String, newAlias: String) {
         viewModelScope.launch {
             try {
+                // Update the alias in the local database
                 repository.upsertAlias(userId = userId, categoryId = categoryId, newAlias = newAlias)
-                // After updating the alias, we refetch the transcripts to get the updated aliases.
+                // Refetch the transcripts to update the UI
                 fetchTranscripts()
                 Log.d("DashboardVM", "Alias updated and transcripts refetched.")
             } catch (e: Exception) {
