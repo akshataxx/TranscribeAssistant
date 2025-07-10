@@ -71,6 +71,10 @@ class TranscriptRepositoryImpl (
                 "alias" to newAlias
             )
         )
-        // If you need to cache the response, you can do it here
+        // Update the local database with the new alias
+        dao.updateAlias(categoryId, newAlias)
+        // Ensure the local cache reflects the updated alias
+        // This assumes you have a method in your DAO to update the alias
+        // If not, you need to implement it in your DAO and entity classes
     }
 }

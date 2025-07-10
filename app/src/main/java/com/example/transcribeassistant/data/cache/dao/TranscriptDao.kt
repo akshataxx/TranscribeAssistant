@@ -21,4 +21,7 @@ interface TranscriptDao {
 
     @Query("SELECT * FROM transcripts WHERE categoryId = :categoryId")
     suspend fun getByCategoryId(categoryId: String): List<TranscriptEntity>
+
+    @Query("UPDATE transcripts SET alias = :newAlias WHERE categoryId = :categoryId")
+    suspend fun updateAlias(categoryId: String, newAlias: String)
 }

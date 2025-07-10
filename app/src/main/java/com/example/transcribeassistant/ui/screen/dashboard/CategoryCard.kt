@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.transcribeassistant.ui.viewmodel.CategoryGroup
+import androidx.compose.foundation.clickable
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -36,10 +37,7 @@ fun CategoryCard(
             .aspectRatio(1f)
             .clip(RoundedCornerShape(16.dp))
             .background(backgroundColor)
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
-            )
+            .clickable(onClick = onClick) // Tile click
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -49,7 +47,8 @@ fun CategoryCard(
             text = categoryGroup.displayName,
             color = Color.White,
             fontWeight = FontWeight.Medium,
-            fontSize = 18.sp
+            fontSize = 18.sp,
+            modifier = Modifier.clickable(onClick = onLongClick) // Text click for renaming
         )
     }
 }
