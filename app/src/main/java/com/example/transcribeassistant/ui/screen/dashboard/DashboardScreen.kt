@@ -110,10 +110,11 @@ fun DashboardScreen(
                     categoryGroup = group,
                     backgroundColor = cardColors[index % cardColors.size],
                     onClick = {
-                        renamingCategoryGroup = group
-                        showRenameDialog = true
+                        // Navigate to the list of transcripts
+                        navigateToTranscriptsScreen(navController, group.categoryId)
                     },
                     onLongClick = {
+                        // Trigger rename dialog
                         renamingCategoryGroup = group
                         showRenameDialog = true
                     }
