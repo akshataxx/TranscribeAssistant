@@ -41,7 +41,6 @@ import com.example.transcribeassistant.ui.viewmodel.CategoryGroup
 import com.example.transcribeassistant.ui.viewmodel.DashboardViewModel
 import androidx.navigation.NavHostController
 import com.example.transcribeassistant.navigation.Screen
-import com.example.transcribeassistant.ui.navigation.Screen
 
 val cardColors = listOf(
     Color(0xFF3A3958),
@@ -49,7 +48,10 @@ val cardColors = listOf(
 )
 
 @Composable
-fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
+fun DashboardScreen(
+    navController: NavHostController,
+    viewModel: DashboardViewModel = hiltViewModel()
+) {
     val categoryGroups by viewModel.categoryGroups.collectAsState()
     var showRenameDialog by remember { mutableStateOf(false) }
     var renamingCategoryGroup by remember { mutableStateOf<CategoryGroup?>(null) }
@@ -110,7 +112,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = hiltViewModel()) {
                     onClick = { 
                         // Navigate to TranscriptsScreen with the categoryId
                         // Assuming a navigation function navigateToTranscriptsScreen is available
-                        navigateToTranscriptsScreen(group.categoryId)
+                        navigateToTranscriptsScreen(navController, group.categoryId)
                     },
                     onLongClick = {
                         renamingCategoryGroup = group

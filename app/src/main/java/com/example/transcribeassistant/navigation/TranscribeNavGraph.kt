@@ -60,7 +60,7 @@ fun TranscribeNavGraph(
                 )
             }
             composable(Screen.Dashboard.route) {
-                DashboardScreen(viewModel = hiltViewModel())
+                DashboardScreen(navController = navController, viewModel = hiltViewModel())
             }
             composable(Screen.Notifications.route) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
