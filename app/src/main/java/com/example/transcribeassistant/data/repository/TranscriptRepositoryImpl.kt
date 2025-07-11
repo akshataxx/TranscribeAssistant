@@ -1,6 +1,7 @@
 package com.example.transcribeassistant.data.repository
 
 import com.example.transcribeassistant.data.cache.dao.TranscriptDao
+import com.example.transcribeassistant.data.dto.RenameAliasRequest
 import com.example.transcribeassistant.data.network.TranscriptApi
 import com.example.transcribeassistant.domain.model.Transcript
 import com.example.transcribeassistant.domain.mapper.toDomain
@@ -65,10 +66,10 @@ class TranscriptRepositoryImpl (
         newAlias: String
     ) {
         val response = api.upsertAlias(
-            mapOf<String, String>(
-                "userId" to userId,
-                "categoryId" to categoryId,
-                "alias" to newAlias
+            RenameAliasRequest(
+                userId = userId,
+                categoryId = categoryId,
+                newAlias = newAlias
             )
         )
         // Update the local database with the new alias
