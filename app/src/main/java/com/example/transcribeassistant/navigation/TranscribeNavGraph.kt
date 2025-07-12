@@ -1,9 +1,14 @@
 package com.example.transcribeassistant.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -29,6 +34,7 @@ fun TranscribeNavGraph(
     val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
+        containerColor = Color(0xFF2C2B3E),
         bottomBar = {
             BottomNavBar(currentRoute = currentRoute ?: "") {
                 if (it != currentRoute) {
@@ -42,7 +48,7 @@ fun TranscribeNavGraph(
     ){ paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Feed.route,
+            startDestination = Screen.Dashboard.route,
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(Screen.Feed.route) {
@@ -54,7 +60,22 @@ fun TranscribeNavGraph(
                 )
             }
             composable(Screen.Dashboard.route) {
-                DashboardScreen(viewModel = hiltViewModel())
+                DashboardScreen(navController = navController, viewModel = hiltViewModel())
+            }
+            composable(Screen.Notifications.route) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Notifications Screen")
+                }
+            }
+            composable(Screen.Profile.route) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Profile Screen")
+                }
+            }
+            composable("add") {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Add Screen")
+                }
             }
             composable(
                 route = Screen.TranscribeDetails.route,
@@ -62,7 +83,23 @@ fun TranscribeNavGraph(
             ) { backStackEntry ->
                 val transcriptId =
                     backStackEntry.arguments?.getString("transcriptId") ?: return@composable
-                TranscribeDetailsScreen(transcriptId = transcriptId)
+                TranscribeDetailsScreen(
+                    transcriptId = transcriptId,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+            composable(
+                route = "transcripts/{categoryId}",
+                arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val categoryId = backStackEntry.arguments?.getString("categoryId")
+                FeedScreen(
+                    viewModel = hiltViewModel(),
+                    onTranscriptClick = { transcriptId ->
+                        navController.navigate(Screen.TranscribeDetails.createRoute(transcriptId))
+                    },
+                    categoryId = categoryId
+                )
             }
         }
     }

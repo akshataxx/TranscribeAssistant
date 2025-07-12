@@ -2,7 +2,6 @@ package com.example.transcribeassistant.data.cache.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.google.gson.annotations.SerializedName
 import java.time.Instant
 
 /**
@@ -16,7 +15,7 @@ data class TranscriptEntity(
     val transcript: String,
     val description: String,
     val title: String,
-    val duration: Int,
+    val duration: Double,
     val uploadedAt: Instant,
     val accountId: String,
     val account: String,

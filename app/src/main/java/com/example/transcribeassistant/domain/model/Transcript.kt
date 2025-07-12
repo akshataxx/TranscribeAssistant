@@ -1,6 +1,5 @@
 package com.example.transcribeassistant.domain.model
 
-import com.google.gson.annotations.SerializedName
 import java.time.Instant
 
 /**
@@ -14,7 +13,7 @@ data class Transcript (
     val transcript: String,
     val description: String,
     val title: String,
-    val duration: Int,
+    val duration: Double,
     val uploadedAt: Instant,
     val accountId: String,
     val account: String,

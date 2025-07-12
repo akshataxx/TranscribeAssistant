@@ -22,4 +22,8 @@ interface TranscriptRepository {
     suspend fun getCachedTranscripts(): List<Transcript>
 
     suspend fun getTranscriptById(id: String, userId: String?): Transcript
+
+    suspend fun getTranscriptsByCategoryId(categoryId: String): List<Transcript>
+
+    suspend fun upsertAlias(userId: String, categoryId: String, newAlias: String)
 }
