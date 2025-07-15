@@ -1,6 +1,8 @@
 package com.example.transcribeassistant.data.network
 
 import com.example.transcribeassistant.data.dto.CategoryAliasDto
+import com.example.transcribeassistant.data.dto.GoogleAuthRequest
+import com.example.transcribeassistant.data.dto.JwtAuthResponse
 import com.example.transcribeassistant.data.dto.RenameAliasRequest
 import com.example.transcribeassistant.data.dto.TranscriptDto
 import retrofit2.http.Body
@@ -17,6 +19,12 @@ import java.time.Instant
  * It uses Retrofit annotations to specify HTTP methods and request bodies.
  */
 interface TranscriptApi {
+
+    @POST("/api/auth/google")
+    suspend fun authenticateWithGoogle(@Body request: GoogleAuthRequest): JwtAuthResponse
+
+    @GET("/api/transcripts")
+    suspend fun getTranscripts(@Query("page") page: Int, @Query("size") size: Int): List<TranscriptDto>
 
     /**
      * Sends a request to the server to transcribe a video URL.

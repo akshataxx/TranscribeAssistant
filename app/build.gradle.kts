@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.room.ktx)
     implementation(libs.hilt.android)
     implementation(libs.androidx.media3.database)
+    implementation(libs.play.services.auth)
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     kapt(libs.room.compiler)

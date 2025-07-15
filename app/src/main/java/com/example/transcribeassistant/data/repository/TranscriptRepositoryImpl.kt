@@ -8,6 +8,7 @@ import com.example.transcribeassistant.domain.mapper.toDomain
 import com.example.transcribeassistant.domain.mapper.toEntity
 import com.example.transcribeassistant.domain.repository.TranscriptRepository
 import java.time.Instant
+import javax.inject.Inject
 
 /**
  * Repository implementation for managing transcripts.
@@ -16,7 +17,7 @@ import java.time.Instant
  * * @property dao The DAO for accessing cached transcripts.
  * * This class implements the [TranscriptRepository] interface.
  */
-class TranscriptRepositoryImpl (
+class TranscriptRepositoryImpl @Inject constructor(
     private val api: TranscriptApi,
     private val dao: TranscriptDao
 ): TranscriptRepository {
