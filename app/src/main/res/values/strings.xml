@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">TranscribeAssistant</string>
-    <string name="server_client_id">63948187194-dg5bna5rk6kpha18uroago2a15tl03la.apps.googleusercontent.com</string>
+    <string name="default_web_client_id">63948187194-dg5bna5rk6kpha18uroago2a15tl03la.apps.googleusercontent.com</string>
 </resources>
