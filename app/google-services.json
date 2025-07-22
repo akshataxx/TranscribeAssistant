@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "63948187194",
+    "project_id": "content-categorisation",
+    "storage_bucket": "content-categorisation.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:63948187194:android:e37629996810f62a9c7703",
+        "android_client_info": {
+          "package_name": "com.example.transcribeassistant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "63948187194-dg5bna5rk6kpha18uroago2a15tl03la.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSD2uIsbKn4iVnb6eOhvpd-zUAj7XsLTI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "63948187194-dg5bna5rk6kpha18uroago2a15tl03la.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

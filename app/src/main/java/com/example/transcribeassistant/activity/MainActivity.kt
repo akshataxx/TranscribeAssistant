@@ -49,6 +49,8 @@ class MainActivity : ComponentActivity() {
             .requestEmail()
             .build()
 
+        Log.d("OAuthDebug","default_web_client_id = ${getString(R.string.default_web_client_id)}")
+
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
         setContent {
@@ -90,8 +92,12 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun signIn(){
-        val signInIntent = googleSignInClient.signInIntent
-        startActivityForResult(signInIntent, RC_SIGN_IN)
+        try {
+            val signInIntent = googleSignInClient.signInIntent
+            startActivityForResult(signInIntent, RC_SIGN_IN)
+        } catch (e: Exception) {
+            Log.e("SignIn", "Error: ${e.message}")
+        }
     }
 
     override fun onActivityResult(
@@ -103,7 +109,14 @@ class MainActivity : ComponentActivity() {
 
         if(requestCode == RC_SIGN_IN){
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            handleSignInResult(task)
+            //handleSignInResult(task)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                // Handle signed in account
+            } catch (e: ApiException) {
+                Log.e("SignIn", "Error code: ${e.statusCode}")
+                Log.e("SignIn", "Error message: ${e.message}")
+            }
         }
     }
 
