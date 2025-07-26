@@ -57,6 +57,8 @@ app/
               activity/
                 MainActivity.kt
                 ShareActivity.kt
+              common/
+                AppContextProvider.kt
               data/
                 cache/
                   dao/
@@ -81,6 +83,8 @@ app/
                   TranscriptApi.kt
                 repository/
                   TranscriptRepositoryImpl.kt
+                session/
+                  JwtManager.kt
                 RetrofitClient.kt
               di/
                 AuthModule.kt
@@ -168,6 +172,133 @@ settings.gradle.kts
 <files>
 This section contains the contents of the repository's files.
 
+<file path="app/src/main/java/com/example/transcribeassistant/common/AppContextProvider.kt">
+package com.example.transcribeassistant.common
+
+import android.annotation.SuppressLint
+import android.app.Application
+import android.content.Context
+
+object AppContextProvider {
+    @SuppressLint("StaticFieldLeak")
+    lateinit var context: Context
+        private set
+
+    fun init(app: Application) {
+        context = app.applicationContext
+    }
+}
+</file>
+
+<file path="app/src/main/java/com/example/transcribeassistant/data/session/JwtManager.kt">
+package com.example.transcribeassistant.data.session
+
+import android.content.Context
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+
+private val Context.dataStore by preferencesDataStore(name = "auth_prefs")
+
+object JwtManager {
+    private val TOKEN_KEY = stringPreferencesKey("jwt_token")
+
+    suspend fun saveToken(context: Context, token: String) {
+        context.dataStore.edit { prefs ->
+            prefs[TOKEN_KEY] = token
+        }
+    }
+
+    suspend fun getToken(context: Context): String? {
+        return context.dataStore.data.map { it[TOKEN_KEY] }.first()
+    }
+
+    suspend fun clearToken(context: Context) {
+        context.dataStore.edit { it.remove(TOKEN_KEY) }
+    }
+}
+</file>
+
+<file path="app/src/androidTest/java/com/example/transcribeassistant/ExampleInstrumentedTest.kt">
+package com.example.transcribeassistant
+
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.ext.junit.runners.AndroidJUnit4
+
+import org.junit.Test
+import org.junit.runner.RunWith
+
+import org.junit.Assert.*
+
+/**
+ * Instrumented test, which will execute on an Android device.
+ *
+ * See [testing documentation](http://d.android.com/tools/testing).
+ */
+@RunWith(AndroidJUnit4::class)
+class ExampleInstrumentedTest {
+    @Test
+    fun useAppContext() {
+        // Context of the app under test.
+        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+        assertEquals("com.example.transcribeassistant", appContext.packageName)
+    }
+}
+</file>
+
+<file path="app/src/main/java/com/example/transcribeassistant/activity/ShareActivity.kt">
+package com.example.transcribeassistant.activity
+
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.material3.Text
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.transcribeassistant.ui.screen.share.ShareScreen
+import com.example.transcribeassistant.ui.theme.TranscribeAssistantTheme
+import dagger.hilt.android.AndroidEntryPoint
+
+@AndroidEntryPoint
+class ShareActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val sharedText = intent?.getStringExtra(Intent.EXTRA_TEXT)
+
+        setContent {
+            TranscribeAssistantTheme {
+                if (!sharedText.isNullOrEmpty()) {
+                    ShareScreen(
+                        sharedLink = sharedText,
+                        viewModel = hiltViewModel()
+                    ) {
+                        finish() // Finish after saving or canceling
+                    }
+                } else {
+                    Text("Invalid shared link")
+                }
+            }
+        }
+    }
+}
+</file>
+
+<file path="app/src/main/java/com/example/transcribeassistant/data/dto/CategoryAliasDto.kt">
+package com.example.transcribeassistant.data.dto
+
+import com.google.gson.annotations.SerializedName
+
+data class CategoryAliasDto(
+    @SerializedName("id") val id: String,
+    @SerializedName("userId") val userId: String,
+    @SerializedName("categoryId") val categoryId: String,
+    @SerializedName("alias") val alias: String
+)
+</file>
+
 <file path="app/src/main/java/com/example/transcribeassistant/data/dto/GoogleAuthRequest.kt">
 package com.example.transcribeassistant.data.dto
 
@@ -181,6 +312,39 @@ data class JwtAuthResponse(
     val accessToken: String,
     val tokenType: String
 )
+</file>
+
+<file path="app/src/main/java/com/example/transcribeassistant/data/dto/RenameAliasRequest.kt">
+package com.example.transcribeassistant.data.dto
+
+import com.google.gson.annotations.SerializedName
+
+data class RenameAliasRequest(
+    @SerializedName("userId") val userId: String,
+    @SerializedName("categoryId") val categoryId: String,
+    @SerializedName("newAlias") val newAlias: String
+)
+</file>
+
+<file path="app/src/main/java/com/example/transcribeassistant/data/network/adapter/InstantAdapter.kt">
+package com.example.transcribeassistant.data.network.adapter
+
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.ToJson
+import java.time.Instant
+
+class InstantAdapter {
+
+    @ToJson
+    fun toJson(instant: Instant): String {
+        return instant.toString() // outputs ISO-8601 format
+    }
+
+    @FromJson
+    fun fromJson(value: String): Instant {
+        return Instant.parse(value) // parses ISO-8601 string into Instant
+    }
+}
 </file>
 
 <file path="app/src/main/java/com/example/transcribeassistant/data/network/AuthApi.kt">
@@ -200,12 +364,12 @@ interface AuthApi {
 <file path="app/src/main/java/com/example/transcribeassistant/di/AuthModule.kt">
 package com.example.transcribeassistant.di
 
+import com.example.transcribeassistant.data.RetrofitClient
 import com.example.transcribeassistant.data.network.AuthApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import retrofit2.Retrofit
 import javax.inject.Singleton
 
 @Module
@@ -214,8 +378,8 @@ object AuthModule {
 
     @Provides
     @Singleton
-    fun provideAuthApi(retrofit: Retrofit): AuthApi {
-        return retrofit.create(AuthApi::class.java)
+    fun provideAuthApi(): AuthApi {
+        return RetrofitClient.authApi
     }
 }
 </file>
@@ -224,6 +388,40 @@ object AuthModule {
 package com.example.transcribeassistant.domain.repository
 
 class AuthRepository {
+}
+</file>
+
+<file path="app/src/main/java/com/example/transcribeassistant/ui/screen/components/CategoryChip.kt">
+package com.example.transcribeassistant.ui.screen.components
+
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.transcribeassistant.ui.theme.*
+
+/**
+ * TODO: Add emojis next to each categoryName
+ */
+@Composable
+fun CategoryChip(label: String) {
+    Surface(
+        color = pastelCyan,
+        shape = RoundedCornerShape(10.dp)
+    ) {
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
 }
 </file>
 
@@ -293,283 +491,6 @@ fun GoogleLoginScreen(
             is LoginState.Error -> Text("❌ ERROR: ${state.message}")
             else -> {}
         }
-    }
-}
-</file>
-
-<file path="app/src/main/java/com/example/transcribeassistant/ui/viewmodel/LoginViewModel.kt">
-package com.example.transcribeassistant.ui.viewmodel
-
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.transcribeassistant.data.network.AuthApi
-import com.example.transcribeassistant.data.dto.GoogleAuthRequest
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-sealed class LoginState {
-    object Idle : LoginState()
-    object Loading : LoginState()
-    data class Success(val token: String) : LoginState()
-    data class Error(val message: String) : LoginState()
-}
-
-@HiltViewModel
-class LoginViewModel @Inject constructor(
-    private val authApi: AuthApi
-) : ViewModel() {
-
-    private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
-    val loginState: StateFlow<LoginState> = _loginState
-
-    fun authenticate(idToken: String) {
-        viewModelScope.launch {
-            _loginState.value = LoginState.Loading
-            try {
-                val response = authApi.authenticate(GoogleAuthRequest(idToken))
-                _loginState.value = LoginState.Success(response.accessToken)
-            } catch (e: Exception) {
-                _loginState.value = LoginState.Error(e.message ?: "Unknown error")
-            }
-        }
-    }
-}
-</file>
-
-<file path="app/google-services.json">
-{
-  "project_info": {
-    "project_number": "63948187194",
-    "project_id": "content-categorisation",
-    "storage_bucket": "content-categorisation.firebasestorage.app"
-  },
-  "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:63948187194:android:e37629996810f62a9c7703",
-        "android_client_info": {
-          "package_name": "com.example.transcribeassistant"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "63948187194-iikq0ecv22dorhr8q8s059ttk0id1cog.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.transcribeassistant",
-            "certificate_hash": "a9e973de6a7b7f2fd4fafd61e47aa78ce8e36190"
-          }
-        },
-        {
-          "client_id": "63948187194-8rir4fa743qu7ri2dhsou5b9ec489p5n.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBSD2uIsbKn4iVnb6eOhvpd-zUAj7XsLTI"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "63948187194-8rir4fa743qu7ri2dhsou5b9ec489p5n.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    }
-  ],
-  "configuration_version": "1"
-}
-</file>
-
-<file path="app/src/androidTest/java/com/example/transcribeassistant/ExampleInstrumentedTest.kt">
-package com.example.transcribeassistant
-
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.ext.junit.runners.AndroidJUnit4
-
-import org.junit.Test
-import org.junit.runner.RunWith
-
-import org.junit.Assert.*
-
-/**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
-@RunWith(AndroidJUnit4::class)
-class ExampleInstrumentedTest {
-    @Test
-    fun useAppContext() {
-        // Context of the app under test.
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.example.transcribeassistant", appContext.packageName)
-    }
-}
-</file>
-
-<file path="app/src/main/java/com/example/transcribeassistant/activity/MainActivity.kt">
-package com.example.transcribeassistant.activity
-
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import com.example.transcribeassistant.ui.screen.TranscribeAssistantApp
-import com.example.transcribeassistant.ui.theme.TranscribeAssistantTheme
-import dagger.hilt.android.AndroidEntryPoint
-import com.example.transcribeassistant.ui.screen.login.GoogleLoginScreen
-import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.transcribeassistant.R
-
-@AndroidEntryPoint
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
-        setContent {
-            TranscribeAssistantTheme {
-//                Surface(modifier = Modifier.fillMaxSize()) {
-//                    TranscribeAssistantApp() // 🔄 Your app root
-//                }
-                val viewModel: LoginViewModel = hiltViewModel()
-                GoogleLoginScreen(
-                    viewModel = viewModel,
-                    webClientId = getString(R.string.default_web_client_id)
-                )
-            }
-        }
-    }
-}
-</file>
-
-<file path="app/src/main/java/com/example/transcribeassistant/activity/ShareActivity.kt">
-package com.example.transcribeassistant.activity
-
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.material3.Text
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.transcribeassistant.ui.screen.share.ShareScreen
-import com.example.transcribeassistant.ui.theme.TranscribeAssistantTheme
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
-class ShareActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        val sharedText = intent?.getStringExtra(Intent.EXTRA_TEXT)
-
-        setContent {
-            TranscribeAssistantTheme {
-                if (!sharedText.isNullOrEmpty()) {
-                    ShareScreen(
-                        sharedLink = sharedText,
-                        viewModel = hiltViewModel()
-                    ) {
-                        finish() // Finish after saving or canceling
-                    }
-                } else {
-                    Text("Invalid shared link")
-                }
-            }
-        }
-    }
-}
-</file>
-
-<file path="app/src/main/java/com/example/transcribeassistant/data/dto/CategoryAliasDto.kt">
-package com.example.transcribeassistant.data.dto
-
-import com.google.gson.annotations.SerializedName
-
-data class CategoryAliasDto(
-    @SerializedName("id") val id: String,
-    @SerializedName("userId") val userId: String,
-    @SerializedName("categoryId") val categoryId: String,
-    @SerializedName("alias") val alias: String
-)
-</file>
-
-<file path="app/src/main/java/com/example/transcribeassistant/data/dto/RenameAliasRequest.kt">
-package com.example.transcribeassistant.data.dto
-
-import com.google.gson.annotations.SerializedName
-
-data class RenameAliasRequest(
-    @SerializedName("userId") val userId: String,
-    @SerializedName("categoryId") val categoryId: String,
-    @SerializedName("newAlias") val newAlias: String
-)
-</file>
-
-<file path="app/src/main/java/com/example/transcribeassistant/data/network/adapter/InstantAdapter.kt">
-package com.example.transcribeassistant.data.network.adapter
-
-import com.squareup.moshi.FromJson
-import com.squareup.moshi.ToJson
-import java.time.Instant
-
-class InstantAdapter {
-
-    @ToJson
-    fun toJson(instant: Instant): String {
-        return instant.toString() // outputs ISO-8601 format
-    }
-
-    @FromJson
-    fun fromJson(value: String): Instant {
-        return Instant.parse(value) // parses ISO-8601 string into Instant
-    }
-}
-</file>
-
-<file path="app/src/main/java/com/example/transcribeassistant/ui/screen/components/CategoryChip.kt">
-package com.example.transcribeassistant.ui.screen.components
-
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.example.transcribeassistant.ui.theme.*
-
-/**
- * TODO: Add emojis next to each categoryName
- */
-@Composable
-fun CategoryChip(label: String) {
-    Surface(
-        color = pastelCyan,
-        shape = RoundedCornerShape(10.dp)
-    ) {
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = label,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.bodySmall
-        )
     }
 }
 </file>
@@ -719,6 +640,53 @@ val Typography = Typography(
 )
 </file>
 
+<file path="app/src/main/java/com/example/transcribeassistant/ui/viewmodel/LoginViewModel.kt">
+package com.example.transcribeassistant.ui.viewmodel
+
+import android.content.Context
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.transcribeassistant.data.network.AuthApi
+import com.example.transcribeassistant.data.dto.GoogleAuthRequest
+import com.example.transcribeassistant.data.session.JwtManager
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+sealed class LoginState {
+    object Idle : LoginState()
+    object Loading : LoginState()
+    data class Success(val token: String) : LoginState()
+    data class Error(val message: String) : LoginState()
+}
+
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val authApi: AuthApi,
+    @ApplicationContext private val context: Context
+) : ViewModel() {
+
+    private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
+    val loginState: StateFlow<LoginState> = _loginState
+
+    fun authenticate(idToken: String) {
+        viewModelScope.launch {
+            _loginState.value = LoginState.Loading
+            try {
+                val response = authApi.authenticate(GoogleAuthRequest(idToken))
+                JwtManager.saveToken(context, response.accessToken)
+                _loginState.value = LoginState.Success(response.accessToken)
+            } catch (e: Exception) {
+                _loginState.value = LoginState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+}
+</file>
+
 <file path="app/src/main/java/com/example/transcribeassistant/ui/viewmodel/ShareViewModel.kt">
 package com.example.transcribeassistant.ui.viewmodel
 
@@ -799,11 +767,16 @@ object TimeUtils {
 package com.example.transcribeassistant
 
 import android.app.Application
+import com.example.transcribeassistant.common.AppContextProvider
 import dagger.hilt.android.HiltAndroidApp
 
 
 @HiltAndroidApp
 class TranscribeAssistantApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        AppContextProvider.init(this)
+    }
 }
 </file>
 
@@ -1052,13 +1025,6 @@ class TranscribeAssistantApplication : Application() {
 </resources>
 </file>
 
-<file path="app/src/main/res/values/strings.xml">
-<resources>
-    <string name="app_name">TranscribeAssistant</string>
-    <string name="default_web_client_id">63948187194-8rir4fa743qu7ri2dhsou5b9ec489p5n.apps.googleusercontent.com</string>
-</resources>
-</file>
-
 <file path="app/src/main/res/values/themes.xml">
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
@@ -1190,6 +1156,56 @@ class TimeUtilsTest {
 
 <file path="app/.gitignore">
 /build
+</file>
+
+<file path="app/google-services.json">
+{
+  "project_info": {
+    "project_number": "63948187194",
+    "project_id": "content-categorisation",
+    "storage_bucket": "content-categorisation.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:63948187194:android:e37629996810f62a9c7703",
+        "android_client_info": {
+          "package_name": "com.example.transcribeassistant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "63948187194-iikq0ecv22dorhr8q8s059ttk0id1cog.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.transcribeassistant",
+            "certificate_hash": "a9e973de6a7b7f2fd4fafd61e47aa78ce8e36190"
+          }
+        },
+        {
+          "client_id": "63948187194-8rir4fa743qu7ri2dhsou5b9ec489p5n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSD2uIsbKn4iVnb6eOhvpd-zUAj7XsLTI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "63948187194-8rir4fa743qu7ri2dhsou5b9ec489p5n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
 </file>
 
 <file path="app/proguard-rules.pro">
@@ -1461,6 +1477,55 @@ rootProject.name = "TranscribeAssistant"
 include(":app")
 </file>
 
+<file path="app/src/main/java/com/example/transcribeassistant/activity/MainActivity.kt">
+package com.example.transcribeassistant.activity
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import com.example.transcribeassistant.ui.screen.TranscribeAssistantApp
+import com.example.transcribeassistant.ui.theme.TranscribeAssistantTheme
+import dagger.hilt.android.AndroidEntryPoint
+import com.example.transcribeassistant.ui.screen.login.GoogleLoginScreen
+import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.transcribeassistant.R
+import com.example.transcribeassistant.data.session.JwtManager
+
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        setContent {
+            TranscribeAssistantTheme {
+                val context = LocalContext.current
+                val tokenState = produceState<String?>(initialValue = null) {
+                    value = JwtManager.getToken(context)
+                }
+
+                if (tokenState.value == null) {
+                    val viewModel: LoginViewModel = hiltViewModel()
+                    GoogleLoginScreen(
+                        viewModel = viewModel,
+                        webClientId = getString(R.string.default_web_client_id)
+                    )
+                } else {
+                    TranscribeAssistantApp()
+                }
+            }
+        }
+    }
+}
+</file>
+
 <file path="app/src/main/java/com/example/transcribeassistant/data/cache/Converters.kt">
 package com.example.transcribeassistant.data.cache
 
@@ -1579,6 +1644,13 @@ import com.example.transcribeassistant.domain.model.Transcript
         duration, uploadedAt, accountId, account,
         identifierId, identifier, categoryId, category, alias, createdAt
     )
+</file>
+
+<file path="app/src/main/res/values/strings.xml">
+<resources>
+    <string name="app_name">TranscribeAssistant</string>
+    <string name="default_web_client_id">63948187194-8rir4fa743qu7ri2dhsou5b9ec489p5n.apps.googleusercontent.com</string>
+</resources>
 </file>
 
 <file path=".gitignore">
@@ -1839,53 +1911,6 @@ data class TranscriptDto(
     @SerializedName("alias") val alias: String?,
     @SerializedName("createdAt") val createdAt: Instant
 )
-</file>
-
-<file path="app/src/main/java/com/example/transcribeassistant/data/RetrofitClient.kt">
-package com.example.transcribeassistant.data
-
-import com.example.transcribeassistant.data.network.TranscriptApi
-import com.example.transcribeassistant.data.network.adapter.InstantAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.converter.moshi.MoshiConverterFactory
-
-/**
- * Singleton class that provides an instance of the ApiService
- * This class is responsible for creating the Retrofit client and make actual network requests.
- *
- */
-object RetrofitClient {
-
-    private val BASE_URL = "http://10.0.2.2:8080"
-
-    private val moshi = Moshi.Builder()
-        .add(InstantAdapter())
-        .add(KotlinJsonAdapterFactory())
-        .build()
-
-    private val logging = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
-    }
-
-    private val client = OkHttpClient.Builder()
-        .addInterceptor(logging)
-        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-        .build()
-
-    val apiService: TranscriptApi = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .client(client)
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
-        .build()
-        .create(TranscriptApi::class.java)
-}
 </file>
 
 <file path="app/src/main/java/com/example/transcribeassistant/ui/screen/components/BottomNavBar.kt">
@@ -2295,6 +2320,81 @@ class FeedViewModel @Inject constructor(
 </manifest>
 </file>
 
+<file path="app/src/main/java/com/example/transcribeassistant/data/RetrofitClient.kt">
+package com.example.transcribeassistant.data
+
+import com.example.transcribeassistant.common.AppContextProvider
+import com.example.transcribeassistant.data.network.AuthApi
+import com.example.transcribeassistant.data.network.TranscriptApi
+import com.example.transcribeassistant.data.network.adapter.InstantAdapter
+import com.example.transcribeassistant.data.session.JwtManager
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
+
+/**
+ * Singleton class that provides an instance of the ApiService
+ * This class is responsible for creating the Retrofit client and make actual network requests.
+ *
+ */
+object RetrofitClient {
+
+    private val BASE_URL = "http://10.0.2.2:8080"
+
+    private val moshi = Moshi.Builder()
+        .add(InstantAdapter())
+        .add(KotlinJsonAdapterFactory())
+        .build()
+
+    private val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    private val client = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            val original = chain.request()
+
+            val token = runBlocking {
+                JwtManager.getToken(AppContextProvider.context)
+            }
+
+            val request = if (token != null) {
+                original.newBuilder()
+                    .header("Authorization", "Bearer $token")
+                    .build()
+            } else original
+
+            chain.proceed(request)
+        }
+        .addInterceptor(logging)
+        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .build()
+
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .client(client)
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .build()
+
+    val apiService: TranscriptApi = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .client(client)
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .build()
+        .create(TranscriptApi::class.java)
+
+    val transcriptApi: TranscriptApi = retrofit.create(TranscriptApi::class.java)
+    val authApi: AuthApi = retrofit.create(AuthApi::class.java)
+}
+</file>
+
 <file path="app/src/main/java/com/example/transcribeassistant/domain/model/Transcript.kt">
 package com.example.transcribeassistant.domain.model
 
@@ -2322,6 +2422,31 @@ data class Transcript (
     val alias: String?,
     val createdAt: Instant
 )
+</file>
+
+<file path="app/src/main/java/com/example/transcribeassistant/ui/screen/TranscribeAssistantApp.kt">
+package com.example.transcribeassistant.ui.screen
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.example.transcribeassistant.ui.screen.dashboard.DashboardScreen
+import androidx.navigation.compose.rememberNavController
+import com.example.transcribeassistant.navigation.TranscribeNavGraph
+import com.example.transcribeassistant.ui.screen.feed.FeedScreen
+
+@Composable
+fun TranscribeAssistantApp() {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        val navController = rememberNavController()
+        TranscribeNavGraph(navController = navController)
+    }
+}
 </file>
 
 <file path="app/build.gradle.kts">
@@ -2411,31 +2536,7 @@ dependencies {
 
     implementation(libs.firebase.auth)
     implementation(libs.google.auth)
-}
-</file>
-
-<file path="app/src/main/java/com/example/transcribeassistant/ui/screen/TranscribeAssistantApp.kt">
-package com.example.transcribeassistant.ui.screen
-
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import com.example.transcribeassistant.ui.screen.dashboard.DashboardScreen
-import androidx.navigation.compose.rememberNavController
-import com.example.transcribeassistant.navigation.TranscribeNavGraph
-import com.example.transcribeassistant.ui.screen.feed.FeedScreen
-
-@Composable
-fun TranscribeAssistantApp() {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        val navController = rememberNavController()
-        TranscribeNavGraph(navController = navController)
-    }
+    implementation(libs.androidx.datastore.preferences)
 }
 </file>
 

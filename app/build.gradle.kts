@@ -84,4 +84,5 @@ dependencies {
 
     implementation(libs.firebase.auth)
     implementation(libs.google.auth)
+    implementation(libs.androidx.datastore.preferences)
 }

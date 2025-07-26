@@ -1,10 +1,13 @@
 package com.example.transcribeassistant.data
 
+import com.example.transcribeassistant.common.AppContextProvider
 import com.example.transcribeassistant.data.network.AuthApi
 import com.example.transcribeassistant.data.network.TranscriptApi
 import com.example.transcribeassistant.data.network.adapter.InstantAdapter
+import com.example.transcribeassistant.data.session.JwtManager
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -30,6 +33,21 @@ object RetrofitClient {
     }
 
     private val client = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            val original = chain.request()
+
+            val token = runBlocking {
+                JwtManager.getToken(AppContextProvider.context)
+            }
+
+            val request = if (token != null) {
+                original.newBuilder()
+                    .header("Authorization", "Bearer $token")
+                    .build()
+            } else original
+
+            chain.proceed(request)
+        }
         .addInterceptor(logging)
         .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
         .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
