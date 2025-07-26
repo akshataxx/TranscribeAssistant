@@ -10,6 +10,10 @@ import androidx.compose.ui.Modifier
 import com.example.transcribeassistant.ui.screen.TranscribeAssistantApp
 import com.example.transcribeassistant.ui.theme.TranscribeAssistantTheme
 import dagger.hilt.android.AndroidEntryPoint
+import com.example.transcribeassistant.ui.screen.login.GoogleLoginScreen
+import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.transcribeassistant.R
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -19,9 +23,14 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             TranscribeAssistantTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    TranscribeAssistantApp() // 🔄 Your app root
-                }
+//                Surface(modifier = Modifier.fillMaxSize()) {
+//                    TranscribeAssistantApp() // 🔄 Your app root
+//                }
+                val viewModel: LoginViewModel = hiltViewModel()
+                GoogleLoginScreen(
+                    viewModel = viewModel,
+                    webClientId = getString(R.string.default_web_client_id)
+                )
             }
         }
     }

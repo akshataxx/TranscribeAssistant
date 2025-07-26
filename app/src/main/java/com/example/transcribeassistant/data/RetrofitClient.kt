@@ -1,5 +1,6 @@
 package com.example.transcribeassistant.data
 
+import com.example.transcribeassistant.data.network.AuthApi
 import com.example.transcribeassistant.data.network.TranscriptApi
 import com.example.transcribeassistant.data.network.adapter.InstantAdapter
 import com.squareup.moshi.Moshi
@@ -35,10 +36,19 @@ object RetrofitClient {
         .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
         .build()
 
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .client(client)
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .build()
+
     val apiService: TranscriptApi = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .client(client)
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
         .create(TranscriptApi::class.java)
+
+    val transcriptApi: TranscriptApi = retrofit.create(TranscriptApi::class.java)
+    val authApi: AuthApi = retrofit.create(AuthApi::class.java)
 }
