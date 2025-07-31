@@ -1,9 +1,11 @@
 package com.example.transcribeassistant.data.dto
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+@JsonClass(generateAdapter = true)
 data class RenameAliasRequest(
-    @SerializedName("userId") val userId: String,
-    @SerializedName("categoryId") val categoryId: String,
-    @SerializedName("newAlias") val newAlias: String
-) 
+    @Json(name = "userId")     val userId: String,
+    @Json(name = "categoryId") val categoryId: String,
+    @Json(name = "newAlias")   val newAlias: String
+)

@@ -20,10 +20,10 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object TranscriptModule {
 
-//    @Provides
-//    fun provideTranscriptApi(): TranscriptApi {
-//        return RetrofitClient.apiService
-//    }
+    /*@Provides
+    fun provideTranscriptApi(): TranscriptApi {
+        return RetrofitClient.apiService
+    }*/
 
     @Provides
     @Singleton
