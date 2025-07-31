@@ -1,8 +1,8 @@
 package com.example.transcribeassistant.data.dto
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import java.time.Instant
-
 /**
  * Data Transfer Object (DTO) representing a transcript.
  * This class is used to map the JSON response from the server to a Kotlin object.
@@ -23,20 +23,22 @@ import java.time.Instant
  * @property alias The final, user-visible alias for the transcript (e.g., "Big-Back", "Tech-Tok").
  * @property createdAt Timestamp when the transcript was created.
  */
+@JsonClass(generateAdapter = true)
 data class TranscriptDto(
-    @SerializedName("id") val id: String,
-    @SerializedName("videoUrl") val videoUrl: String,
-    @SerializedName("transcript") val transcript: String,
-    @SerializedName("description") val description: String,
-    @SerializedName("title") val title: String,
-    @SerializedName("duration") val duration: Double,
-    @SerializedName("uploadedAt") val uploadedAt: Instant,
-    @SerializedName("accountId") val accountId: String,
-    @SerializedName("account") val account: String,
-    @SerializedName("identifierId") val identifierId: String,
-    @SerializedName("identifier") val identifier: String,
-    @SerializedName("categoryId") val categoryId: String,
-    @SerializedName("category") val category: String,
-    @SerializedName("alias") val alias: String?,
-    @SerializedName("createdAt") val createdAt: Instant
+    @Json(name = "id")           val id: String,
+    @Json(name = "videoUrl")     val videoUrl: String,
+    @Json(name = "transcript")   val transcript: String,
+    @Json(name = "description")  val description: String,
+    @Json(name = "title")        val title: String,
+    @Json(name = "duration")     val duration: Double,
+    @Json(name = "uploadedAt")   val uploadedAt: Instant,
+    @Json(name = "accountId")    val accountId: String,
+    @Json(name = "account")      val account: String,
+    @Json(name = "identifierId") val identifierId: String,
+    @Json(name = "identifier")   val identifier: String,
+    @Json(name = "categoryId")   val categoryId: String,
+    @Json(name = "category")     val category: String,
+    @Json(name = "alias")        val alias: String?,
+    @Json(name = "createdAt")    val createdAt: Instant
 )
+
