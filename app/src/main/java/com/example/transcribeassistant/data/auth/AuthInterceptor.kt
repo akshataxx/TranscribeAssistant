@@ -1,6 +1,8 @@
 package com.example.transcribeassistant.data.auth
 
 
+import android.util.Log
+import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
 
@@ -10,14 +12,17 @@ import okhttp3.Response
 
 class AuthInterceptor(private val jwtManager: JwtManager): Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token = jwtManager.getAccessToken()
-        val request = if (token != null) {
-            chain.request().newBuilder()
-                .addHeader("Authorization", "Bearer $token")
-                .build()
+        val original = chain.request()
+        // get token and cache in memory temporarily
+        val accessToken = runBlocking { jwtManager.getAccessToken() }
+        val requestBuilder = original.newBuilder()
+        if (!accessToken.isNullOrBlank()) {
+            requestBuilder.addHeader("Authorization", "Bearer $accessToken")
         } else {
-            chain.request()
+            Log.d("AuthInterceptor", "no access token available")
         }
+        val request = requestBuilder.build()
+        Log.d("AuthInterceptor", "sending request with auth header: ${request.header("Authorization")}")
         return chain.proceed(request)
     }
 }
