@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TranscribeAssistantTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    TranscribeAssistantApp() // 🔄 Your app root
+                    TranscribeAssistantApp() // Your app root
                 }
             }
         }

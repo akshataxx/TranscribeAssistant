@@ -36,27 +36,12 @@ object NetworkModule {
         .build()
 
     private val logging = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        level = HttpLoggingInterceptor.Level.HEADERS
     }
 
     @Provides
     @Singleton
     fun provideJwtManager(@ApplicationContext ctx: Context) = JwtManager(ctx)
-
-    /*@Provides @Singleton
-    fun provideAuthApi(): AuthApi {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080/")
-            .addConverterFactory(
-                MoshiConverterFactory.create(
-                    Moshi.Builder()
-                        .add(KotlinJsonAdapterFactory())
-                        .build()
-                )
-            )
-            .build()
-        return retrofit.create(AuthApi::class.java)
-    }*/
 
     @Provides
     @Singleton
@@ -69,34 +54,6 @@ object NetworkModule {
                 .build())
             .build()
             .create(AuthApi::class.java)
-
-
-    /*@Provides @Singleton
-    fun provideTranscriptApi(
-        authApi: AuthApi,
-        jwtManager: JwtManager
-    ): TranscriptApi {
-        val logging = HttpLoggingInterceptor()
-            .setLevel(HttpLoggingInterceptor.Level.BODY)
-        val client = OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(jwtManager))
-            .authenticator(TokenAuthenticator(authApi, jwtManager))
-            .addInterceptor(logging)
-            .build()
-
-        return Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080/")
-            .client(client)
-            .addConverterFactory(
-                MoshiConverterFactory.create(
-                    Moshi.Builder()
-                        .add(KotlinJsonAdapterFactory())
-                        .build()
-                )
-            )
-            .build()
-            .create(TranscriptApi::class.java)
-    }*/
 
     @Provides
     @Singleton
@@ -119,5 +76,13 @@ object NetworkModule {
             .create(TranscriptApi::class.java)
     }
 
-
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(
+        authInterceptor: AuthInterceptor,
+        tokenAuthenticator: TokenAuthenticator): OkHttpClient = OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
+            .authenticator(tokenAuthenticator)
+            .addInterceptor(logging)
+            .build()
 }
