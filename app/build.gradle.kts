@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.androidx.media3.database)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.core.android)
+    implementation (libs.play.services.auth)
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     kapt(libs.room.compiler)

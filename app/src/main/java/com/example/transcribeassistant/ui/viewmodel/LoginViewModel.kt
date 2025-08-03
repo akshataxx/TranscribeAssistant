@@ -34,8 +34,12 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
             try {
+                Log.d("LoginViewModel", "Calling loginWithGoogle with credential ending: ${googleCredential.takeLast(8)}")
+
+                Log.d("LoginViewModel", "Sending login payload: ${mapOf("idToken" to googleCredential).toString().take(200)}")
+
                 // Adapt payload to what your backend wants. Previously you had a map of string to string.
-                val response: JwtAuthResponse = authApi.loginWithGoogle(mapOf("credential" to googleCredential))
+                val response: JwtAuthResponse = authApi.loginWithGoogle(mapOf("idToken" to googleCredential))
                 // Save tokens
                 jwtManager.saveTokens(response.accessToken, response.refreshToken)
                 Log.d("LoginViewModel", "Saved access (last 8): ${response.accessToken.takeLast(8)}, refresh (last 8): ${response.refreshToken.takeLast(8)}")
@@ -45,5 +49,9 @@ class LoginViewModel @Inject constructor(
                 _uiState.value = LoginUiState.Error(e.message ?: "Unknown error")
             }
         }
+    }
+
+    fun setError(message: String) {
+        _uiState.value = LoginUiState.Error(message)
     }
 }

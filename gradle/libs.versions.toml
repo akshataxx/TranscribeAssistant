@@ -21,6 +21,7 @@ hiltNavigationCompose="1.2.0"
 media3Database = "1.7.1"
 datastore = "1.0.0"
 datastoreCoreAndroid = "1.1.7"
+play-services-auth = "20.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -55,7 +56,7 @@ hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-com
 androidx-media3-database = { group = "androidx.media3", name = "media3-database", version.ref = "media3Database" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
-
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

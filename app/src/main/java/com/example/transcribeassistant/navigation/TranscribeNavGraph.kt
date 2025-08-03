@@ -1,5 +1,7 @@
 package com.example.transcribeassistant.navigation
 
+import android.app.Application
+import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -25,6 +27,7 @@ import com.example.transcribeassistant.ui.screen.TranscribeDetailsScreen
 import com.example.transcribeassistant.ui.screen.dashboard.DashboardScreen
 import com.example.transcribeassistant.ui.screen.feed.FeedScreen
 import com.example.transcribeassistant.ui.screen.login.LoginScreen
+import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.runBlocking
 
@@ -52,8 +55,8 @@ fun TranscribeNavGraph(
         }
     ){ paddingValues ->
         val context = LocalContext.current
-        val jwtManager = EntryPointAccessors.fromContext(
-            context,
+        val jwtManager = EntryPointAccessors.fromApplication(
+            context.applicationContext as Application,
             JwtManagerEntryPoint::class.java
         ).jwtManager()
 
@@ -67,15 +70,11 @@ fun TranscribeNavGraph(
             modifier = Modifier.padding(paddingValues)
         ) {
             composable("login") {
-                // You need to supply invokeGoogleSignIn appropriately; stub or real implementation
-                val loginViewModel: com.example.transcribeassistant.ui.viewmodel.LoginViewModel = hiltViewModel()
+                val loginViewModel: LoginViewModel = hiltViewModel()
                 LoginScreen(
                     navController = navController,
                     viewModel = loginViewModel,
-                    invokeGoogleSignIn = {
-                        // TODO: replace with real Google sign-in logic that returns the credential/token
-                        "eyJhbGciOiJSUzI1NiIsImtpZCI6ImRkNTMwMTIwNGZjMWQ2YTBkNjhjNzgzYTM1Y2M5YzEwYjI1ZTFmNGEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI2Mzk0ODE4NzE5NC04cmlyNGZhNzQzcXU3cmkyZGhzb3U1YjllYzQ4OXA1bi5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjYzOTQ4MTg3MTk0LThyaXI0ZmE3NDNxdTdyaTJkaHNvdTViOWVjNDg5cDVuLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTAxODMxMDM3MDM4MjA1NzQzMDQ1IiwiZW1haWwiOiJidXR0ZXIuY2hpY2tlbjMwMTdAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJIWTRjd3JhaV9leUpuNlZ4ZTBwZ1BnIiwiaWF0IjoxNzUzOTQ4OTY4LCJleHAiOjE3NTM5NTI1Njh9.aLQsKQGonTc956TqYVuKiq7XM5F6gE07H6Q3DNXWweWNJSUBbYVydkNW3PZwY33fh7eHoKFYr3rR4t4tQnhaZ_cmknqeJHWHT_RN97uZ-NuTPXuMYEU0J9L0YaQBYJ3At1V7m0oDsg24LlT7N5RkNhQO9uo5PfHU6dlt7diS6mcQ2n3ffu12w8A9UU0Avvw0UBJ9KPPNs2_Q7C813CDEpjiB4RwWE4NfneAzRumKTq3e8H6tP0hFjzd8B0J7DPZOkhcr14gBLVNYdNQttwMc7gcGfDJa5hOm5ND9cZf7PvRajvvIApueVGHUCjjnd-UtppteW1eEcPzWwuexCzSBuw"
-                    }
+                    webClientId = "63948187194-8rir4fa743qu7ri2dhsou5b9ec489p5n.apps.googleusercontent.com"
                 )
             }
 
