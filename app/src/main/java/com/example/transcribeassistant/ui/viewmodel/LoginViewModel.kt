@@ -1,44 +1,57 @@
 package com.example.transcribeassistant.ui.viewmodel
 
-import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.transcribeassistant.data.auth.JwtManager
+import com.example.transcribeassistant.data.dto.JwtAuthResponse
 import com.example.transcribeassistant.data.network.AuthApi
-import com.example.transcribeassistant.data.dto.GoogleAuthRequest
-import com.example.transcribeassistant.data.session.JwtManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed class LoginState {
-    object Idle : LoginState()
-    object Loading : LoginState()
-    data class Success(val token: String) : LoginState()
-    data class Error(val message: String) : LoginState()
-}
+
+/**
+ * Does the login call and saves tokens
+ */
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val authApi: AuthApi,
-    @ApplicationContext private val context: Context
+    private val jwtManager: JwtManager
 ) : ViewModel() {
 
-    private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
-    val loginState: StateFlow<LoginState> = _loginState
+    private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
+    val uiState: StateFlow<LoginUiState> = _uiState
 
-    fun authenticate(idToken: String) {
+    /**
+     * Simplest possible Google login flow. The `googleCredential` here is whatever your backend
+     * expects (e.g., an id_token or code). Adjust the map accordingly.
+     */
+    fun loginWithGoogle(googleCredential: String) {
         viewModelScope.launch {
-            _loginState.value = LoginState.Loading
+            _uiState.value = LoginUiState.Loading
             try {
-                val response = authApi.authenticate(GoogleAuthRequest(idToken))
-                JwtManager.saveToken(context, response.accessToken)
-                _loginState.value = LoginState.Success(response.accessToken)
+                Log.d("LoginViewModel", "Calling loginWithGoogle with credential ending: ${googleCredential.takeLast(8)}")
+
+                Log.d("LoginViewModel", "Sending login payload: ${mapOf("idToken" to googleCredential).toString().take(200)}")
+
+                // Adapt payload to what your backend wants. Previously you had a map of string to string.
+                val response: JwtAuthResponse = authApi.loginWithGoogle(mapOf("idToken" to googleCredential))
+                // Save tokens
+                jwtManager.saveTokens(response.accessToken, response.refreshToken)
+                Log.d("LoginViewModel", "Saved access (last 8): ${response.accessToken.takeLast(8)}, refresh (last 8): ${response.refreshToken.takeLast(8)}")
+                _uiState.value = LoginUiState.Success(response.accessToken.takeLast(8))
             } catch (e: Exception) {
-                _loginState.value = LoginState.Error(e.message ?: "Unknown error")
+                Log.e("LoginViewModel", "Login failed", e)
+                _uiState.value = LoginUiState.Error(e.message ?: "Unknown error")
             }
         }
+    }
+
+    fun setError(message: String) {
+        _uiState.value = LoginUiState.Error(message)
     }
 }

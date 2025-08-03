@@ -1,5 +1,7 @@
 package com.example.transcribeassistant.navigation
 
+import android.app.Application
+import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -14,14 +16,20 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.transcribeassistant.di.JwtManagerEntryPoint
 import com.example.transcribeassistant.ui.screen.components.BottomNavBar
 import com.example.transcribeassistant.ui.screen.TranscribeDetailsScreen
 import com.example.transcribeassistant.ui.screen.dashboard.DashboardScreen
 import com.example.transcribeassistant.ui.screen.feed.FeedScreen
+import com.example.transcribeassistant.ui.screen.login.LoginScreen
+import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
+import dagger.hilt.android.EntryPointAccessors
+import kotlinx.coroutines.runBlocking
 
 @Composable
 fun TranscribeNavGraph(
@@ -46,11 +54,30 @@ fun TranscribeNavGraph(
             }
         }
     ){ paddingValues ->
+        val context = LocalContext.current
+        val jwtManager = EntryPointAccessors.fromApplication(
+            context.applicationContext as Application,
+            JwtManagerEntryPoint::class.java
+        ).jwtManager()
+
+// decide start destination
+        val accessToken = runBlocking { jwtManager.getAccessToken() }
+        val startDest = if (accessToken.isNullOrBlank()) "login" else Screen.Dashboard.route
+
         NavHost(
             navController = navController,
-            startDestination = Screen.Dashboard.route,
+            startDestination = startDest,
             modifier = Modifier.padding(paddingValues)
         ) {
+            composable("login") {
+                val loginViewModel: LoginViewModel = hiltViewModel()
+                LoginScreen(
+                    navController = navController,
+                    viewModel = loginViewModel,
+                    webClientId = "63948187194-8rir4fa743qu7ri2dhsou5b9ec489p5n.apps.googleusercontent.com"
+                )
+            }
+
             composable(Screen.Feed.route) {
                 FeedScreen(
                     viewModel = hiltViewModel(),

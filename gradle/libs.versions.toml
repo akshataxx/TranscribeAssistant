@@ -11,6 +11,7 @@ composeBom = "2024.09.00"
 navigationCompose = "2.7.7"
 retrofit = "2.9.0"
 moshi = "1.15.1"
+moshi-codegen   = "1.15.0"
 moshiConverter = "2.9.0"
 okhttpLogging = "4.12.0"
 materialIconsExtended = "1.6.4"
@@ -22,6 +23,8 @@ firebase-auth = "22.1.1"
 google-auth = "20.6.0"
 google-services = "4.3.15"
 datastore = "1.1.0"
+datastoreCoreAndroid = "1.1.7"
+play-services-auth = "20.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,11 +42,11 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
-androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "moshiConverter" }
 moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
 moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
+moshi-kotlin-codegen = { group="com.squareup.moshi", name="moshi-kotlin-codegen", version.ref="moshi-codegen" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttpLogging" }
 material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version = "materialIconsExtended" }
 retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version = "2.9.0" }
@@ -57,6 +60,9 @@ androidx-media3-database = { group = "androidx.media3", name = "media3-database"
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebase-auth" }
 google-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "google-auth" }
 
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

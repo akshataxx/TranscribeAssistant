@@ -21,11 +21,6 @@ import javax.inject.Singleton
 object TranscriptModule {
 
     @Provides
-    fun provideTranscriptApi(): TranscriptApi {
-        return RetrofitClient.apiService
-    }
-
-    @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(

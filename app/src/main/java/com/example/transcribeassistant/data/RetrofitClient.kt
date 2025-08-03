@@ -11,7 +11,6 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 /**
@@ -19,6 +18,8 @@ import retrofit2.converter.moshi.MoshiConverterFactory
  * This class is responsible for creating the Retrofit client and make actual network requests.
  *
  */
+
+@Deprecated("Use hilt provided AuthApi and TranscriptApi instead")
 object RetrofitClient {
 
     private val BASE_URL = "http://10.0.2.2:8080"
