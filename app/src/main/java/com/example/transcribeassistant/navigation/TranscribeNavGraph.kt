@@ -9,6 +9,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,8 +28,11 @@ import com.example.transcribeassistant.ui.screen.TranscribeDetailsScreen
 import com.example.transcribeassistant.ui.screen.dashboard.DashboardScreen
 import com.example.transcribeassistant.ui.screen.feed.FeedScreen
 import com.example.transcribeassistant.ui.screen.login.LoginScreen
+import com.example.transcribeassistant.ui.screen.profile.ProfileScreen
+import com.example.transcribeassistant.ui.screen.profile.SettingsScreen
 import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
 import dagger.hilt.android.EntryPointAccessors
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 @Composable
@@ -60,7 +64,9 @@ fun TranscribeNavGraph(
             JwtManagerEntryPoint::class.java
         ).jwtManager()
 
-// decide start destination
+        val scope = rememberCoroutineScope()
+
+        // decide start destination based on logged in user or not
         val accessToken = runBlocking { jwtManager.getAccessToken() }
         val startDest = if (accessToken.isNullOrBlank()) "login" else Screen.Dashboard.route
 
@@ -95,9 +101,27 @@ fun TranscribeNavGraph(
                 }
             }
             composable(Screen.Profile.route) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Profile Screen")
-                }
+                ProfileScreen(
+                    onSettingsClick = {
+                        navController.navigate(Screen.Settings.route) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onLogoutClick = {
+                        scope.launch {
+                            // Clear tokens, then go to login and wipe history
+                            jwtManager.clearTokens()
+                            navController.navigate("login") {
+                                popUpTo(0) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.Settings.route) {
+                SettingsScreen()
             }
             composable("add") {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
