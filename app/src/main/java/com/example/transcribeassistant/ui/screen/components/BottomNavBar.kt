@@ -30,7 +30,6 @@ fun BottomNavBar(
         BottomNavItem("Notifications", Screen.Notifications.route, Icons.Default.Notifications),
         BottomNavItem("Add", "add", Icons.Default.Add, size = 48),
         BottomNavItem("Feed", Screen.Feed.route, Icons.Outlined.Article),
-        BottomNavItem("Profile", Screen.Profile.route, Icons.Default.Person)
     )
 
     NavigationBar(

@@ -28,8 +28,6 @@ import com.example.transcribeassistant.ui.screen.TranscribeDetailsScreen
 import com.example.transcribeassistant.ui.screen.dashboard.DashboardScreen
 import com.example.transcribeassistant.ui.screen.feed.FeedScreen
 import com.example.transcribeassistant.ui.screen.login.LoginScreen
-import com.example.transcribeassistant.ui.screen.profile.ProfileScreen
-import com.example.transcribeassistant.ui.screen.profile.SettingsScreen
 import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.launch
@@ -99,29 +97,6 @@ fun TranscribeNavGraph(
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Notifications Screen")
                 }
-            }
-            composable(Screen.Profile.route) {
-                ProfileScreen(
-                    onSettingsClick = {
-                        navController.navigate(Screen.Settings.route) {
-                            launchSingleTop = true
-                        }
-                    },
-                    onLogoutClick = {
-                        scope.launch {
-                            // Clear tokens, then go to login and wipe history
-                            jwtManager.clearTokens()
-                            navController.navigate("login") {
-                                popUpTo(0) { inclusive = true }
-                                launchSingleTop = true
-                            }
-                        }
-                    }
-                )
-            }
-
-            composable(Screen.Settings.route) {
-                SettingsScreen()
             }
             composable("add") {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
