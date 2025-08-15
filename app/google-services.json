@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "63948187194-vvi78a1raf31c77g37a8h64s56rest39.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.transcribeassistant",
+            "certificate_hash": "559954b8af5c53510023e83d100e58095c0d937e"
+          }
+        },
+        {
           "client_id": "63948187194-8rir4fa743qu7ri2dhsou5b9ec489p5n.apps.googleusercontent.com",
           "client_type": 3
         }
