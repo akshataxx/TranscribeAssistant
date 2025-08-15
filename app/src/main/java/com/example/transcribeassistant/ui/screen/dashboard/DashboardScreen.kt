@@ -2,7 +2,9 @@ package com.example.transcribeassistant.ui.screen.dashboard
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +19,8 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -89,14 +93,38 @@ fun DashboardScreen(
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
-            Image(
-                painter = painterResource(id = R.drawable.ic_profile),
-                contentDescription = "Profile",
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
+
+            var menuOpen by remember { mutableStateOf(false) }
+            Box{
+                Image(
+                    painter = painterResource(id = R.drawable.ic_profile),
+                    contentDescription = "Profile",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .clickable { menuOpen = true },
+                    contentScale = ContentScale.Crop
+                )
+
+                DropdownMenu(
+                    expanded = menuOpen,
+                    onDismissRequest = { menuOpen = false },
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Logout") },
+                        onClick = {
+                            menuOpen = false
+                            viewModel.logout()
+                            navController.navigate("login"){
+                                popUpTo(0) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+            }
+
+
         }
         Spacer(modifier = Modifier.height(32.dp))
 
