@@ -9,6 +9,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,6 +30,7 @@ import com.example.transcribeassistant.ui.screen.feed.FeedScreen
 import com.example.transcribeassistant.ui.screen.login.LoginScreen
 import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
 import dagger.hilt.android.EntryPointAccessors
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 @Composable
@@ -60,7 +62,9 @@ fun TranscribeNavGraph(
             JwtManagerEntryPoint::class.java
         ).jwtManager()
 
-// decide start destination
+        val scope = rememberCoroutineScope()
+
+        // decide start destination based on logged in user or not
         val accessToken = runBlocking { jwtManager.getAccessToken() }
         val startDest = if (accessToken.isNullOrBlank()) "login" else Screen.Dashboard.route
 
@@ -92,11 +96,6 @@ fun TranscribeNavGraph(
             composable(Screen.Notifications.route) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Notifications Screen")
-                }
-            }
-            composable(Screen.Profile.route) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Profile Screen")
                 }
             }
             composable("add") {

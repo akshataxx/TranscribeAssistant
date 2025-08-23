@@ -1,9 +1,7 @@
 package com.example.transcribeassistant.di
 
 import android.content.Context
-import androidx.media3.database.DatabaseProvider
 import androidx.room.Room
-import com.example.transcribeassistant.data.RetrofitClient
 import com.example.transcribeassistant.data.cache.AppDatabase
 import com.example.transcribeassistant.data.cache.dao.TranscriptDao
 import com.example.transcribeassistant.data.network.TranscriptApi

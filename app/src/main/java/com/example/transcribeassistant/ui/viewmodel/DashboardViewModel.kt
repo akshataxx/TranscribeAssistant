@@ -3,6 +3,7 @@ package com.example.transcribeassistant.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.transcribeassistant.data.auth.JwtManager
 import com.example.transcribeassistant.domain.model.Transcript
 import com.example.transcribeassistant.domain.repository.TranscriptRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +21,8 @@ data class CategoryGroup(
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val repository: TranscriptRepository
+    private val repository: TranscriptRepository,
+    private val jwtManager: JwtManager
 ): ViewModel() {
     private val _transcripts = MutableStateFlow<List<Transcript>>(emptyList())
     val transcripts: StateFlow<List<Transcript>> = _transcripts
@@ -85,5 +87,15 @@ class DashboardViewModel @Inject constructor(
                     transcripts = transcriptsInGroup
                 )
             }
+    }
+
+    fun logout(){
+        viewModelScope.launch {
+            try{
+                jwtManager.clearTokens()
+            }catch(e: Exception) {
+                Log.e("DashboardVM", "Error logging out: ${e.message}")
+            }
+        }
     }
 }

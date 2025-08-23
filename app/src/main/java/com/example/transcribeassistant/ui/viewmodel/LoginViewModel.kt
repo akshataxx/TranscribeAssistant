@@ -27,8 +27,7 @@ class LoginViewModel @Inject constructor(
     val uiState: StateFlow<LoginUiState> = _uiState
 
     /**
-     * Simplest possible Google login flow. The `googleCredential` here is whatever your backend
-     * expects (e.g., an id_token or code). Adjust the map accordingly.
+     * Login with Google credential and save tokens to datastore
      */
     fun loginWithGoogle(googleCredential: String) {
         viewModelScope.launch {
@@ -38,7 +37,7 @@ class LoginViewModel @Inject constructor(
 
                 Log.d("LoginViewModel", "Sending login payload: ${mapOf("idToken" to googleCredential).toString().take(200)}")
 
-                // Adapt payload to what your backend wants. Previously you had a map of string to string.
+                // Call API to get tokens back from Google OAuth endpoint and refresh token
                 val response: JwtAuthResponse = authApi.loginWithGoogle(mapOf("idToken" to googleCredential))
                 // Save tokens
                 jwtManager.saveTokens(response.accessToken, response.refreshToken)
@@ -53,5 +52,9 @@ class LoginViewModel @Inject constructor(
 
     fun setError(message: String) {
         _uiState.value = LoginUiState.Error(message)
+    }
+
+    fun resetToIdle() {
+        _uiState.value = LoginUiState.Idle
     }
 }
