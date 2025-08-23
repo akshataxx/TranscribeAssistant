@@ -21,8 +21,8 @@ class TranscriptRepositoryImpl (
     private val dao: TranscriptDao
 ): TranscriptRepository {
 
-    override suspend fun transcribeVideo(videoUrl: String, userId: String): Transcript {
-        val dto = api.transcribeVideo(mapOf("videoUrl" to videoUrl, "userId" to userId))
+    override suspend fun transcribeVideo(videoUrl: String): Transcript {
+        val dto = api.transcribeVideo(mapOf("videoUrl" to videoUrl))
         val model = dto.toDomain()
         model.toEntity().let { dao.insert(it) } // cache it
         return model
@@ -32,10 +32,9 @@ class TranscriptRepositoryImpl (
         categories: List<String>?,
         account: String?,
         from: Instant?,
-        to: Instant?,
-        userId: String?
+        to: Instant?
     ): List<Transcript> {
-        val dtoList = api.getAllTranscripts(categories, account, from, to, userId)
+        val dtoList = api.getAllTranscripts(categories, account, from, to)
         val modelList = dtoList.map { it.toDomain() }
         modelList.forEach { it.toEntity().let { entity -> dao.insert(entity) } }
         return modelList
@@ -45,12 +44,12 @@ class TranscriptRepositoryImpl (
         return dao.getAll().map { it.toDomain() }
     }
 
-    override suspend fun getTranscriptById(id: String, userId: String?): Transcript {
+    override suspend fun getTranscriptById(id: String): Transcript {
         // First try to fetch from cache
         dao.getById(id)?.let {
             return it.toDomain()
         }
-        val dto = api.getTranscriptById(id, userId)
+        val dto = api.getTranscriptById(id)
         val model = dto.toDomain()
         model.toEntity().let { dao.insert(it) } // cache it
         return model
@@ -61,13 +60,11 @@ class TranscriptRepositoryImpl (
     }
 
     override suspend fun upsertAlias(
-        userId: String,
         categoryId: String,
         newAlias: String
     ) {
         val response = api.upsertAlias(
             RenameAliasRequest(
-                userId = userId,
                 categoryId = categoryId,
                 newAlias = newAlias
             )

@@ -20,14 +20,11 @@ class ShareViewModel @Inject constructor(
 
     private val _transcript = MutableStateFlow<Transcript?>(null)
     val transcript: StateFlow<Transcript?> = _transcript
-    val userId: String = "1c9a16ba-1e25-4de0-bc8f-4414669bc0de"
-
-
     // For initial video submission when user shares a video with the app
     fun submitNewVideo(videoUrl: String) {
         viewModelScope.launch {
             try {
-                val response = repository.transcribeVideo(videoUrl, userId)
+                val response = repository.transcribeVideo(videoUrl)
                 Log.d("TranscriptVM", "Transcript created: ${response.transcript}")
                 _transcript.value = response
             } catch(e: Exception) {

@@ -31,13 +31,11 @@ class TranscriptViewModel @Inject constructor(
     val transcript: StateFlow<Transcript?> = _transcript
     private val _transcriptsByCategory = MutableStateFlow<List<Transcript>>(emptyList())
     val transcriptsByCategory: StateFlow<List<Transcript>> = _transcriptsByCategory
-    val userId: String   = "1c9a16ba-1e25-4de0-bc8f-4414669bc0de"
-
     // For initial video submission
     fun submitNewVideo(videoUrl: String) {
         viewModelScope.launch {
             try {
-                val response = repository.transcribeVideo(videoUrl, userId)
+                val response = repository.transcribeVideo(videoUrl)
                 Log.d("TranscriptVM", "Transcript created: ${response.transcript}")
                 _transcript.value = response
             } catch(e: Exception) {
@@ -50,7 +48,7 @@ class TranscriptViewModel @Inject constructor(
     fun loadExistingTranscript(transcriptId: String) {
         viewModelScope.launch {
             try {
-                val response = repository.getTranscriptById(transcriptId, userId)
+                val response = repository.getTranscriptById(transcriptId)
                 Log.d("TranscriptVM", "Transcript fetched by ID: ${response.transcript}")
                 _transcript.value = response
             } catch(e: Exception) {
