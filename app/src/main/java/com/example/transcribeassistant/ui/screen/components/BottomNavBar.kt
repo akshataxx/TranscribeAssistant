@@ -1,20 +1,17 @@
 package com.example.transcribeassistant.ui.screen.components
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Article
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -32,7 +29,6 @@ fun BottomNavBar(
         BottomNavItem("Notifications", Screen.Notifications.route, Icons.Default.Notifications),
         BottomNavItem("Add", "add", Icons.Default.Add, size = 48),
         BottomNavItem("Feed", Screen.Feed.route, Icons.Outlined.Article),
-        BottomNavItem("Profile", Screen.Profile.route, Icons.Default.Person)
     )
 
     NavigationBar(
