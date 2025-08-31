@@ -26,12 +26,10 @@ class FeedViewModel @Inject constructor(
 
     private val _transcripts = MutableStateFlow<List<Transcript>>(emptyList())
     val transcripts: StateFlow<List<Transcript>> = _transcripts
-    val userId: String = "1c9a16ba-1e25-4de0-bc8f-4414669bc0de"
-
     fun fetchTranscripts() {
         viewModelScope.launch {
             try{
-                val response = repository.getAllTranscripts(userId = userId)
+                val response = repository.getAllTranscripts()
                 Log.d("TranscriptVM", "Transcripts fetched: ${response}")
                 _transcripts.value = response
             }catch(e: Exception) {

@@ -20,7 +20,7 @@ interface TranscriptApi {
 
     /**
      * Sends a request to the server to transcribe a video URL.
-     * @param request A map containing the video URL and userId.
+     * @param request A map containing the video URL.
      * @return The created transcript as a TranscriptDto.
      */
     @POST("api/video/transcribe")
@@ -31,14 +31,12 @@ interface TranscriptApi {
         @Query("categoryIds") categories: List<String>? = null,
         @Query("account") account: String? = null,
         @Query("from") from: Instant? = null,
-        @Query("to") to: Instant? = null,
-        @Query("userId") userId: String? = null
+        @Query("to") to: Instant? = null
     ): List<TranscriptDto>
 
     @GET("transcript/{id}")
     suspend fun getTranscriptById(
-        @Path("id") transcriptId: String,
-        @Query("userId") userId: String? = null
+        @Path("id") transcriptId: String
     ): TranscriptDto
 
     @PUT("api/v1/aliases/upsert")
