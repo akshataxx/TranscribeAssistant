@@ -5,6 +5,7 @@ import com.example.transcribeassistant.data.auth.AuthInterceptor
 import com.example.transcribeassistant.data.auth.JwtManager
 import com.example.transcribeassistant.data.auth.TokenAuthenticator
 import com.example.transcribeassistant.data.network.AuthApi
+import com.example.transcribeassistant.data.network.SubscriptionApi
 import com.example.transcribeassistant.data.network.TranscriptApi
 import com.example.transcribeassistant.data.network.adapter.InstantAdapter
 import com.squareup.moshi.Moshi
@@ -74,6 +75,26 @@ object NetworkModule {
                 MoshiConverterFactory.create(moshi))
             .build()
             .create(TranscriptApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSubscriptionApi(
+        authApi: AuthApi,
+        jwtManager: JwtManager
+    ): SubscriptionApi {
+        val client = OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(jwtManager))
+            .authenticator(TokenAuthenticator(authApi, jwtManager))
+            .addInterceptor(logging)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(SubscriptionApi::class.java)
     }
 
     @Provides

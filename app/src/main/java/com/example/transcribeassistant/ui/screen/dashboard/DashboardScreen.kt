@@ -58,6 +58,7 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val categoryGroups by viewModel.categoryGroups.collectAsState()
+    val usageInfo by viewModel.usageInfo.collectAsState()
     var showRenameDialog by remember { mutableStateOf(false) }
     var renamingCategoryGroup by remember { mutableStateOf<CategoryGroup?>(null) }
 
@@ -111,6 +112,13 @@ fun DashboardScreen(
                     onDismissRequest = { menuOpen = false },
                 ) {
                     DropdownMenuItem(
+                        text = { Text("Subscription") },
+                        onClick = {
+                            menuOpen = false
+                            navController.navigate(Screen.Subscription.route)
+                        }
+                    )
+                    DropdownMenuItem(
                         text = { Text("Logout") },
                         onClick = {
                             menuOpen = false
@@ -126,6 +134,16 @@ fun DashboardScreen(
 
 
         }
+        
+        // Usage tracking card
+        usageInfo?.let { usage ->
+            Spacer(modifier = Modifier.height(16.dp))
+            UsageTrackingCard(
+                usageInfo = usage,
+                onUpgradeClick = { navController.navigate(Screen.Subscription.route) }
+            )
+        }
+        
         Spacer(modifier = Modifier.height(32.dp))
 
         LazyVerticalGrid(
@@ -217,6 +235,55 @@ fun RenameCategoryDialog(
             }
         }
     )
+}
+
+@Composable
+private fun UsageTrackingCard(
+    usageInfo: com.example.transcribeassistant.domain.model.UsageInfo,
+    onUpgradeClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (usageInfo.isPremium) Color(0xFF4CAF50) else Color(0xFFFFA726)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = if (usageInfo.isPremium) "Premium Active" else "Free Plan",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    text = usageInfo.usageMessage,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White
+                )
+            }
+            
+            if (!usageInfo.isPremium && usageInfo.hasReachedFreeLimit) {
+                Button(
+                    onClick = onUpgradeClick,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color(0xFFFFA726)
+                    )
+                ) {
+                    Text("Upgrade", fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)

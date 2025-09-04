@@ -28,6 +28,7 @@ import com.example.transcribeassistant.ui.screen.TranscribeDetailsScreen
 import com.example.transcribeassistant.ui.screen.dashboard.DashboardScreen
 import com.example.transcribeassistant.ui.screen.feed.FeedScreen
 import com.example.transcribeassistant.ui.screen.login.LoginScreen
+import com.example.transcribeassistant.ui.screen.subscription.SubscriptionScreen
 import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.launch
@@ -97,6 +98,11 @@ fun TranscribeNavGraph(
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Notifications Screen")
                 }
+            }
+            composable(Screen.Subscription.route) {
+                SubscriptionScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
             composable("add") {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
