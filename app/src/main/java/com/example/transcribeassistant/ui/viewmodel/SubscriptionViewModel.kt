@@ -3,6 +3,7 @@ package com.example.transcribeassistant.ui.viewmodel
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.billingclient.api.Purchase
 import com.example.transcribeassistant.billing.BillingManager
 import com.example.transcribeassistant.domain.model.Subscription
 import com.example.transcribeassistant.domain.model.UsageInfo
@@ -97,7 +98,7 @@ class SubscriptionViewModel @Inject constructor(
         }
     }
     
-    private suspend fun handleSuccessfulPurchase(purchase: com.android.billingclient.api.Purchase) {
+    private suspend fun handleSuccessfulPurchase(purchase: Purchase) {
         try {
             // Verify purchase with backend
             val productId = purchase.products.firstOrNull() ?: return
@@ -117,4 +118,7 @@ class SubscriptionViewModel @Inject constructor(
         }
     }
 }
+
+
+
 

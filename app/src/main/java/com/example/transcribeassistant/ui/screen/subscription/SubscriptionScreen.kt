@@ -1,5 +1,6 @@
 package com.example.transcribeassistant.ui.screen.subscription
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -17,6 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.transcribeassistant.domain.model.Subscription
+import com.example.transcribeassistant.domain.model.UsageInfo
 import com.example.transcribeassistant.ui.viewmodel.SubscriptionUiState
 import com.example.transcribeassistant.ui.viewmodel.SubscriptionViewModel
 
@@ -63,7 +66,7 @@ fun SubscriptionScreen(
                         usageInfo = currentState.usageInfo,
                         subscription = currentState.subscription,
                         onUpgradeClick = { productId ->
-                            viewModel.startPurchaseFlow(context as androidx.activity.ComponentActivity, productId)
+                            viewModel.startPurchaseFlow(context as ComponentActivity, productId)
                         },
                         onCancelClick = { viewModel.cancelSubscription() }
                     )
@@ -82,8 +85,8 @@ fun SubscriptionScreen(
 
 @Composable
 private fun SubscriptionContent(
-    usageInfo: com.example.transcribeassistant.domain.model.UsageInfo,
-    subscription: com.example.transcribeassistant.domain.model.Subscription?,
+    usageInfo: UsageInfo,
+    subscription: Subscription?,
     onUpgradeClick: (String) -> Unit,
     onCancelClick: () -> Unit
 ) {
