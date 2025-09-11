@@ -118,13 +118,3 @@ class SubscriptionViewModel @Inject constructor(
     }
 }
 
-sealed class SubscriptionUiState {
-    object Loading : SubscriptionUiState()
-    
-    data class Success(
-        val usageInfo: UsageInfo,
-        val subscription: Subscription?
-    ) : SubscriptionUiState()
-    
-    data class Error(val message: String) : SubscriptionUiState()
-}

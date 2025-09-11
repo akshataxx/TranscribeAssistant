@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.transcribeassistant.ui.viewmodel.SubscriptionUiState
 import com.example.transcribeassistant.ui.viewmodel.SubscriptionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,15 +53,15 @@ fun SubscriptionScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            when (uiState) {
+            when (val currentState = uiState) {
                 is SubscriptionUiState.Loading -> {
                     CircularProgressIndicator()
                 }
-                
+
                 is SubscriptionUiState.Success -> {
                     SubscriptionContent(
-                        usageInfo = uiState.usageInfo,
-                        subscription = uiState.subscription,
+                        usageInfo = currentState.usageInfo,
+                        subscription = currentState.subscription,
                         onUpgradeClick = { productId ->
                             viewModel.startPurchaseFlow(context as androidx.activity.ComponentActivity, productId)
                         },
@@ -70,7 +71,7 @@ fun SubscriptionScreen(
                 
                 is SubscriptionUiState.Error -> {
                     ErrorContent(
-                        message = uiState.message,
+                        message = currentState.message,
                         onRetry = { viewModel.loadSubscriptionData() }
                     )
                 }
