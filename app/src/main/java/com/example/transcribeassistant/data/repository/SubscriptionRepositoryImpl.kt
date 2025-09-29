@@ -1,5 +1,6 @@
 package com.example.transcribeassistant.data.repository
 
+import android.util.Log
 import com.example.transcribeassistant.data.dto.UpgradeSubscriptionRequest
 import com.example.transcribeassistant.data.network.SubscriptionApi
 import com.example.transcribeassistant.domain.mapper.toDomain
@@ -19,7 +20,9 @@ class SubscriptionRepositoryImpl @Inject constructor(
     }
     
     override suspend fun getUsageInfo(): UsageInfo {
-        return subscriptionApi.getUsageInfo().toDomain()
+        val usageDto = subscriptionApi.getUsageInfo()
+        Log.d("SubscriptionRepo", "Received usage DTO: isPremium=${usageDto.isPremium}, remaining=${usageDto.remainingFreeTranscriptions}")
+        return usageDto.toDomain()
     }
     
     override suspend fun upgradeSubscription(purchaseToken: String, productId: String): Subscription {
