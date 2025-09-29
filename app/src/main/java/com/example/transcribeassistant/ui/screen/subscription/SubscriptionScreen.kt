@@ -1,6 +1,5 @@
 package com.example.transcribeassistant.ui.screen.subscription
 
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -13,14 +12,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.transcribeassistant.domain.model.Subscription
-import com.example.transcribeassistant.domain.model.UsageInfo
-import com.example.transcribeassistant.ui.viewmodel.SubscriptionUiState
 import com.example.transcribeassistant.ui.viewmodel.SubscriptionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,10 +25,9 @@ fun SubscriptionScreen(
     viewModel: SubscriptionViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val context = LocalContext.current
     
     LaunchedEffect(Unit) {
-        viewModel.loadSubscriptionData()
+        viewModel.loadUsageInfo()
     }
     
     Scaffold(
@@ -56,26 +50,25 @@ fun SubscriptionScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            when (val currentState = uiState) {
+            when (uiState) {
                 is SubscriptionUiState.Loading -> {
                     CircularProgressIndicator()
                 }
-
+                
                 is SubscriptionUiState.Success -> {
                     SubscriptionContent(
-                        usageInfo = currentState.usageInfo,
-                        subscription = currentState.subscription,
-                        onUpgradeClick = { productId ->
-                            viewModel.startPurchaseFlow(context as ComponentActivity, productId)
-                        },
-                        onCancelClick = { viewModel.cancelSubscription() }
+                        usageInfo = uiState.usageInfo,
+                        onUpgradeClick = { 
+                            // For now, just show a message
+                            // TODO: Implement Google Play Billing
+                        }
                     )
                 }
                 
                 is SubscriptionUiState.Error -> {
                     ErrorContent(
-                        message = currentState.message,
-                        onRetry = { viewModel.loadSubscriptionData() }
+                        message = uiState.message,
+                        onRetry = { viewModel.loadUsageInfo() }
                     )
                 }
             }
@@ -85,10 +78,8 @@ fun SubscriptionScreen(
 
 @Composable
 private fun SubscriptionContent(
-    usageInfo: UsageInfo,
-    subscription: Subscription?,
-    onUpgradeClick: (String) -> Unit,
-    onCancelClick: () -> Unit
+    usageInfo: com.example.transcribeassistant.domain.model.UsageInfo,
+    onUpgradeClick: () -> Unit
 ) {
     // Usage Status Card
     Card(
@@ -138,9 +129,9 @@ private fun SubscriptionContent(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Monthly Plan
+        // Premium Plan Card
         PremiumPlanCard(
-            title = "Premium Monthly",
+            title = "Premium Plan",
             price = "$9.99/month",
             features = listOf(
                 "Unlimited transcriptions",
@@ -148,69 +139,8 @@ private fun SubscriptionContent(
                 "Advanced categorization",
                 "Export features"
             ),
-            onSubscribeClick = { onUpgradeClick("premium_monthly") }
+            onSubscribeClick = onUpgradeClick
         )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Yearly Plan (with discount)
-        PremiumPlanCard(
-            title = "Premium Yearly",
-            price = "$99.99/year",
-            subtitle = "Save $20!",
-            features = listOf(
-                "Unlimited transcriptions",
-                "Priority processing", 
-                "Advanced categorization",
-                "Export features",
-                "2 months free"
-            ),
-            onSubscribeClick = { onUpgradeClick("premium_yearly") },
-            isRecommended = true
-        )
-    } else {
-        // Current Premium Subscription
-        subscription?.let { sub ->
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Current Plan",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    
-                    Text(
-                        text = when (sub.subscriptionType) {
-                            com.example.transcribeassistant.domain.model.SubscriptionType.PREMIUM_MONTHLY -> "Premium Monthly"
-                            com.example.transcribeassistant.domain.model.SubscriptionType.PREMIUM_YEARLY -> "Premium Yearly"
-                            else -> "Free"
-                        },
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    
-                    sub.subscriptionEndDate?.let { endDate ->
-                        Text(
-                            text = "Renews: ${endDate}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    OutlinedButton(
-                        onClick = onCancelClick,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Cancel Subscription")
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -218,54 +148,37 @@ private fun SubscriptionContent(
 private fun PremiumPlanCard(
     title: String,
     price: String,
-    subtitle: String? = null,
     features: List<String>,
-    onSubscribeClick: () -> Unit,
-    isRecommended: Boolean = false
+    onSubscribeClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = if (isRecommended) {
-            CardDefaults.cardColors(containerColor = Color(0xFF5856D6))
-        } else {
-            CardDefaults.cardColors()
-        }
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF5856D6))
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            if (isRecommended) {
-                Text(
-                    text = "RECOMMENDED",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-            }
+            Text(
+                text = "RECOMMENDED",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
             
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = if (isRecommended) Color.White else MaterialTheme.colorScheme.onSurface
+                color = Color.White
             )
             
             Text(
                 text = price,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = if (isRecommended) Color.White else MaterialTheme.colorScheme.primary
+                color = Color.White
             )
-            
-            subtitle?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isRecommended) Color.White else Color(0xFF4CAF50),
-                    fontWeight = FontWeight.Medium
-                )
-            }
             
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -276,14 +189,14 @@ private fun PremiumPlanCard(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        tint = if (isRecommended) Color.White else Color(0xFF4CAF50),
+                        tint = Color.White,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = feature,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (isRecommended) Color.White else MaterialTheme.colorScheme.onSurface
+                        color = Color.White
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
@@ -294,17 +207,13 @@ private fun PremiumPlanCard(
             Button(
                 onClick = onSubscribeClick,
                 modifier = Modifier.fillMaxWidth(),
-                colors = if (isRecommended) {
-                    ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color(0xFF5856D6)
-                    )
-                } else {
-                    ButtonDefaults.buttonColors()
-                }
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color(0xFF5856D6)
+                )
             ) {
                 Text(
-                    text = "Subscribe",
+                    text = "Coming Soon",
                     fontWeight = FontWeight.Bold
                 )
             }

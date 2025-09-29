@@ -1,6 +1,5 @@
 package com.example.transcribeassistant.domain.repository
 
-import com.example.transcribeassistant.domain.model.Subscription
 import com.example.transcribeassistant.domain.model.UsageInfo
 
 /**
@@ -8,11 +7,9 @@ import com.example.transcribeassistant.domain.model.UsageInfo
  */
 interface SubscriptionRepository {
     
-    suspend fun getSubscriptionStatus(): Subscription?
-    
     suspend fun getUsageInfo(): UsageInfo
     
-    suspend fun upgradeSubscription(purchaseToken: String, productId: String): Subscription
+    suspend fun upgradeSubscription(purchaseToken: String, productId: String)
     
     suspend fun cancelSubscription()
 }

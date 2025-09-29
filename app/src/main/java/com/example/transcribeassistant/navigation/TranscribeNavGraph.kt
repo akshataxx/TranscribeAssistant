@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.transcribeassistant.data.auth.AuthStateManager
 import com.example.transcribeassistant.di.JwtManagerEntryPoint
 import com.example.transcribeassistant.ui.screen.components.BottomNavBar
 import com.example.transcribeassistant.ui.screen.TranscribeDetailsScreen
@@ -36,7 +38,8 @@ import kotlinx.coroutines.runBlocking
 
 @Composable
 fun TranscribeNavGraph(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    authViewModel: com.example.transcribeassistant.ui.viewmodel.AuthViewModel
 ) {
     // Deep link URI for transcribe details used later
     val uri = "transcribeassistant://transcript/"
@@ -64,6 +67,16 @@ fun TranscribeNavGraph(
         ).jwtManager()
 
         val scope = rememberCoroutineScope()
+
+        // Listen for authentication expiration
+        LaunchedEffect(authViewModel) {
+            authViewModel.authenticationExpired.collect {
+                navController.navigate("login") {
+                    popUpTo(0) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+        }
 
         // decide start destination based on logged in user or not
         val accessToken = runBlocking { jwtManager.getAccessToken() }

@@ -18,7 +18,8 @@ import okhttp3.Route
 
 class TokenAuthenticator(
     private val authApi: AuthApi,
-    private val jwtManager: JwtManager
+    private val jwtManager: JwtManager,
+    private val authStateManager: AuthStateManager
 ) : Authenticator {
     
     init {
@@ -50,7 +51,12 @@ class TokenAuthenticator(
                 }
                 
                 if (refreshResponse == null) {
-                    Log.e("TokenAuthenticator", "Token refresh returned null")
+                    Log.e("TokenAuthenticator", "Token refresh returned null - clearing tokens")
+                    // Clear tokens when refresh fails and signal authentication expired
+                    runBlocking {
+                        jwtManager.clearTokens()
+                    }
+                    authStateManager.signalAuthenticationExpired()
                     return null
                 }
 

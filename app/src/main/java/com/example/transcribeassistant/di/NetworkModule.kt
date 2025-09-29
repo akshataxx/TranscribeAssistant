@@ -3,6 +3,7 @@ package com.example.transcribeassistant.di
 import android.content.Context
 import android.util.Log
 import com.example.transcribeassistant.data.auth.AuthInterceptor
+import com.example.transcribeassistant.data.auth.AuthStateManager
 import com.example.transcribeassistant.data.auth.JwtManager
 import com.example.transcribeassistant.data.auth.TokenAuthenticator
 import com.example.transcribeassistant.data.network.AuthApi
@@ -61,10 +62,11 @@ object NetworkModule {
     @Singleton
     fun provideTranscriptApi(
         authApi: AuthApi,
-        jwtManager: JwtManager
+        jwtManager: JwtManager,
+        authStateManager: AuthStateManager
     ): TranscriptApi {
         val authInterceptor = AuthInterceptor(jwtManager, authApi)
-        val tokenAuthenticator = TokenAuthenticator(authApi, jwtManager)
+        val tokenAuthenticator = TokenAuthenticator(authApi, jwtManager, authStateManager)
         
         Log.d("NetworkModule", "Creating TranscriptApi with AuthInterceptor that handles token refresh")
         
@@ -87,11 +89,12 @@ object NetworkModule {
     @Singleton
     fun provideSubscriptionApi(
         authApi: AuthApi,
-        jwtManager: JwtManager
+        jwtManager: JwtManager,
+        authStateManager: AuthStateManager
     ): SubscriptionApi {
         val client = OkHttpClient.Builder()
             .addInterceptor(AuthInterceptor(jwtManager, authApi))
-            .authenticator(TokenAuthenticator(authApi, jwtManager))
+            .authenticator(TokenAuthenticator(authApi, jwtManager, authStateManager))
             .addInterceptor(logging)
             .build()
 
