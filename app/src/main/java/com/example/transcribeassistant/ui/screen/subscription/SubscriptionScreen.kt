@@ -25,7 +25,7 @@ fun SubscriptionScreen(
     onNavigateBack: () -> Unit,
     viewModel: SubscriptionViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState: SubscriptionUiState by viewModel.uiState.collectAsState()
     
     LaunchedEffect(Unit) {
         viewModel.loadUsageInfo()
@@ -51,24 +51,24 @@ fun SubscriptionScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            when (uiState) {
+            when (val state = uiState) {
                 is SubscriptionUiState.Loading -> {
                     CircularProgressIndicator()
                 }
-                
+
                 is SubscriptionUiState.Success -> {
                     SubscriptionContent(
-                        usageInfo = uiState.usageInfo,
-                        onUpgradeClick = { 
+                        usageInfo = state.usageInfo,
+                        onUpgradeClick = {
                             // For now, just show a message
                             // TODO: Implement Google Play Billing
                         }
                     )
                 }
-                
+
                 is SubscriptionUiState.Error -> {
                     ErrorContent(
-                        message = uiState.message,
+                        message = state.message,
                         onRetry = { viewModel.loadUsageInfo() }
                     )
                 }
