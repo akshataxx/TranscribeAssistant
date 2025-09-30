@@ -23,7 +23,7 @@ class ShareActivity : ComponentActivity() {
                     ShareScreen(
                         sharedLink = sharedText,
                         viewModel = hiltViewModel(),
-                        onDone = TODO()
+                        onDone = { finish() }
                     ) {
                         finish() // Finish after saving or canceling
                     }
