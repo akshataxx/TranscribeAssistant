@@ -1,6 +1,7 @@
 package com.example.transcribeassistant.data.repository
 
 import android.util.Log
+import com.example.transcribeassistant.data.dto.StripeCheckoutRequest
 import com.example.transcribeassistant.data.dto.UpgradeSubscriptionRequest
 import com.example.transcribeassistant.data.dto.UsageInfoDto
 import com.example.transcribeassistant.data.network.SubscriptionApi
@@ -22,6 +23,13 @@ class SubscriptionRepositoryImpl @Inject constructor(
             remainingFreeTranscriptions = dto.remainingFreeTranscriptions
         )
     }
+
+    override suspend fun createStripeCheckout(priceId: String): String {
+        val request = StripeCheckoutRequest(priceId)
+        val response = subscriptionApi.createStripeCheckout(request)
+        Log.d("SubscriptionRepo", "Created Stripe checkout: ${response.checkoutUrl}")
+        return response.checkoutUrl
+    }
     
     override suspend fun upgradeSubscription(purchaseToken: String, productId: String) {
         val request = UpgradeSubscriptionRequest(purchaseToken, productId)
@@ -32,3 +40,4 @@ class SubscriptionRepositoryImpl @Inject constructor(
         subscriptionApi.cancelSubscription()
     }
 }
+

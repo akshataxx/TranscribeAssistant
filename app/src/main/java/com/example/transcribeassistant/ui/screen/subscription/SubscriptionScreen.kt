@@ -60,8 +60,7 @@ fun SubscriptionScreen(
                     SubscriptionContent(
                         usageInfo = state.usageInfo,
                         onUpgradeClick = {
-                            // For now, just show a message
-                            // TODO: Implement Google Play Billing
+                            viewModel.startPremiumUpgrade()
                         }
                     )
                 }
@@ -214,7 +213,7 @@ private fun PremiumPlanCard(
                 )
             ) {
                 Text(
-                    text = "Coming Soon",
+                    text = "Upgrade Now - $3.99/month",
                     fontWeight = FontWeight.Bold
                 )
             }
