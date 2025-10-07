@@ -39,7 +39,7 @@ class SubscriptionViewModel @Inject constructor(
     fun startPremiumUpgrade() {
         viewModelScope.launch {
             try {
-                val checkoutUrl = subscriptionRepository.createStripeCheckout("price_premium_monthly")
+                val checkoutUrl = subscriptionRepository.createStripeCheckout("price_1SDccWBIj51ZSIefUfPLTqxf")
                 openUrlInBrowser(checkoutUrl)
             } catch (e: Exception) {
                 _uiState.value = SubscriptionUiState.Error("Failed to start upgrade: ${e.message}")

@@ -132,7 +132,7 @@ private fun SubscriptionContent(
         // Premium Plan Card
         PremiumPlanCard(
             title = "Premium Plan",
-            price = "$9.99/month",
+            price = "$3.99/month",
             features = listOf(
                 "Unlimited transcriptions",
                 "Priority processing",
@@ -213,7 +213,7 @@ private fun PremiumPlanCard(
                 )
             ) {
                 Text(
-                    text = "Upgrade Now - $3.99/month",
+                    text = "Subscribe - $3.99/month",
                     fontWeight = FontWeight.Bold
                 )
             }
