@@ -31,14 +31,6 @@ class SubscriptionRepositoryImpl @Inject constructor(
         return response.checkoutUrl
     }
 
-    // DEPRECATED: Google Play Billing - Replaced with Stripe
-    /*
-    override suspend fun upgradeSubscription(purchaseToken: String, productId: String) {
-        val request = UpgradeSubscriptionRequest(purchaseToken, productId)
-        subscriptionApi.upgradeSubscription(request)
-    }
-    */
-
     override suspend fun cancelSubscription() {
         subscriptionApi.cancelSubscription()
     }
