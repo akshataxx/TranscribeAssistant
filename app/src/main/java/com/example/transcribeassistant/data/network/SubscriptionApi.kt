@@ -19,8 +19,9 @@ interface SubscriptionApi {
     @POST("api/subscription/create-checkout")
     suspend fun createStripeCheckout(@Body request: StripeCheckoutRequest): StripeCheckoutResponse
 
-    @POST("api/subscription/upgrade")
-    suspend fun upgradeSubscription(@Body request: UpgradeSubscriptionRequest)
+    // DEPRECATED: Google Play Billing - Replaced with Stripe
+    // @POST("api/subscription/upgrade")
+    // suspend fun upgradeSubscription(@Body request: UpgradeSubscriptionRequest)
 
     @POST("api/subscription/cancel")
     suspend fun cancelSubscription()

@@ -11,7 +11,8 @@ interface SubscriptionRepository {
 
     suspend fun createStripeCheckout(priceId: String): String
 
-    suspend fun upgradeSubscription(purchaseToken: String, productId: String)
+    // DEPRECATED: Google Play Billing - Replaced with Stripe
+    // suspend fun upgradeSubscription(purchaseToken: String, productId: String)
 
     suspend fun cancelSubscription()
 }
