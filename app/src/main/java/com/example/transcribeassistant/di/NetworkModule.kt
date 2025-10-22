@@ -2,6 +2,7 @@ package com.example.transcribeassistant.di
 
 import android.content.Context
 import android.util.Log
+import com.example.transcribeassistant.BuildConfig
 import com.example.transcribeassistant.data.auth.AuthInterceptor
 import com.example.transcribeassistant.data.auth.AuthStateManager
 import com.example.transcribeassistant.data.auth.JwtManager
@@ -31,7 +32,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private val BASE_URL = "http://10.0.2.2:8080"
+    private val BASE_URL = BuildConfig.API_BASE_URL
 
     private val moshi = Moshi.Builder()
         .add(InstantAdapter())
