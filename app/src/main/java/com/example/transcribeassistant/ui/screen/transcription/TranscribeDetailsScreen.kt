@@ -1,4 +1,4 @@
-package com.example.transcribeassistant.ui.screen
+package com.example.transcribeassistant.ui.screen.transcription
 
 import android.speech.tts.TextToSpeech
 import android.util.Log

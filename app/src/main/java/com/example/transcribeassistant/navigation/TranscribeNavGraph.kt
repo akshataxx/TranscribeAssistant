@@ -1,7 +1,6 @@
 package com.example.transcribeassistant.navigation
 
 import android.app.Application
-import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,13 +23,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.transcribeassistant.di.JwtManagerEntryPoint
 import com.example.transcribeassistant.ui.screen.components.BottomNavBar
-import com.example.transcribeassistant.ui.screen.TranscribeDetailsScreen
+import com.example.transcribeassistant.ui.screen.transcription.TranscribeDetailsScreen
 import com.example.transcribeassistant.ui.screen.dashboard.DashboardScreen
 import com.example.transcribeassistant.ui.screen.feed.FeedScreen
 import com.example.transcribeassistant.ui.screen.login.LoginScreen
 import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
 import dagger.hilt.android.EntryPointAccessors
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 @Composable
