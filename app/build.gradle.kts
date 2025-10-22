@@ -88,7 +88,4 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.google.auth)
     implementation(libs.androidx.datastore.preferences)
-    
-    // Google Play Billing for subscription management
-    implementation("com.android.billingclient:billing-ktx:6.1.0")
 }
