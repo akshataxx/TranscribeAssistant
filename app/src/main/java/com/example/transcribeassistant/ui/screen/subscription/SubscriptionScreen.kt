@@ -61,6 +61,9 @@ fun SubscriptionScreen(
                         usageInfo = state.usageInfo,
                         onUpgradeClick = {
                             viewModel.startPremiumUpgrade()
+                        },
+                        onCancelClick = {
+                            viewModel.cancelSubscription()
                         }
                     )
                 }
@@ -79,7 +82,8 @@ fun SubscriptionScreen(
 @Composable
 private fun SubscriptionContent(
     usageInfo: com.example.transcribeassistant.domain.model.UsageInfo,
-    onUpgradeClick: () -> Unit
+    onUpgradeClick: () -> Unit,
+    onCancelClick: () -> Unit
 ) {
     // Usage Status Card
     Card(
@@ -118,7 +122,7 @@ private fun SubscriptionContent(
     }
     
     Spacer(modifier = Modifier.height(24.dp))
-    
+
     if (!usageInfo.isPremium) {
         // Premium Plans
         Text(
@@ -126,21 +130,75 @@ private fun SubscriptionContent(
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Premium Plan Card
         PremiumPlanCard(
             title = "Premium Plan",
             price = "$3.99/month",
             features = listOf(
                 "Unlimited transcriptions",
-                "Priority processing",
-                "Advanced categorization",
-                "Export features"
+                "Advanced categorization"
             ),
             onSubscribeClick = onUpgradeClick
         )
+    } else {
+        // Cancel Subscription Section for Premium users
+        Text(
+            text = "Manage Subscription",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Premium - $3.99/month",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "You have unlimited transcriptions.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedButton(
+                    onClick = onCancelClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Cancel Subscription")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "You will retain premium access until the end of your billing period.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
     }
 }
 
