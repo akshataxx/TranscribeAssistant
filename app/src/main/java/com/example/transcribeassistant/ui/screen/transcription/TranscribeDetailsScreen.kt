@@ -168,12 +168,11 @@ fun TranscribeDetailsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Full Transcript + Read Aloud
-
+            // Content Section
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Full Transcript", fontWeight = FontWeight.Medium, color = Color.White)
+                Text("Content", fontWeight = FontWeight.Medium, color = Color.White)
                 Spacer(modifier = Modifier.weight(1f))
                 Button(
                     onClick = {
@@ -196,11 +195,16 @@ fun TranscribeDetailsScreen(
             if (transcript == null) {
                 CircularProgressIndicator()
             } else {
-                Text(
-                    text = transcript.transcript,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White
-                )
+                // Display structured content if available, otherwise show raw transcript
+                if (transcript.structuredContent != null && transcript.structuredContent.isNotEmpty()) {
+                    StructuredContentDisplay(transcript.structuredContent)
+                } else {
+                    Text(
+                        text = transcript.transcript,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
