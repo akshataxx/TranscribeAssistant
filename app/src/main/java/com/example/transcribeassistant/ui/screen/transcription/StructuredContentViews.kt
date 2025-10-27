@@ -15,24 +15,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import org.json.JSONObject
 
 /**
  * Data classes for structured content types
  */
+@JsonClass(generateAdapter = true)
 data class RecipeContent(
     val type: String,
     val ingredients: List<String>,
     val steps: List<String>
 )
 
+@JsonClass(generateAdapter = true)
 data class BeautyContent(
     val type: String,
     val products: List<String>,
     val steps: List<String>
 )
 
+@JsonClass(generateAdapter = true)
 data class GeneralContent(
     val type: String,
     val keyPoints: List<String>

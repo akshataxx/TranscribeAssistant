@@ -25,7 +25,10 @@ object TranscriptModule {
             context,
             AppDatabase::class.java,
             "transcribe_db"
-        ).fallbackToDestructiveMigration().build()
+        )
+            .addMigrations(AppDatabase.MIGRATION_5_6)
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
 
