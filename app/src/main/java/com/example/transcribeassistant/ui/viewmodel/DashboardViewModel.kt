@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.transcribeassistant.data.auth.JwtManager
 import com.example.transcribeassistant.domain.model.Transcript
+import com.example.transcribeassistant.domain.model.UsageInfo
 import com.example.transcribeassistant.domain.repository.TranscriptRepository
+import com.example.transcribeassistant.domain.repository.SubscriptionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +24,7 @@ data class CategoryGroup(
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val repository: TranscriptRepository,
+    private val subscriptionRepository: SubscriptionRepository,
     private val jwtManager: JwtManager
 ): ViewModel() {
     private val _transcripts = MutableStateFlow<List<Transcript>>(emptyList())
@@ -32,6 +35,9 @@ class DashboardViewModel @Inject constructor(
 
     private val _transcriptsByCategory = MutableStateFlow<List<Transcript>>(emptyList())
     val transcriptsByCategory: StateFlow<List<Transcript>> = _transcriptsByCategory
+    
+    private val _usageInfo = MutableStateFlow<UsageInfo?>(null)
+    val usageInfo: StateFlow<UsageInfo?> = _usageInfo
 
     fun fetchTranscripts() {
         viewModelScope.launch {
@@ -40,8 +46,23 @@ class DashboardViewModel @Inject constructor(
                 _transcripts.value = response
                 _categoryGroups.value = groupTranscripts(response)
                 Log.d("DashboardVM", "Transcripts fetched and grouped: ${_categoryGroups.value}")
+                
+                // Also fetch usage info
+                fetchUsageInfo()
             }catch(e: Exception) {
                 Log.e("DashboardVM", "Error fetching transcripts: ${e.message}")
+            }
+        }
+    }
+    
+    fun fetchUsageInfo() {
+        viewModelScope.launch {
+            try {
+                val usage = subscriptionRepository.getUsageInfo()
+                _usageInfo.value = usage
+                Log.d("DashboardVM", "Usage info fetched: $usage")
+            } catch (e: Exception) {
+                Log.e("DashboardVM", "Error fetching usage info: ${e.message}")
             }
         }
     }

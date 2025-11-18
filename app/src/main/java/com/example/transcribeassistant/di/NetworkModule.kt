@@ -1,10 +1,14 @@
 package com.example.transcribeassistant.di
 
 import android.content.Context
+import android.util.Log
+import com.example.transcribeassistant.BuildConfig
 import com.example.transcribeassistant.data.auth.AuthInterceptor
+import com.example.transcribeassistant.data.auth.AuthStateManager
 import com.example.transcribeassistant.data.auth.JwtManager
 import com.example.transcribeassistant.data.auth.TokenAuthenticator
 import com.example.transcribeassistant.data.network.AuthApi
+import com.example.transcribeassistant.data.network.SubscriptionApi
 import com.example.transcribeassistant.data.network.TranscriptApi
 import com.example.transcribeassistant.data.network.adapter.InstantAdapter
 import com.squareup.moshi.Moshi
@@ -28,7 +32,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private val BASE_URL = "http://10.0.2.2:8080"
+    private val BASE_URL = BuildConfig.API_BASE_URL
 
     private val moshi = Moshi.Builder()
         .add(InstantAdapter())
@@ -59,11 +63,17 @@ object NetworkModule {
     @Singleton
     fun provideTranscriptApi(
         authApi: AuthApi,
-        jwtManager: JwtManager
+        jwtManager: JwtManager,
+        authStateManager: AuthStateManager
     ): TranscriptApi {
+        val authInterceptor = AuthInterceptor(jwtManager, authApi)
+        val tokenAuthenticator = TokenAuthenticator(authApi, jwtManager, authStateManager)
+        
+        Log.d("NetworkModule", "Creating TranscriptApi with AuthInterceptor that handles token refresh")
+        
         val client = OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(jwtManager))
-            .authenticator(TokenAuthenticator(authApi, jwtManager))
+            .addInterceptor(authInterceptor)
+            .authenticator(tokenAuthenticator)
             .addInterceptor(logging)
             .build()
 
@@ -74,6 +84,27 @@ object NetworkModule {
                 MoshiConverterFactory.create(moshi))
             .build()
             .create(TranscriptApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSubscriptionApi(
+        authApi: AuthApi,
+        jwtManager: JwtManager,
+        authStateManager: AuthStateManager
+    ): SubscriptionApi {
+        val client = OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(jwtManager, authApi))
+            .authenticator(TokenAuthenticator(authApi, jwtManager, authStateManager))
+            .addInterceptor(logging)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(SubscriptionApi::class.java)
     }
 
     @Provides

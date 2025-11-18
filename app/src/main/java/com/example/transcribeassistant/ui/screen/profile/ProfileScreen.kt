@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ProfileScreen(
     onSettingsClick: () -> Unit,
+    onSubscriptionClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
     Column(
@@ -31,11 +32,19 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Button(
-            onClick = onSettingsClick,
+            onClick = onSubscriptionClick,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF5856D6),
                 contentColor = Color.White
             )
+        ) {
+            Text("Subscription", style = MaterialTheme.typography.titleMedium)
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        OutlinedButton(
+            onClick = onSettingsClick
         ) {
             Text("Settings", style = MaterialTheme.typography.titleMedium)
         }
