@@ -24,7 +24,7 @@ android {
     buildTypes {
         debug {
             // For local development/testing
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8080\"")
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8090\"")
             buildConfigField("String", "STRIPE_PREMIUM_PRICE_ID", "\"price_1SDccWBIj51ZSIefUfPLTqxf\"")
         }
         release {
