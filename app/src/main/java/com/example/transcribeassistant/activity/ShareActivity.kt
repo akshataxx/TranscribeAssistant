@@ -22,7 +22,8 @@ class ShareActivity : ComponentActivity() {
                 if (!sharedText.isNullOrEmpty()) {
                     ShareScreen(
                         sharedLink = sharedText,
-                        viewModel = hiltViewModel()
+                        viewModel = hiltViewModel(),
+                        onDone = { finish() }
                     ) {
                         finish() // Finish after saving or canceling
                     }

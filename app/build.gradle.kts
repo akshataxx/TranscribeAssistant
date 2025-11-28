@@ -22,12 +22,20 @@ android {
     }
 
     buildTypes {
+        debug {
+            // For local development/testing
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8090\"")
+            buildConfigField("String", "STRIPE_PREMIUM_PRICE_ID", "\"price_1SDccWBIj51ZSIefUfPLTqxf\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // For production - UPDATE THIS when you deploy backend
+            buildConfigField("String", "API_BASE_URL", "\"https://your-production-domain.com\"")
+            buildConfigField("String", "STRIPE_PREMIUM_PRICE_ID", "\"price_1SDccWBIj51ZSIefUfPLTqxf\"")
         }
     }
     compileOptions {
@@ -39,6 +47,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
