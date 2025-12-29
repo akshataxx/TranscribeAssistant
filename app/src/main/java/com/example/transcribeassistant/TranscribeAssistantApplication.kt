@@ -16,7 +16,7 @@ class TranscribeAssistantApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        AppContextProvider.init( this)
+        AppContextProvider.init(this)
 
         // Register app lifecycle observer to detect foreground/background events
         ProcessLifecycleOwner.get().lifecycle.addObserver(appLifecycleObserver)
