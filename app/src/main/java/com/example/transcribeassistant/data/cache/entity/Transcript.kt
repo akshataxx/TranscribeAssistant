@@ -13,6 +13,7 @@ data class TranscriptEntity(
     @PrimaryKey val id: String,
     val videoUrl: String,
     val transcript: String,
+    val structuredContent: String?,
     val description: String,
     val title: String,
     val duration: Double,
