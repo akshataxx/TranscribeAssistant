@@ -1,5 +1,6 @@
 package com.example.transcribeassistant.ui.screen.dashboard
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,11 +45,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.example.transcribeassistant.R
+import com.example.transcribeassistant.navigation.Screen
 import com.example.transcribeassistant.ui.viewmodel.CategoryGroup
 import com.example.transcribeassistant.ui.viewmodel.DashboardViewModel
-import androidx.navigation.NavHostController
-import com.example.transcribeassistant.navigation.Screen
+import com.example.transcribeassistant.ui.viewmodel.RefreshManagerViewModel
 
 val cardColors = listOf(
     Color(0xFF3A3958),
@@ -58,15 +60,25 @@ val cardColors = listOf(
 @Composable
 fun DashboardScreen(
     navController: NavHostController,
-    viewModel: DashboardViewModel = hiltViewModel()
+    viewModel: DashboardViewModel = hiltViewModel(),
+    refreshManagerViewModel: RefreshManagerViewModel = hiltViewModel()
 ) {
     val categoryGroups by viewModel.categoryGroups.collectAsState()
     val usageInfo by viewModel.usageInfo.collectAsState()
     var showRenameDialog by remember { mutableStateOf(false) }
     var renamingCategoryGroup by remember { mutableStateOf<CategoryGroup?>(null) }
 
+    // Initial data fetch
     LaunchedEffect(Unit) {
         viewModel.fetchTranscripts()
+    }
+
+    // Listen for app foreground refresh events
+    LaunchedEffect(Unit) {
+        refreshManagerViewModel.appRefreshManager.refreshTrigger.collect { event ->
+            Log.d("DashboardScreen", "Received refresh event: $event")
+            viewModel.fetchTranscripts()
+        }
     }
 
     if (showRenameDialog && renamingCategoryGroup != null) {

@@ -1,5 +1,6 @@
 package com.example.transcribeassistant.ui.screen.feed
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,12 +23,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.transcribeassistant.ui.viewmodel.DashboardViewModel
+import com.example.transcribeassistant.ui.viewmodel.RefreshManagerViewModel
 
 @Composable
 fun FeedScreen(
     viewModel: DashboardViewModel = hiltViewModel(),
     onTranscriptClick: (String) -> Unit,
-    categoryId: String? = null
+    categoryId: String? = null,
+    refreshManagerViewModel: RefreshManagerViewModel = hiltViewModel()
 ) {
     val transcriptList by if (categoryId != null) {
         viewModel.transcriptsByCategory.collectAsState()
@@ -36,12 +39,24 @@ fun FeedScreen(
     }
     val scrollState = rememberScrollState()
 
-    // Fetch data once on screen load
+    // Initial data fetch
     LaunchedEffect(categoryId) {
         if (categoryId != null) {
             viewModel.fetchTranscriptsByCategory(categoryId)
         } else {
             viewModel.fetchTranscripts()
+        }
+    }
+
+    // Listen for app foreground refresh events
+    LaunchedEffect(categoryId) {
+        refreshManagerViewModel.appRefreshManager.refreshTrigger.collect { event ->
+            Log.d("FeedScreen", "Received refresh event: $event")
+            if (categoryId != null) {
+                viewModel.fetchTranscriptsByCategory(categoryId)
+            } else {
+                viewModel.fetchTranscripts()
+            }
         }
     }
 

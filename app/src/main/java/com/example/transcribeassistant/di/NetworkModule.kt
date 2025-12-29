@@ -11,6 +11,7 @@ import com.example.transcribeassistant.data.network.AuthApi
 import com.example.transcribeassistant.data.network.SubscriptionApi
 import com.example.transcribeassistant.data.network.TranscriptApi
 import com.example.transcribeassistant.data.network.adapter.InstantAdapter
+import com.example.transcribeassistant.data.refresh.AppRefreshManager
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -116,4 +117,8 @@ object NetworkModule {
             .authenticator(tokenAuthenticator)
             .addInterceptor(logging)
             .build()
+
+    @Provides
+    @Singleton
+    fun provideAppRefreshManager() = AppRefreshManager()
 }
