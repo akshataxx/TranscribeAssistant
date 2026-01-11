@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -7,24 +10,43 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
+// Load keystore properties
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.example.transcribeassistant"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.transcribeassistant"
+        applicationId = "com.contentcategorise.transcribeassistant"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+            }
+        }
+    }
+
     buildTypes {
         debug {
-            // For local development/testing
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8081\"")
+            // For testing on real device with VM backend
+            // Use http://10.0.2.2:8081 for emulator testing with local backend
+            buildConfigField("String", "API_BASE_URL", "\"http://34.151.189.90:8080\"")
             buildConfigField("String", "STRIPE_PREMIUM_PRICE_ID", "\"price_1SDccWBIj51ZSIefUfPLTqxf\"")
         }
         release {
@@ -33,9 +55,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // For production - UPDATE THIS when you deploy backend
-            buildConfigField("String", "API_BASE_URL", "\"https://your-production-domain.com\"")
+            // Production backend on GCE
+            buildConfigField("String", "API_BASE_URL", "\"http://34.151.189.90:8080\"")
             buildConfigField("String", "STRIPE_PREMIUM_PRICE_ID", "\"price_1SDccWBIj51ZSIefUfPLTqxf\"")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {

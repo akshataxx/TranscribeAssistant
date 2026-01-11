@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
+        <!-- Emulator localhost for debug builds -->
         <domain includeSubdomains="true">10.0.2.2</domain>
+        <!-- Production GCE backend -->
+        <domain includeSubdomains="true">34.151.189.90</domain>
     </domain-config>
 </network-security-config>
