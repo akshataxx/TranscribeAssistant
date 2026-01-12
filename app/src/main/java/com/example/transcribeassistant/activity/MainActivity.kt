@@ -17,6 +17,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Ensure window draws behind system bars
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+
         setContent {
             TranscribeAssistantTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {

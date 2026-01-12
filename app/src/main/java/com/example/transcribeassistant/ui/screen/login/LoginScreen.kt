@@ -45,11 +45,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -95,12 +93,14 @@ fun LoginScreen(
     val context = LocalContext.current
     val view = LocalView.current
 
-    // Set status bar to light theme
+    // Ensure status bar icons are dark (for light background)
     SideEffect {
         val window = (view.context as? Activity)?.window
         window?.let {
-            WindowCompat.getInsetsController(it, view).isAppearanceLightStatusBars = true
-            it.statusBarColor = LightBackground.toArgb()
+            val insetsController = WindowCompat.getInsetsController(it, view)
+            insetsController.isAppearanceLightStatusBars = true
+            it.statusBarColor = android.graphics.Color.TRANSPARENT
+            it.navigationBarColor = android.graphics.Color.TRANSPARENT
         }
     }
 
@@ -159,7 +159,6 @@ fun LoginScreen(
                     )
                 )
             )
-            .statusBarsPadding()
     ) {
         // ============================================================================
         // REMOVED: "Welcome Back" header with profile icon (Scoop design is centered)
@@ -174,6 +173,7 @@ fun LoginScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .statusBarsPadding()
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
@@ -207,6 +207,7 @@ fun LoginScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .statusBarsPadding()
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
@@ -240,6 +241,7 @@ fun LoginScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .statusBarsPadding()
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
@@ -303,6 +305,7 @@ fun LoginScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .statusBarsPadding()
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
@@ -375,7 +378,7 @@ fun LoginScreen(
 
                     Box(
                         modifier = Modifier
-                            .size(320.dp)
+                            .size(360.dp)
                             .offset(y = offsetY.dp)
                             .graphicsLayer(
                                 scaleX = scale,
@@ -383,13 +386,29 @@ fun LoginScreen(
                                 rotationZ = rotation
                             )
                     ) {
+                        // Vector drawable for crisp, scalable graphics
                         Image(
                             painter = painterResource(id = R.drawable.scoop_gradient_blob),
                             contentDescription = "Gradient Blob",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit
+                        )
+                        // Radial gradient overlay to fade the edges
+                        Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .blur(radius = 8.dp),
-                            contentScale = ContentScale.Fit
+                                .background(
+                                    Brush.radialGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            Color.Transparent,
+                                            LightBackground.copy(alpha = 0.3f),
+                                            LightBackground.copy(alpha = 0.7f),
+                                            LightBackground
+                                        ),
+                                        radius = 650f
+                                    )
+                                )
                         )
                     }
 
@@ -521,7 +540,7 @@ fun LoginScreenPreview() {
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Gradient blob image
+            // Gradient blob image (vector drawable)
             Image(
                 painter = painterResource(id = R.drawable.scoop_gradient_blob),
                 contentDescription = "Gradient Blob",
