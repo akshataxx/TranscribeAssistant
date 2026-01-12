@@ -48,11 +48,14 @@ fun TranscribeNavGraph(
     Scaffold(
         containerColor = Color(0xFF2C2B3E),
         bottomBar = {
-            BottomNavBar(currentRoute = currentRoute ?: "") {
-                if (it != currentRoute) {
-                    navController.navigate(it) {
-                        popUpTo(Screen.Feed.route) { inclusive = false }
-                        launchSingleTop = true
+            // Only show bottom bar when not on login screen
+            if (currentRoute != "login") {
+                BottomNavBar(currentRoute = currentRoute ?: "") {
+                    if (it != currentRoute) {
+                        navController.navigate(it) {
+                            popUpTo(Screen.Feed.route) { inclusive = false }
+                            launchSingleTop = true
+                        }
                     }
                 }
             }
