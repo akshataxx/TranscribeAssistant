@@ -229,7 +229,7 @@ fun LoginScreen(
                     Text(
                         text = "Taking you to your dashboard...",
                         fontSize = 14.sp,
-                        color = SecondaryText // CHANGED: was Color.Gray
+                        color = SecondaryText
                     )
                 }
             }
@@ -298,10 +298,6 @@ fun LoginScreen(
             }
 
             is LoginUiState.Idle -> {
-                // ============================================================================
-                // COMPLETELY REDESIGNED: New Scoop-style centered layout
-                // (was card-based layout with header)
-                // ============================================================================
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -312,12 +308,6 @@ fun LoginScreen(
                 ) {
                     Spacer(modifier = Modifier.weight(0.35f))
 
-                    // ============================================================================
-                    // NEW: Scoop logo
-                    // TODO: Add your cropped scoop_logo.png to res/drawable folder
-                    // Then uncomment this Image block and remove the Text placeholder below
-                    // ============================================================================
-
                     Image(
                         painter = painterResource(id = R.drawable.scoop_logo),
                         contentDescription = "Scoop Logo",
@@ -327,10 +317,6 @@ fun LoginScreen(
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    // ============================================================================
-                    // NEW: Tagline
-                    // ============================================================================
                     Text(
                         text = "Organize. Transcribe. Discover.",
                         fontSize = 16.sp,
@@ -340,9 +326,6 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(48.dp))
 
-                    // ============================================================================
-                    // NEW: Animated gradient blob (the purple/blue/cyan abstract shape)
-                    // ============================================================================
                     // Animated gradient blob image
                     val infiniteTransition = rememberInfiniteTransition(label = "blob")
 
@@ -414,10 +397,6 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.weight(0.3f))
 
-                    // ============================================================================
-                    // CHANGED: Updated button design for Scoop style
-                    // (was white button, now has elevation and better styling)
-                    // ============================================================================
                     Button(
                         onClick = {
                             launcher.launch(googleSignInClient.signInIntent)
