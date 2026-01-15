@@ -17,6 +17,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.transcribeassistant.navigation.Screen
 
+// Colors matching the new Scoop light theme
+private val LightBackground = Color(0xFFF5F7FA)
+private val PrimaryText = Color(0xFF1F2937)
+private val SecondaryText = Color(0xFF9CA3AF)
+private val PurpleAccent = Color(0xFF7C3AED)
+
 data class BottomNavItem(val label: String, val route: String, val icon: ImageVector, val size: Int = 24)
 
 @Composable
@@ -32,7 +38,7 @@ fun BottomNavBar(
     )
 
     NavigationBar(
-        containerColor = Color(0xFF3A3958),
+        containerColor = LightBackground,
         tonalElevation = 0.dp,
     ) {
         items.forEach { item ->
@@ -41,8 +47,8 @@ fun BottomNavBar(
                 selected = currentRoute == item.route,
                 onClick = { onTabSelected(item.route) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.White,
-                    unselectedIconColor = Color.Gray,
+                    selectedIconColor = PurpleAccent,
+                    unselectedIconColor = SecondaryText,
                     indicatorColor = Color.Transparent
                 )
             )
