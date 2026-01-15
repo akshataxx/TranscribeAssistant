@@ -1,58 +1,71 @@
 package com.example.transcribeassistant.ui.screen.dashboard
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.transcribeassistant.R
+import com.example.transcribeassistant.navigation.Screen
 import com.example.transcribeassistant.ui.viewmodel.CategoryGroup
 import com.example.transcribeassistant.ui.viewmodel.DashboardViewModel
-import androidx.navigation.NavHostController
-import com.example.transcribeassistant.navigation.Screen
 
-val cardColors = listOf(
-    Color(0xFF3A3958),
-    Color(0xFFD9725B)
+// ============================================================================
+// CHANGED: New light theme colors matching Scoop login design
+// ============================================================================
+private val LightBackground = Color(0xFFF5F7FA)
+private val LightBackgroundEnd = Color(0xFFE8ECF1)
+private val CardBackground = Color.White
+private val PrimaryText = Color(0xFF1F2937)
+private val SecondaryText = Color(0xFF6B7280)
+private val PurpleGradientStart = Color(0xFF7C3AED)
+private val BlueGradientMiddle = Color(0xFF2563EB)
+private val CyanGradientEnd = Color(0xFF06B6D4)
+private val TealCard = Color(0xFF14B8A6)
+private val OrangeCard = Color(0xFFF97316)
+private val PinkCard = Color(0xFFEC4899)
+private val IndigoCard = Color(0xFF6366F1)
+
+// Card colors for categories (matching reference image aesthetic)
+val scoopCardColors = listOf(
+    PurpleGradientStart,
+    TealCard,
+    BlueGradientMiddle,
+    OrangeCard,
+    PinkCard,
+    IndigoCard,
+    CyanGradientEnd,
+    Color(0xFF8B5CF6)
 )
 
 @Composable
@@ -80,95 +93,250 @@ fun DashboardScreen(
         )
     }
 
-    Column(
+    // ============================================================================
+    // Animated blob transitions
+    // ============================================================================
+    val infiniteTransition = rememberInfiniteTransition(label = "dashboardBlobs")
+
+    // First blob animations (top-right area)
+    val blob1OffsetX by infiniteTransition.animateFloat(
+        initialValue = 80f,
+        targetValue = 120f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blob1OffsetX"
+    )
+    val blob1OffsetY by infiniteTransition.animateFloat(
+        initialValue = -60f,
+        targetValue = -20f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blob1OffsetY"
+    )
+    val blob1Scale by infiniteTransition.animateFloat(
+        initialValue = 0.9f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blob1Scale"
+    )
+    val blob1Rotation by infiniteTransition.animateFloat(
+        initialValue = -10f,
+        targetValue = 10f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(5000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blob1Rotation"
+    )
+
+    // Second blob animations (bottom-left area)
+    val blob2OffsetX by infiniteTransition.animateFloat(
+        initialValue = -100f,
+        targetValue = -60f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blob2OffsetX"
+    )
+    val blob2OffsetY by infiniteTransition.animateFloat(
+        initialValue = 200f,
+        targetValue = 260f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blob2OffsetY"
+    )
+    val blob2Scale by infiniteTransition.animateFloat(
+        initialValue = 0.85f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blob2Scale"
+    )
+    val blob2Rotation by infiniteTransition.animateFloat(
+        initialValue = 5f,
+        targetValue = -15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blob2Rotation"
+    )
+
+    // ============================================================================
+    // Light gradient background with animated blob overlay
+    // ============================================================================
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF2C2B3E))
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Categories",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        LightBackground,
+                        LightBackgroundEnd
+                    )
+                )
             )
+    ) {
+        // Animated blob 1 (top-right)
+        Box(
+            modifier = Modifier
+                .size(300.dp)
+                .offset(x = blob1OffsetX.dp, y = blob1OffsetY.dp)
+                .graphicsLayer(
+                    scaleX = blob1Scale,
+                    scaleY = blob1Scale,
+                    rotationZ = blob1Rotation,
+                    alpha = 0.4f
+                )
+                .align(Alignment.TopEnd)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.scoop_png),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
 
-            var menuOpen by remember { mutableStateOf(false) }
-            Box{
+        // Animated blob 2 (bottom-left)
+        Box(
+            modifier = Modifier
+                .size(280.dp)
+                .offset(x = blob2OffsetX.dp, y = blob2OffsetY.dp)
+                .graphicsLayer(
+                    scaleX = blob2Scale,
+                    scaleY = blob2Scale,
+                    rotationZ = blob2Rotation,
+                    alpha = 0.35f
+                )
+                .align(Alignment.BottomStart)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.scoop_png),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        // Main content layer
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            // ============================================================================
+            // CHANGED: Header with Scoop logo instead of "Categories" text
+            // ============================================================================
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Scoop Logo (static, not floating)
                 Image(
-                    painter = painterResource(id = R.drawable.ic_profile),
-                    contentDescription = "Profile",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .clickable { menuOpen = true },
-                    contentScale = ContentScale.Crop
+                    painter = painterResource(id = R.drawable.scoop_logo),
+                    contentDescription = "Scoop Logo",
+                    modifier = Modifier.height(36.dp)
                 )
 
-                DropdownMenu(
-                    expanded = menuOpen,
-                    onDismissRequest = { menuOpen = false },
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Subscription") },
-                        onClick = {
-                            menuOpen = false
-                            navController.navigate(Screen.Subscription.route)
-                        }
+                // Profile dropdown menu
+                var menuOpen by remember { mutableStateOf(false) }
+                Box {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_profile),
+                        contentDescription = "Profile",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .clickable { menuOpen = true },
+                        contentScale = ContentScale.Crop
                     )
-                    DropdownMenuItem(
-                        text = { Text("Logout") },
-                        onClick = {
-                            menuOpen = false
-                            viewModel.logout()
-                            navController.navigate("login"){
-                                popUpTo(0) { inclusive = true }
-                                launchSingleTop = true
+
+                    DropdownMenu(
+                        expanded = menuOpen,
+                        onDismissRequest = { menuOpen = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Subscription") },
+                            onClick = {
+                                menuOpen = false
+                                navController.navigate(Screen.Subscription.route)
                             }
-                        }
-                    )
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Logout") },
+                            onClick = {
+                                menuOpen = false
+                                viewModel.logout()
+                                navController.navigate("login") {
+                                    popUpTo(0) { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
+            Spacer(modifier = Modifier.height(24.dp))
 
-        }
-        
-        // Usage tracking card
-        usageInfo?.let { usage ->
-            Spacer(modifier = Modifier.height(16.dp))
-            UsageTrackingCard(
-                usageInfo = usage,
-                onUpgradeClick = { navController.navigate(Screen.Subscription.route) }
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(32.dp))
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            itemsIndexed(categoryGroups) { index, group ->
-                CategoryCard(
-                    categoryGroup = group,
-                    backgroundColor = cardColors[index % cardColors.size],
-                    onClick = {
-                        // Navigate to the list of transcripts
-                        navigateToTranscriptsScreen(navController, group.categoryId)
-                    },
-                    onLongClick = {
-                        // Trigger rename dialog
-                        renamingCategoryGroup = group
-                        showRenameDialog = true
-                    }
+            // ============================================================================
+            // CHANGED: Updated usage tracking card design
+            // ============================================================================
+            usageInfo?.let { usage ->
+                UsageTrackingCard(
+                    usageInfo = usage,
+                    onUpgradeClick = { navController.navigate(Screen.Subscription.route) }
                 )
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            // ============================================================================
+            // NEW: "Categories" heading with modern styling
+            // ============================================================================
+            Text(
+                text = "Categories",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = PrimaryText,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // ============================================================================
+            // Category grid (keeping same functionality, updated styling)
+            // ============================================================================
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                itemsIndexed(categoryGroups) { index, group ->
+                    CategoryCard(
+                        categoryGroup = group,
+                        backgroundColor = scoopCardColors[index % scoopCardColors.size],
+                        onClick = {
+                            navigateToTranscriptsScreen(navController, group.categoryId)
+                        },
+                        onLongClick = {
+                            renamingCategoryGroup = group
+                            showRenameDialog = true
+                        }
+                    )
+                }
             }
         }
     }
@@ -176,37 +344,6 @@ fun DashboardScreen(
 
 fun navigateToTranscriptsScreen(navController: NavHostController, categoryId: String) {
     navController.navigate(Screen.Transcripts.createRoute(categoryId))
-}
-
-@Composable
-fun RenameDialog(
-    categoryGroup: CategoryGroup,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
-) {
-    var text by remember { mutableStateOf(categoryGroup.displayName) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = "Rename ${categoryGroup.categoryName}") },
-        text = {
-            TextField(
-                value = text,
-                onValueChange = { text = it },
-                label = { Text("New Alias") }
-            )
-        },
-        confirmButton = {
-            Button(onClick = { onConfirm(text) }) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
 }
 
 @Composable
@@ -219,27 +356,46 @@ fun RenameCategoryDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Rename ${categoryGroup.categoryName}") },
+        title = {
+            Text(
+                text = "Rename ${categoryGroup.categoryName}",
+                color = PrimaryText
+            )
+        },
         text = {
-            TextField(
+            OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
-                label = { Text("New Alias") }
+                label = { Text("New Alias") },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = PurpleGradientStart,
+                    focusedLabelColor = PurpleGradientStart
+                ),
+                modifier = Modifier.fillMaxWidth()
             )
         },
         confirmButton = {
-            Button(onClick = { onConfirm(text) }) {
+            Button(
+                onClick = { onConfirm(text) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = PurpleGradientStart
+                )
+            ) {
                 Text("Save")
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancel")
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = SecondaryText)
             }
-        }
+        },
+        containerColor = CardBackground
     )
 }
 
+// ============================================================================
+// CHANGED: Redesigned usage tracking card with light theme
+// ============================================================================
 @Composable
 private fun UsageTrackingCard(
     usageInfo: com.example.transcribeassistant.domain.model.UsageInfo,
@@ -248,8 +404,13 @@ private fun UsageTrackingCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (usageInfo.isPremium) Color(0xFF4CAF50) else Color(0xFFFFA726)
-        )
+            containerColor = if (usageInfo.isPremium)
+                Color(0xFF10B981) // Green for premium
+            else
+                Color(0xFFF59E0B) // Amber for free
+        ),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
             modifier = Modifier
@@ -262,25 +423,28 @@ private fun UsageTrackingCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = if (usageInfo.isPremium) "Premium Active" else "Free Plan",
+                    text = if (usageInfo.isPremium) "Premium Active ✨" else "Free Plan",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = usageInfo.usageMessage,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White
+                    color = Color.White.copy(alpha = 0.95f)
                 )
             }
-            
+
             if (!usageInfo.isPremium && usageInfo.hasReachedFreeLimit) {
                 Button(
                     onClick = onUpgradeClick,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.White,
-                        contentColor = Color(0xFFFFA726)
-                    )
+                        contentColor = Color(0xFFF59E0B)
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                 ) {
                     Text("Upgrade", fontWeight = FontWeight.Bold)
                 }
@@ -289,47 +453,127 @@ private fun UsageTrackingCard(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun DashboardScreenPreview() {
-    val cardColors = listOf(
-        Color(0xFF3A3958),
-        Color(0xFFD9725B)
+    val mockCategories = listOf(
+        CategoryGroup("Trending", "1", "Trending", emptyList()),
+        CategoryGroup("Music & Podcasts", "2", "Music & Podcasts", emptyList()),
+        CategoryGroup("Fitness & Wellness", "3", "Fitness & Wellness", emptyList()),
+        CategoryGroup("Tech & Gadgets", "4", "Tech & Gadgets", emptyList())
     )
-    Column(
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF2C2B3E))
-            .padding(16.dp)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        LightBackground,
+                        LightBackgroundEnd
+                    )
+                )
+            )
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Placeholder for Scoop logo
+                Text(
+                    text = "Scoop",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    style = LocalTextStyle.current.copy(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                PurpleGradientStart,
+                                BlueGradientMiddle,
+                                CyanGradientEnd
+                            )
+                        )
+                    )
+                )
+
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(SecondaryText),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("P", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Usage card preview
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFFF59E0B)
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text(
+                            "Free Plan",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Text(
+                            "5 of 10 transcripts used",
+                            fontSize = 12.sp,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             Text(
                 text = "Categories",
-                style = MaterialTheme.typography.headlineLarge,
+                fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = PrimaryText,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
-            Image(
-                painter = painterResource(id = R.drawable.ic_profile),
-                contentDescription = "Profile",
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-        }
-        Spacer(modifier = Modifier.height(32.dp))
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
+            // Category grid
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                itemsIndexed(mockCategories) { index, group ->
+                    CategoryCard(
+                        categoryGroup = group,
+                        backgroundColor = scoopCardColors[index % scoopCardColors.size],
+                        onClick = { },
+                        onLongClick = { }
+                    )
+                }
+            }
         }
     }
 }
+
+
+
+

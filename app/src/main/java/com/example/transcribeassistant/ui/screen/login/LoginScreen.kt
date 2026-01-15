@@ -326,72 +326,16 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(48.dp))
 
-                    // Animated gradient blob image
-                    val infiniteTransition = rememberInfiniteTransition(label = "blob")
-
-                    val offsetY by infiniteTransition.animateFloat(
-                        initialValue = -10f,
-                        targetValue = 20f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(3500, easing = FastOutSlowInEasing),
-                            repeatMode = RepeatMode.Reverse
-                        ),
-                        label = "offsetY"
-                    )
-
-                    val scale by infiniteTransition.animateFloat(
-                        initialValue = 0.95f,
-                        targetValue = 1.15f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(2800, easing = FastOutSlowInEasing),
-                            repeatMode = RepeatMode.Reverse
-                        ),
-                        label = "scale"
-                    )
-
-                    val rotation by infiniteTransition.animateFloat(
-                        initialValue = -5f,
-                        targetValue = 5f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(4200, easing = FastOutSlowInEasing),
-                            repeatMode = RepeatMode.Reverse
-                        ),
-                        label = "rotation"
-                    )
-
+                    // Static gradient blob image - large enough to hide edges
                     Box(
-                        modifier = Modifier
-                            .size(360.dp)
-                            .offset(y = offsetY.dp)
-                            .graphicsLayer(
-                                scaleX = scale,
-                                scaleY = scale,
-                                rotationZ = rotation
-                            )
+                        modifier = Modifier.size(400.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        // Vector drawable for crisp, scalable graphics
                         Image(
                             painter = painterResource(id = R.drawable.scoop_png),
                             contentDescription = "Gradient Blob",
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit
-                        )
-                        // Radial gradient overlay to fade the edges
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Brush.radialGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            Color.Transparent,
-                                            LightBackground.copy(alpha = 0.3f),
-                                            LightBackground.copy(alpha = 0.7f),
-                                            LightBackground
-                                        ),
-                                        radius = 650f
-                                    )
-                                )
+                            contentScale = ContentScale.Crop // Crop to fill and hide edges
                         )
                     }
 
