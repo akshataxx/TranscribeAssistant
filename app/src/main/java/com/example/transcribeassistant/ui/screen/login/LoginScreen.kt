@@ -371,7 +371,7 @@ fun LoginScreen(
                     ) {
                         // Vector drawable for crisp, scalable graphics
                         Image(
-                            painter = painterResource(id = R.drawable.scoop_gradient_blob),
+                            painter = painterResource(id = R.drawable.scoop_png),
                             contentDescription = "Gradient Blob",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Fit
@@ -521,7 +521,7 @@ fun LoginScreenPreview() {
 
             // Gradient blob image (vector drawable)
             Image(
-                painter = painterResource(id = R.drawable.scoop_gradient_blob),
+                painter = painterResource(id = R.drawable.scoop_png),
                 contentDescription = "Gradient Blob",
                 modifier = Modifier.size(240.dp),
                 contentScale = ContentScale.Fit
