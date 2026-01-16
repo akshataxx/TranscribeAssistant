@@ -34,6 +34,11 @@ import com.example.transcribeassistant.ui.viewmodel.CategoryGroup
 private val CardBackground = Color.White
 private val PrimaryText = Color(0xFF1F2937)
 
+// Scoop gradient colors
+private val ScoopPurple = Color(0xFF7165E0)
+private val ScoopBlue = Color(0xFF85ACEC)
+private val ScoopCyan = Color(0xFF7FD9EA)
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CategoryCard(
@@ -67,7 +72,7 @@ fun CategoryCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // ============================================================================
-            // Colored icon circle (gradient matching the category color)
+            // Icon circle with Scoop gradient blend
             // ============================================================================
             Box(
                 modifier = Modifier
@@ -75,16 +80,11 @@ fun CategoryCard(
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
-                            colors = listOf(
-                                backgroundColor.copy(alpha = 0.9f),
-                                backgroundColor.copy(alpha = 0.7f)
-                            )
+                            colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
                         )
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                // TODO: Add category-specific icons here
-                // For now, using a placeholder
                 Text(
                     text = categoryGroup.displayName.take(1).uppercase(),
                     fontSize = 32.sp,
@@ -105,16 +105,6 @@ fun CategoryCard(
                 maxLines = 2,
                 modifier = Modifier.fillMaxWidth()
             )
-
-            // Optional: Transcript count
-            /*
-            Text(
-                text = "${categoryGroup.transcriptCount} items",
-                color = SecondaryText,
-                fontSize = 12.sp,
-                textAlign = TextAlign.Center
-            )
-            */
         }
     }
 }

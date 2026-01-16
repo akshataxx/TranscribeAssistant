@@ -26,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.transcribeassistant.data.auth.AuthStateManager
 import com.example.transcribeassistant.di.JwtManagerEntryPoint
+import com.example.transcribeassistant.ui.screen.components.AnimatedBlobsBackground
 import com.example.transcribeassistant.ui.screen.components.BottomNavBar
 import com.example.transcribeassistant.ui.screen.transcription.TranscribeDetailsScreen
 import com.example.transcribeassistant.ui.screen.dashboard.DashboardScreen
@@ -126,8 +127,10 @@ fun TranscribeNavGraph(
                 DashboardScreen(navController = navController, viewModel = hiltViewModel())
             }
             composable(Screen.Notifications.route) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Notifications Screen", color = PrimaryText)
+                AnimatedBlobsBackground {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Notifications Screen", color = PrimaryText)
+                    }
                 }
             }
             composable(Screen.Subscription.route) {
@@ -136,8 +139,10 @@ fun TranscribeNavGraph(
                 )
             }
             composable("add") {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Add Screen", color = PrimaryText)
+                AnimatedBlobsBackground {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Add Screen", color = PrimaryText)
+                    }
                 }
             }
             composable(

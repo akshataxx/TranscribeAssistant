@@ -17,10 +17,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.transcribeassistant.ui.screen.components.AnimatedBlobsBackground
+import com.example.transcribeassistant.ui.screen.components.PrimaryText
+import com.example.transcribeassistant.ui.screen.components.ScoopPurple
 import com.example.transcribeassistant.ui.viewmodel.DashboardViewModel
 
 @Composable
@@ -45,26 +47,33 @@ fun FeedScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(scrollState)
-    ) {
-        Text(if (categoryId != null) "Transcripts" else "Feed", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Color.White)
-        Spacer(modifier = Modifier.height(12.dp))
-
-        transcriptList.forEach { transcript ->
-            TranscriptCard(
-                transcript = transcript,
-                onClick = { onTranscriptClick(transcript.id) }
+    AnimatedBlobsBackground {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .verticalScroll(scrollState)
+        ) {
+            Text(
+                if (categoryId != null) "Transcripts" else "Feed",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = PrimaryText
             )
             Spacer(modifier = Modifier.height(12.dp))
-        }
 
-        if (transcriptList.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+            transcriptList.forEach { transcript ->
+                TranscriptCard(
+                    transcript = transcript,
+                    onClick = { onTranscriptClick(transcript.id) }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            if (transcriptList.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = ScoopPurple)
+                }
             }
         }
     }
@@ -84,26 +93,33 @@ fun TranscriptsScreen(
         viewModel.fetchTranscriptsByCategory(categoryId)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(scrollState)
-    ) {
-        Text("Transcripts", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Color.White)
-        Spacer(modifier = Modifier.height(12.dp))
-
-        transcriptList.forEach { transcript ->
-            TranscriptCard(
-                transcript = transcript,
-                onClick = { onTranscriptClick(transcript.id) }
+    AnimatedBlobsBackground {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .verticalScroll(scrollState)
+        ) {
+            Text(
+                "Transcripts",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = PrimaryText
             )
             Spacer(modifier = Modifier.height(12.dp))
-        }
 
-        if (transcriptList.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+            transcriptList.forEach { transcript ->
+                TranscriptCard(
+                    transcript = transcript,
+                    onClick = { onTranscriptClick(transcript.id) }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            if (transcriptList.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = ScoopPurple)
+                }
             }
         }
     }

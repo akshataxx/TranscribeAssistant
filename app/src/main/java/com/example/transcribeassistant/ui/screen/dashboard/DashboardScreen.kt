@@ -394,59 +394,176 @@ fun RenameCategoryDialog(
 }
 
 // ============================================================================
-// CHANGED: Redesigned usage tracking card with light theme
+// Scoop gradient colors for usage card
+// ============================================================================
+private val ScoopPurple = Color(0xFF7165E0)
+private val ScoopBlue = Color(0xFF85ACEC)
+private val ScoopCyan = Color(0xFF7FD9EA)
+
+// ============================================================================
+// CHANGED: Redesigned usage tracking card with transparent bg and gradient blobs
 // ============================================================================
 @Composable
 private fun UsageTrackingCard(
     usageInfo: com.example.transcribeassistant.domain.model.UsageInfo,
     onUpgradeClick: () -> Unit
 ) {
+    val infiniteTransition = rememberInfiniteTransition(label = "usageCardBlobs")
+
+    // Small blob 1 animation
+    val blob1X by infiniteTransition.animateFloat(
+        initialValue = -20f,
+        targetValue = 10f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blob1X"
+    )
+    val blob1Scale by infiniteTransition.animateFloat(
+        initialValue = 0.8f,
+        targetValue = 1.2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blob1Scale"
+    )
+
+    // Small blob 2 animation
+    val blob2X by infiniteTransition.animateFloat(
+        initialValue = 40f,
+        targetValue = 80f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blob2X"
+    )
+    val blob2Scale by infiniteTransition.animateFloat(
+        initialValue = 0.9f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blob2Scale"
+    )
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (usageInfo.isPremium)
-                Color(0xFF10B981) // Green for premium
-            else
-                Color(0xFFF59E0B) // Amber for free
+            containerColor = Color.Transparent
         ),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            Brush.linearGradient(
+                colors = listOf(ScoopPurple.copy(alpha = 0.3f), ScoopCyan.copy(alpha = 0.3f))
+            )
+        )
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .height(80.dp)
         ) {
-            Column(
-                modifier = Modifier.weight(1f)
+            // Small floating blob 1
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .offset(x = blob1X.dp, y = (-10).dp)
+                    .graphicsLayer(
+                        scaleX = blob1Scale,
+                        scaleY = blob1Scale,
+                        alpha = 0.3f
+                    )
+                    .align(Alignment.CenterStart)
             ) {
-                Text(
-                    text = if (usageInfo.isPremium) "Premium Active ✨" else "Free Plan",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = usageInfo.usageMessage,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.95f)
+                Image(
+                    painter = painterResource(id = R.drawable.scoop_png),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
             }
 
-            if (!usageInfo.isPremium && usageInfo.hasReachedFreeLimit) {
-                Button(
-                    onClick = onUpgradeClick,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color(0xFFF59E0B)
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+            // Small floating blob 2
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .offset(x = blob2X.dp, y = 5.dp)
+                    .graphicsLayer(
+                        scaleX = blob2Scale,
+                        scaleY = blob2Scale,
+                        alpha = 0.25f
+                    )
+                    .align(Alignment.CenterEnd)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.scoop_png),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            // Content
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Text("Upgrade", fontWeight = FontWeight.Bold)
+                    Text(
+                        text = if (usageInfo.isPremium) "Premium Active" else "Free Plan",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            brush = Brush.linearGradient(
+                                colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+                            )
+                        ),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = usageInfo.usageMessage,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ScoopBlue
+                    )
+                }
+
+                if (!usageInfo.isPremium && usageInfo.hasReachedFreeLimit) {
+                    Button(
+                        onClick = onUpgradeClick,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent
+                        ),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                            horizontal = 16.dp,
+                            vertical = 8.dp
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            Brush.linearGradient(
+                                colors = listOf(ScoopPurple, ScoopCyan)
+                            )
+                        )
+                    ) {
+                        Text(
+                            "Upgrade",
+                            fontWeight = FontWeight.Bold,
+                            style = LocalTextStyle.current.copy(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+                                )
+                            )
+                        )
+                    }
                 }
             }
         }
