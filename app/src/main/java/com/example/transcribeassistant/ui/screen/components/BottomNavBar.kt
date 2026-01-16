@@ -38,7 +38,7 @@ fun BottomNavBar(
     )
 
     NavigationBar(
-        containerColor = LightBackground,
+        containerColor = Color.Transparent,
         tonalElevation = 0.dp,
     ) {
         items.forEach { item ->

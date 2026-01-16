@@ -1,6 +1,7 @@
 package com.example.transcribeassistant.navigation
 
 import android.app.Application
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -34,6 +36,11 @@ import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.runBlocking
 
+// Colors matching the new Scoop light theme
+private val LightBackground = Color(0xFFF5F7FA)
+private val LightBackgroundEnd = Color(0xFFE8ECF1)
+private val PrimaryText = Color(0xFF1F2937)
+
 @Composable
 fun TranscribeNavGraph(
     navController: NavHostController = rememberNavController(),
@@ -46,7 +53,7 @@ fun TranscribeNavGraph(
     val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
-        containerColor = Color(0xFF2C2B3E),
+        containerColor = Color.Transparent,
         bottomBar = {
             // Only show bottom bar when not on login screen
             if (currentRoute != "login") {
@@ -59,7 +66,17 @@ fun TranscribeNavGraph(
                     }
                 }
             }
-        }
+        },
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        LightBackground,
+                        LightBackgroundEnd
+                    )
+                )
+            )
     ){ paddingValues ->
         val context = LocalContext.current
         val jwtManager = EntryPointAccessors.fromApplication(
@@ -110,7 +127,7 @@ fun TranscribeNavGraph(
             }
             composable(Screen.Notifications.route) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Notifications Screen")
+                    Text("Notifications Screen", color = PrimaryText)
                 }
             }
             composable(Screen.Subscription.route) {
@@ -120,7 +137,7 @@ fun TranscribeNavGraph(
             }
             composable("add") {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Add Screen")
+                    Text("Add Screen", color = PrimaryText)
                 }
             }
             composable(
