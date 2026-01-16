@@ -1,19 +1,23 @@
- package com.example.transcribeassistant.ui.screen.transcription
+package com.example.transcribeassistant.ui.screen.transcription
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.transcribeassistant.ui.screen.components.PrimaryText
+import com.example.transcribeassistant.ui.screen.components.SecondaryText
+import com.example.transcribeassistant.ui.screen.components.ScoopBlue
+import com.example.transcribeassistant.ui.screen.components.ScoopCyan
+import com.example.transcribeassistant.ui.screen.components.ScoopPurple
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
@@ -47,52 +51,49 @@ data class GeneralContent(
  */
 @Composable
 fun RecipeContentView(content: RecipeContent) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF2A2A2A)
-        )
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            // Ingredients Section
-            Text(
-                text = "Ingredients",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFFFA8A8)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            content.ingredients.forEach { ingredient ->
-                Text(
-                    text = "• $ingredient",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White,
-                    modifier = Modifier.padding(vertical = 2.dp)
+        // Ingredients Section
+        Text(
+            text = "Ingredients",
+            style = MaterialTheme.typography.titleMedium.copy(
+                brush = Brush.linearGradient(
+                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
                 )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Steps Section
+            ),
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        content.ingredients.forEach { ingredient ->
             Text(
-                text = "Recipe Steps",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFFFA8A8)
+                text = "• $ingredient",
+                style = MaterialTheme.typography.bodyMedium,
+                color = PrimaryText,
+                modifier = Modifier.padding(vertical = 2.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            content.steps.forEachIndexed { index, step ->
-                Text(
-                    text = "${index + 1}. $step",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White,
-                    modifier = Modifier.padding(vertical = 4.dp)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Steps Section
+        Text(
+            text = "Recipe Steps",
+            style = MaterialTheme.typography.titleMedium.copy(
+                brush = Brush.linearGradient(
+                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
                 )
-            }
+            ),
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        content.steps.forEachIndexed { index, step ->
+            Text(
+                text = "${index + 1}. $step",
+                style = MaterialTheme.typography.bodyMedium,
+                color = PrimaryText,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
         }
     }
 }
@@ -102,52 +103,49 @@ fun RecipeContentView(content: RecipeContent) {
  */
 @Composable
 fun BeautyContentView(content: BeautyContent) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF2A2A2A)
-        )
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            // Products Section
-            Text(
-                text = "Products Used",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFFFA8A8)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            content.products.forEach { product ->
-                Text(
-                    text = "• $product",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White,
-                    modifier = Modifier.padding(vertical = 2.dp)
+        // Products Section
+        Text(
+            text = "Products Used",
+            style = MaterialTheme.typography.titleMedium.copy(
+                brush = Brush.linearGradient(
+                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
                 )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Steps Section
+            ),
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        content.products.forEach { product ->
             Text(
-                text = "Steps",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFFFA8A8)
+                text = "• $product",
+                style = MaterialTheme.typography.bodyMedium,
+                color = PrimaryText,
+                modifier = Modifier.padding(vertical = 2.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            content.steps.forEachIndexed { index, step ->
-                Text(
-                    text = "${index + 1}. $step",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White,
-                    modifier = Modifier.padding(vertical = 4.dp)
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Steps Section
+        Text(
+            text = "Steps",
+            style = MaterialTheme.typography.titleMedium.copy(
+                brush = Brush.linearGradient(
+                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
                 )
-            }
+            ),
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        content.steps.forEachIndexed { index, step ->
+            Text(
+                text = "${index + 1}. $step",
+                style = MaterialTheme.typography.bodyMedium,
+                color = PrimaryText,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
         }
     }
 }
@@ -157,32 +155,26 @@ fun BeautyContentView(content: BeautyContent) {
  */
 @Composable
 fun BulletedContentView(content: GeneralContent) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF2A2A2A)
-        )
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Key Points",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFFFA8A8)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            content.keyPoints.forEach { point ->
-                Text(
-                    text = "• $point",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White,
-                    modifier = Modifier.padding(vertical = 4.dp)
+        Text(
+            text = "Key Points",
+            style = MaterialTheme.typography.titleMedium.copy(
+                brush = Brush.linearGradient(
+                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
                 )
-            }
+            ),
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        content.keyPoints.forEach { point ->
+            Text(
+                text = "• $point",
+                style = MaterialTheme.typography.bodyMedium,
+                color = PrimaryText,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
         }
     }
 }
@@ -255,7 +247,7 @@ fun StructuredContentDisplay(structuredContentJson: String?) {
             Text(
                 text = parsedContent.message,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                color = SecondaryText
             )
         }
         null -> { /* Do nothing */ }
