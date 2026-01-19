@@ -486,8 +486,16 @@ private fun UsageTrackingCard(
         label = "blob2Scale"
     )
 
+    val cardModifier = if (!usageInfo.isPremium) {
+        Modifier
+            .fillMaxWidth()
+            .clickable { onUpgradeClick() }
+    } else {
+        Modifier.fillMaxWidth()
+    }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = cardModifier,
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         ),
