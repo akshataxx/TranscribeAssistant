@@ -363,22 +363,22 @@ fun LoginScreen(
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            // TODO: Replace with actual Google logo
-                            // Image(
-                            //     painter = painterResource(id = R.drawable.ic_google_logo),
-                            //     contentDescription = "Google",
-                            //     modifier = Modifier.size(20.dp)
-                            // )
-                            Icon(
-                                imageVector = Icons.Default.Login,
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_google_logo),
                                 contentDescription = "Google",
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = "Continue with Google",
+                                text = "Sign in with ",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium,
+                                color = PrimaryText
+                            )
+                            Text(
+                                text = "Google",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
                                 color = PrimaryText
                             )
                         }

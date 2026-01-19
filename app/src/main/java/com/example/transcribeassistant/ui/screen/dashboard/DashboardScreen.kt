@@ -17,6 +17,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -255,29 +258,63 @@ fun DashboardScreen(
                 // Profile dropdown menu
                 var menuOpen by remember { mutableStateOf(false) }
                 Box {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_profile),
-                        contentDescription = "Profile",
+                    // Profile icon with gradient border
+                    Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(44.dp)
                             .clip(CircleShape)
-                            .clickable { menuOpen = true },
-                        contentScale = ContentScale.Crop
-                    )
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+                                )
+                            )
+                            .padding(2.dp)
+                            .clickable { menuOpen = true }
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_profile),
+                            contentDescription = "Profile",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
 
                     DropdownMenu(
                         expanded = menuOpen,
                         onDismissRequest = { menuOpen = false },
+                        modifier = Modifier.background(CardBackground)
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Subscription") },
+                            text = {
+                                Text(
+                                    "Subscription",
+                                    color = PrimaryText,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            },
                             onClick = {
                                 menuOpen = false
                                 navController.navigate(Screen.Subscription.route)
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = androidx.compose.material.icons.Icons.Default.Star,
+                                    contentDescription = null,
+                                    tint = ScoopPurple,
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Logout") },
+                            text = {
+                                Text(
+                                    "Logout",
+                                    color = Color(0xFFEF4444),
+                                    fontWeight = FontWeight.Medium
+                                )
+                            },
                             onClick = {
                                 menuOpen = false
                                 viewModel.logout()
@@ -285,6 +322,14 @@ fun DashboardScreen(
                                     popUpTo(0) { inclusive = true }
                                     launchSingleTop = true
                                 }
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = androidx.compose.material.icons.Icons.Default.ExitToApp,
+                                    contentDescription = null,
+                                    tint = Color(0xFFEF4444),
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
                         )
                     }
