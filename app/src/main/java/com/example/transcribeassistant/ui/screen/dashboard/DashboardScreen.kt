@@ -341,13 +341,15 @@ fun DashboardScreen(
             // ============================================================================
             // CHANGED: Updated usage tracking card design
             // ============================================================================
-            usageInfo?.let { usage ->
-                UsageTrackingCard(
-                    usageInfo = usage,
-                    onUpgradeClick = { navController.navigate(Screen.Subscription.route) }
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-            }
+            usageInfo
+                ?.takeIf { !it.isPremium } // Show free tier usage only for non-premium users
+                ?.let { usage ->
+                    UsageTrackingCard(
+                        usageInfo = usage,
+                        onUpgradeClick = { navController.navigate(Screen.Subscription.route) }
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
 
             // ============================================================================
             // Category grid - no header needed, content is self-explanatory

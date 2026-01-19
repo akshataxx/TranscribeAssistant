@@ -3,8 +3,15 @@ package com.example.transcribeassistant.navigation
 import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +21,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -36,6 +45,7 @@ import com.example.transcribeassistant.ui.screen.subscription.SubscriptionScreen
 import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.runBlocking
+import androidx.compose.ui.unit.dp
 
 // Colors matching the new Scoop light theme
 private val LightBackground = Color(0xFFF5F7FA)
@@ -127,11 +137,10 @@ fun TranscribeNavGraph(
                 DashboardScreen(navController = navController, viewModel = hiltViewModel())
             }
             composable(Screen.Notifications.route) {
-                AnimatedBlobsBackground {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Notifications Screen", color = PrimaryText)
-                    }
-                }
+                UnderConstructionScreen(
+                    title = "Notifications",
+                    description = "We’re wiring up alerts so you never miss an update. Check back soon."
+                )
             }
             composable(Screen.Subscription.route) {
                 SubscriptionScreen(
@@ -139,11 +148,10 @@ fun TranscribeNavGraph(
                 )
             }
             composable("add") {
-                AnimatedBlobsBackground {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Add Screen", color = PrimaryText)
-                    }
-                }
+                UnderConstructionScreen(
+                    title = "Add",
+                    description = "The new add flow is in progress. We’ll let you know when it’s ready."
+                )
             }
             composable(
                 route = Screen.TranscribeDetails.route,
@@ -167,6 +175,52 @@ fun TranscribeNavGraph(
                         navController.navigate(Screen.TranscribeDetails.createRoute(transcriptId))
                     },
                     categoryId = categoryId
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun UnderConstructionScreen(
+    title: String,
+    description: String
+) {
+    AnimatedBlobsBackground {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Build,
+                    contentDescription = null,
+                    tint = PrimaryText
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "$title is under construction",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFF7C3AED),
+                                Color(0xFF2563EB),
+                                Color(0xFF06B6D4)
+                            )
+                        )
+                    ),
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = description,
+                    color = PrimaryText.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center
                 )
             }
         }
