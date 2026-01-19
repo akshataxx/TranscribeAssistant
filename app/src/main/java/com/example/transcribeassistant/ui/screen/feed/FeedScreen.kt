@@ -17,11 +17,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.transcribeassistant.ui.screen.components.AnimatedBlobsBackground
-import com.example.transcribeassistant.ui.screen.components.PrimaryText
+import com.example.transcribeassistant.ui.screen.components.ScoopBlue
+import com.example.transcribeassistant.ui.screen.components.ScoopCyan
 import com.example.transcribeassistant.ui.screen.components.ScoopPurple
 import com.example.transcribeassistant.ui.viewmodel.DashboardViewModel
 
@@ -55,12 +57,15 @@ fun FeedScreen(
                 .verticalScroll(scrollState)
         ) {
             Text(
-                if (categoryId != null) "Transcripts" else "Feed",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = PrimaryText
+                text = "Your Feed",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    brush = Brush.linearGradient(
+                        colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+                    )
+                ),
+                fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             transcriptList.forEach { transcript ->
                 TranscriptCard(
@@ -100,14 +105,6 @@ fun TranscriptsScreen(
                 .padding(16.dp)
                 .verticalScroll(scrollState)
         ) {
-            Text(
-                "Transcripts",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = PrimaryText
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
             transcriptList.forEach { transcript ->
                 TranscriptCard(
                     transcript = transcript,

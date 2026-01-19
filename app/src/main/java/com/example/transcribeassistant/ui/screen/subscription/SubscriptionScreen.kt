@@ -48,8 +48,14 @@ fun SubscriptionScreen(
                     title = {
                         Text(
                             "Subscription",
-                            color = PrimaryText
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+                                )
+                            ),
+                            fontWeight = FontWeight.Bold
                         )
+                        Spacer(modifier = Modifier.height(16.dp))
                     },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {

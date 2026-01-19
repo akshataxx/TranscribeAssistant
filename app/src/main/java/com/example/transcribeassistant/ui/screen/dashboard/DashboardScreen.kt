@@ -350,18 +350,7 @@ fun DashboardScreen(
             }
 
             // ============================================================================
-            // NEW: "Categories" heading with modern styling
-            // ============================================================================
-            Text(
-                text = "Categories",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = PrimaryText,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            // ============================================================================
-            // Category grid (keeping same functionality, updated styling)
+            // Category grid - no header needed, content is self-explanatory
             // ============================================================================
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
