@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
+    <!-- Default: HTTPS only (production) -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    
+    <!-- Allow HTTP only for local development -->
     <domain-config cleartextTrafficPermitted="true">
-        <!-- Emulator localhost for debug builds -->
         <domain includeSubdomains="true">10.0.2.2</domain>
-        <!-- Production GCE backend -->
-        <domain includeSubdomains="true">34.151.189.90</domain>
+        <domain includeSubdomains="true">localhost</domain>
     </domain-config>
 </network-security-config>

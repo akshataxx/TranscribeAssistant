@@ -23,6 +23,27 @@ This is the Android client for the Transcribe Assistant service. It lets you req
 
 ---
 
+## 🔧 Build Variants
+
+The app has different configurations for local development and production:
+
+| Build Type | API URL | Protocol |
+|------------|---------|----------|
+| `debug` | `http://10.0.2.2:8081` | HTTP (local backend) |
+| `release` | `https://34-151-189-90.sslip.io` | HTTPS (production) |
+
+### Switching Build Variants in Android Studio
+
+1. Go to **View** → **Tool Windows** → **Build Variants**
+2. A panel appears on the left side
+3. Click the dropdown next to `:app`
+4. Select `debug` or `release`
+5. Run the app as normal
+
+> **Note:** Release builds require signing config in `keystore.properties`
+
+---
+
 ## 🧱 Project Structure Overview
 
 This project follows **Clean Architecture** principles—UI, business logic, and data are strictly separated to improve maintainability and testability.
