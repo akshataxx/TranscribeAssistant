@@ -38,13 +38,6 @@ android {
                 keyPassword = keystoreProperties["keyPassword"] as String
                 storeFile = file(keystoreProperties["storeFile"] as String)
                 storePassword = keystoreProperties["storePassword"] as String
-            } else {
-                // Fall back to debug signing if no keystore configured
-                // Remove this for actual Play Store releases
-                storeFile = file(System.getProperty("user.home") + "/.android/debug.keystore")
-                storePassword = "android"
-                keyAlias = "androiddebugkey"
-                keyPassword = "android"
             }
         }
     }
@@ -52,7 +45,7 @@ android {
     buildTypes {
         debug {
             // Local backend via emulator (10.0.2.2 = host machine)
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8081\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://34-151-189-90.sslip.io\"")
             buildConfigField("String", "STRIPE_PREMIUM_PRICE_ID", "\"price_1SDccWBIj51ZSIefUfPLTqxf\"")
         }
         release {
