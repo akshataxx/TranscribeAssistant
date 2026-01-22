@@ -8,7 +8,6 @@
 .externalNativeBuild
 .cxx
 local.properties
-google-services.json
 
 # Keystore files - DO NOT COMMIT
 *.jks
