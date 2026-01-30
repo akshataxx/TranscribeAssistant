@@ -25,8 +25,8 @@ android {
         applicationId = "com.contentcategorise.transcribeassistant"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.0.3"
+        versionCode = 5
+        versionName = "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -46,7 +46,7 @@ android {
         debug {
             // Local backend via emulator (10.0.2.2 = host machine)
             buildConfigField("String", "API_BASE_URL", "\"https://34-151-189-90.sslip.io\"")
-            buildConfigField("String", "STRIPE_PREMIUM_PRICE_ID", "\"price_1SDccWBIj51ZSIefUfPLTqxf\"")
+            buildConfigField("String", "GOOGLE_PLAY_PRODUCT_ID_MONTHLY", "\"premium_monthly\"")
         }
         release {
             isMinifyEnabled = false
@@ -56,7 +56,7 @@ android {
             )
             // Production backend on GCE with HTTPS
             buildConfigField("String", "API_BASE_URL", "\"https://34-151-189-90.sslip.io\"")
-            buildConfigField("String", "STRIPE_PREMIUM_PRICE_ID", "\"price_1SDccWBIj51ZSIefUfPLTqxf\"")
+            buildConfigField("String", "GOOGLE_PLAY_PRODUCT_ID_MONTHLY", "\"premium_monthly\"")
             signingConfig = signingConfigs.getByName("release")
         }
     }
@@ -119,4 +119,7 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.google.auth)
     implementation(libs.androidx.datastore.preferences)
+
+    // Google Play Billing
+    implementation(libs.billing)
 }

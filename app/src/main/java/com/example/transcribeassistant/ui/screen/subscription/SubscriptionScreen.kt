@@ -1,5 +1,6 @@
 package com.example.transcribeassistant.ui.screen.subscription
 
+import android.app.Activity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -36,6 +38,8 @@ fun SubscriptionScreen(
     viewModel: SubscriptionViewModel = hiltViewModel()
 ) {
     val uiState: SubscriptionUiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val activity = context as? Activity
 
     LaunchedEffect(Unit) {
         viewModel.loadUsageInfo()
@@ -90,7 +94,7 @@ fun SubscriptionScreen(
                         SubscriptionContent(
                             usageInfo = state.usageInfo,
                             onUpgradeClick = {
-                                viewModel.startPremiumUpgrade()
+                                activity?.let { viewModel.startPremiumUpgrade(it) }
                             },
                             onCancelClick = {
                                 viewModel.cancelSubscription()
