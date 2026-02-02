@@ -14,11 +14,35 @@
       },
       "oauth_client": [
         {
+          "client_id": "63948187194-0013cnqqka9hr2oefni105ot2ff8jrlt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.contentcategorise.transcribeassistant",
+            "certificate_hash": "e20097d85848351f1bdc2be76d9553176d52facd"
+          }
+        },
+        {
           "client_id": "63948187194-7d72l17apiqi0fgbnhfpbvq94t3ddoaf.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.contentcategorise.transcribeassistant",
             "certificate_hash": "a9c38290b0da2c8c48b66faa192cc5cbeb8e606c"
+          }
+        },
+        {
+          "client_id": "63948187194-8nl7tf914bbcpf2433irgm09g06pi8vb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.contentcategorise.transcribeassistant",
+            "certificate_hash": "a9e973de6a7b7f2fd4fafd61e47aa78ce8e36190"
+          }
+        },
+        {
+          "client_id": "63948187194-b7uvejinl28ivpptcm3m73qi8q1p5k2f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.contentcategorise.transcribeassistant",
+            "certificate_hash": "13d7b0c318ac2542c88aab2c9162644ba790a4c4"
           }
         },
         {
