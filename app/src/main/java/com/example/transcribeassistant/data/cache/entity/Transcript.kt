@@ -25,5 +25,6 @@ data class TranscriptEntity(
     val categoryId: String,
     val category: String,
     val alias: String?,
+    val notes: String? = null,
     val createdAt: Instant
 )

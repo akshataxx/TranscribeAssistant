@@ -18,7 +18,8 @@ class SubscriptionRepositoryImpl @Inject constructor(
         Log.d("SubscriptionRepo", "Received usage DTO: isPremium=${dto.isPremium}, remaining=${dto.remainingFreeTranscriptions}")
         return UsageInfo(
             isPremium = dto.isPremium,
-            remainingFreeTranscriptions = dto.remainingFreeTranscriptions
+            remainingFreeTranscriptions = dto.remainingFreeTranscriptions,
+            totalFreeTranscriptions = dto.totalFreeTranscriptions
         )
     }
 

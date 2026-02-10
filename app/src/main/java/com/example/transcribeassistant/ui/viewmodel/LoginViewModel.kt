@@ -42,6 +42,16 @@ class LoginViewModel @Inject constructor(
                 // Save tokens
                 jwtManager.saveTokens(response.accessToken, response.refreshToken)
                 Log.d("LoginViewModel", "Saved access (last 8): ${response.accessToken.takeLast(8)}, refresh (last 8): ${response.refreshToken.takeLast(8)}")
+
+                // Fetch and save user profile
+                try {
+                    val profile = authApi.getProfile("Bearer ${response.accessToken}")
+                    jwtManager.saveProfile(profile.name, profile.email)
+                    Log.d("LoginViewModel", "Profile saved: ${profile.name}, ${profile.email}")
+                } catch (profileError: Exception) {
+                    Log.w("LoginViewModel", "Failed to fetch profile: ${profileError.message}")
+                }
+
                 _uiState.value = LoginUiState.Success(response.accessToken.takeLast(8))
             } catch (e: Exception) {
                 Log.e("LoginViewModel", "Login failed", e)

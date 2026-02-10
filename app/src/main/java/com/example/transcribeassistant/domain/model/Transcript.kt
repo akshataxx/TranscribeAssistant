@@ -23,5 +23,6 @@ data class Transcript (
     val categoryId: String,
     val category: String,
     val alias: String?,
+    val notes: String? = null,
     val createdAt: Instant
 )

@@ -37,10 +37,12 @@ import com.example.transcribeassistant.data.auth.AuthStateManager
 import com.example.transcribeassistant.di.JwtManagerEntryPoint
 import com.example.transcribeassistant.ui.screen.components.AnimatedBlobsBackground
 import com.example.transcribeassistant.ui.screen.components.BottomNavBar
+import com.example.transcribeassistant.ui.screen.add.AddLinkScreen
 import com.example.transcribeassistant.ui.screen.transcription.TranscribeDetailsScreen
 import com.example.transcribeassistant.ui.screen.dashboard.DashboardScreen
 import com.example.transcribeassistant.ui.screen.feed.FeedScreen
 import com.example.transcribeassistant.ui.screen.login.LoginScreen
+import com.example.transcribeassistant.ui.screen.profile.ProfileScreen
 import com.example.transcribeassistant.ui.screen.subscription.SubscriptionScreen
 import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
 import dagger.hilt.android.EntryPointAccessors
@@ -147,10 +149,33 @@ fun TranscribeNavGraph(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
-            composable("add") {
+            composable(Screen.AddLink.route) {
+                AddLinkScreen(
+                    onViewTranscript = { transcriptId ->
+                        navController.navigate(Screen.TranscribeDetails.createRoute(transcriptId))
+                    }
+                )
+            }
+            composable(Screen.Profile.route) {
+                ProfileScreen(
+                    onSettingsClick = {
+                        navController.navigate(Screen.Settings.route)
+                    },
+                    onSubscriptionClick = {
+                        navController.navigate(Screen.Subscription.route)
+                    },
+                    onLogoutClick = {
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+            composable(Screen.Settings.route) {
                 UnderConstructionScreen(
-                    title = "Add",
-                    description = "The new add flow is in progress. We’ll let you know when it’s ready."
+                    title = "Settings",
+                    description = "Settings will be available here soon."
                 )
             }
             composable(

@@ -1,7 +1,10 @@
 package com.example.transcribeassistant.ui.screen.subscription
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,7 +14,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.transcribeassistant.ui.screen.components.AnimatedBlobsBackground
 import com.example.transcribeassistant.ui.screen.components.PrimaryText
@@ -59,7 +62,6 @@ fun SubscriptionScreen(
                             ),
                             fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
                     },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
@@ -98,6 +100,13 @@ fun SubscriptionScreen(
                             },
                             onCancelClick = {
                                 viewModel.cancelSubscription()
+                            },
+                            onManageClick = {
+                                val intent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://play.google.com/store/account/subscriptions")
+                                )
+                                context.startActivity(intent)
                             }
                         )
                     }
@@ -118,146 +127,188 @@ fun SubscriptionScreen(
 private fun SubscriptionContent(
     usageInfo: com.example.transcribeassistant.domain.model.UsageInfo,
     onUpgradeClick: () -> Unit,
-    onCancelClick: () -> Unit
+    onCancelClick: () -> Unit,
+    onManageClick: () -> Unit
 ) {
-    // Usage Status Card with gradient border
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(
-            2.dp,
-            Brush.linearGradient(
-                colors = if (usageInfo.isPremium)
-                    listOf(Color(0xFF10B981), Color(0xFF34D399))
-                else
-                    listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+    // Header Section with gradient text
+    Text(
+        text = "Premium",
+        fontSize = 28.sp,
+        fontWeight = FontWeight.Bold,
+        style = MaterialTheme.typography.headlineLarge.copy(
+            brush = Brush.linearGradient(
+                colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
             )
         )
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = if (usageInfo.isPremium) Icons.Default.Star else Icons.Default.Check,
-                contentDescription = null,
-                tint = if (usageInfo.isPremium) Color(0xFF10B981) else ScoopPurple,
-                modifier = Modifier.size(48.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = if (usageInfo.isPremium) "Premium Active" else "Free Plan",
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    brush = Brush.linearGradient(
-                        colors = if (usageInfo.isPremium)
-                            listOf(Color(0xFF10B981), Color(0xFF34D399))
-                        else
-                            listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                    )
-                ),
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = usageInfo.usageMessage,
-                style = MaterialTheme.typography.bodyMedium,
-                color = SecondaryText,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
+    )
+    Spacer(modifier = Modifier.height(4.dp))
+    Text(
+        text = "Unlock unlimited transcriptions",
+        style = MaterialTheme.typography.bodyLarge,
+        color = SecondaryText
+    )
 
     Spacer(modifier = Modifier.height(24.dp))
 
     if (!usageInfo.isPremium) {
-        // Premium Plans
-        Text(
-            text = "Upgrade to Premium",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = PrimaryText
-        )
+        // Benefits Card for free users
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    text = "Premium Benefits",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = PrimaryText
+                )
+                Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
+                BenefitRow(
+                    icon = "\u221E", // infinity symbol
+                    text = "Unlimited transcriptions"
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                BenefitRow(
+                    icon = "\u26A1", // bolt
+                    text = "Priority processing"
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Premium Plan Card
         PremiumPlanCard(
             title = "Premium Plan",
             price = "$3.99/month",
-            features = listOf(
-                "Unlimited transcriptions",
-                "Advanced categorization"
-            ),
             onSubscribeClick = onUpgradeClick
         )
     } else {
-        // Cancel Subscription Section for Premium users
-        Text(
-            text = "Manage Subscription",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = PrimaryText
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
+        // Premium Status Card
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            ),
-            shape = RoundedCornerShape(16.dp)
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF0FDF4)),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.5.dp, Color(0xFF10B981))
         ) {
             Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = Color(0xFF10B981),
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Text(
-                    text = "Premium - $3.99/month",
-                    style = MaterialTheme.typography.titleMedium,
+                    text = "Premium Active",
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = PrimaryText
+                    color = Color(0xFF065F46)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
+                Divider(color = Color(0xFF10B981).copy(alpha = 0.2f))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "You have unlimited transcriptions.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = SecondaryText
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedButton(
-                    onClick = onCancelClick,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color(0xFFEF4444)
-                    ),
-                    border = BorderStroke(1.dp, Color(0xFFEF4444)),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Cancel Subscription")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "You will retain premium access until the end of your billing period.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = SecondaryText,
-                    textAlign = TextAlign.Center,
+                    text = "Your benefits:",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF065F46),
                     modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                BenefitRow(
+                    icon = "\u221E",
+                    text = "Unlimited transcriptions",
+                    textColor = Color(0xFF065F46)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                BenefitRow(
+                    icon = "\u26A1",
+                    text = "Priority processing",
+                    textColor = Color(0xFF065F46)
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Manage Subscription button
+        Button(
+            onClick = onManageClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+            border = BorderStroke(
+                1.dp,
+                Brush.linearGradient(colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan))
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                "Manage Subscription",
+                fontWeight = FontWeight.Bold,
+                style = LocalTextStyle.current.copy(
+                    brush = Brush.linearGradient(
+                        colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+                    )
+                )
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Cancel option
+        OutlinedButton(
+            onClick = onCancelClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = Color(0xFFEF4444)
+            ),
+            border = BorderStroke(1.dp, Color(0xFFEF4444).copy(alpha = 0.5f)),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text("Cancel Subscription")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "You will retain premium access until the end of your billing period.",
+            style = MaterialTheme.typography.bodySmall,
+            color = SecondaryText,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun BenefitRow(
+    icon: String,
+    text: String,
+    textColor: Color = PrimaryText
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = icon,
+            fontSize = 18.sp
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = textColor
+        )
     }
 }
 
@@ -265,7 +316,6 @@ private fun SubscriptionContent(
 private fun PremiumPlanCard(
     title: String,
     price: String,
-    features: List<String>,
     onSubscribeClick: () -> Unit
 ) {
     Card(
@@ -310,10 +360,8 @@ private fun PremiumPlanCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            features.forEach { feature ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            listOf("Unlimited transcriptions", "Priority processing").forEach { feature ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
@@ -332,27 +380,34 @@ private fun PremiumPlanCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Filled gradient subscribe button
             Button(
                 onClick = onSubscribeClick,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent
-                ),
-                border = BorderStroke(
-                    1.dp,
-                    Brush.linearGradient(colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan))
-                ),
-                shape = RoundedCornerShape(12.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                contentPadding = PaddingValues()
             ) {
-                Text(
-                    text = "Subscribe - $3.99/month",
-                    fontWeight = FontWeight.Bold,
-                    style = LocalTextStyle.current.copy(
-                        brush = Brush.linearGradient(
-                            colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                        )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Subscribe Now",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 16.sp
                     )
-                )
+                }
             }
         }
     }

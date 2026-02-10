@@ -16,6 +16,8 @@ class JwtManager(private val context: Context) {
     companion object {
         private val ACCESS_KEY = stringPreferencesKey("access_token")
         private val REFRESH_KEY = stringPreferencesKey("refresh_token")
+        private val PROFILE_NAME_KEY = stringPreferencesKey("profile_name")
+        private val PROFILE_EMAIL_KEY = stringPreferencesKey("profile_email")
     }
 
     /**
@@ -43,7 +45,31 @@ class JwtManager(private val context: Context) {
     }
 
     /**
-     * Clears both tokens (e.g. on logout).
+     * Save user profile info.
+     */
+    suspend fun saveProfile(name: String?, email: String?) {
+        context.dataStore.edit { prefs ->
+            if (name != null) prefs[PROFILE_NAME_KEY] = name
+            if (email != null) prefs[PROFILE_EMAIL_KEY] = email
+        }
+    }
+
+    /**
+     * Returns the stored profile name, or null.
+     */
+    fun getProfileName(): String? = runBlocking {
+        context.dataStore.data.first()[PROFILE_NAME_KEY]
+    }
+
+    /**
+     * Returns the stored profile email, or null.
+     */
+    fun getProfileEmail(): String? = runBlocking {
+        context.dataStore.data.first()[PROFILE_EMAIL_KEY]
+    }
+
+    /**
+     * Clears both tokens and profile (e.g. on logout).
      */
     suspend fun clearTokens() {
         context.dataStore.edit { it.clear() }

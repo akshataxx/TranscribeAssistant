@@ -3,9 +3,11 @@ package com.example.transcribeassistant.ui.screen.dashboard
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,9 +19,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -255,84 +260,27 @@ fun DashboardScreen(
                     modifier = Modifier.height(36.dp)
                 )
 
-                // Profile dropdown menu
-                var menuOpen by remember { mutableStateOf(false) }
-                Box {
-                    // Profile icon with gradient border
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(
-                                Brush.linearGradient(
-                                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                                )
+                // Profile icon — navigates to Profile screen
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
                             )
-                            .padding(2.dp)
-                            .clickable { menuOpen = true }
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_profile),
-                            contentDescription = "Profile",
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
                         )
-                    }
-
-                    DropdownMenu(
-                        expanded = menuOpen,
-                        onDismissRequest = { menuOpen = false },
-                        modifier = Modifier.background(CardBackground)
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    "Subscription",
-                                    color = PrimaryText,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            },
-                            onClick = {
-                                menuOpen = false
-                                navController.navigate(Screen.Subscription.route)
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = androidx.compose.material.icons.Icons.Default.Star,
-                                    contentDescription = null,
-                                    tint = ScoopPurple,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    "Logout",
-                                    color = Color(0xFFEF4444),
-                                    fontWeight = FontWeight.Medium
-                                )
-                            },
-                            onClick = {
-                                menuOpen = false
-                                viewModel.logout()
-                                navController.navigate("login") {
-                                    popUpTo(0) { inclusive = true }
-                                    launchSingleTop = true
-                                }
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = androidx.compose.material.icons.Icons.Default.ExitToApp,
-                                    contentDescription = null,
-                                    tint = Color(0xFFEF4444),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        )
-                    }
+                        .padding(2.dp)
+                        .clickable { navController.navigate(Screen.Profile.route) }
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_profile),
+                        contentDescription = "Profile",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
                 }
             }
 
@@ -437,178 +385,127 @@ private val ScoopBlue = Color(0xFF85ACEC)
 private val ScoopCyan = Color(0xFF7FD9EA)
 
 // ============================================================================
-// CHANGED: Redesigned usage tracking card with transparent bg and gradient blobs
+// Redesigned usage tracking card matching iOS design
 // ============================================================================
 @Composable
 private fun UsageTrackingCard(
     usageInfo: com.example.transcribeassistant.domain.model.UsageInfo,
     onUpgradeClick: () -> Unit
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "usageCardBlobs")
+    val atLimit = usageInfo.hasReachedFreeLimit
+    val normalGradient = listOf(ScoopPurple, ScoopCyan)
+    val limitGradient = listOf(Color(0xFFF59E0B), Color(0xFFEF4444))
+    val accentColors = if (atLimit) limitGradient else normalGradient
 
-    // Small blob 1 animation
-    val blob1X by infiniteTransition.animateFloat(
-        initialValue = -20f,
-        targetValue = 10f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(3000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "blob1X"
+    val animatedProgress by animateFloatAsState(
+        targetValue = usageInfo.usageProgress.toFloat().coerceIn(0f, 1f),
+        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+        label = "progressAnim"
     )
-    val blob1Scale by infiniteTransition.animateFloat(
-        initialValue = 0.8f,
-        targetValue = 1.2f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "blob1Scale"
-    )
-
-    // Small blob 2 animation
-    val blob2X by infiniteTransition.animateFloat(
-        initialValue = 40f,
-        targetValue = 80f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(3500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "blob2X"
-    )
-    val blob2Scale by infiniteTransition.animateFloat(
-        initialValue = 0.9f,
-        targetValue = 1.1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2800, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "blob2Scale"
-    )
-
-    val cardModifier = if (!usageInfo.isPremium) {
-        Modifier
-            .fillMaxWidth()
-            .clickable { onUpgradeClick() }
-    } else {
-        Modifier.fillMaxWidth()
-    }
 
     Card(
-        modifier = cardModifier,
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
-        ),
-        shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            Brush.linearGradient(
-                colors = listOf(ScoopPurple.copy(alpha = 0.3f), ScoopCyan.copy(alpha = 0.3f))
-            )
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onUpgradeClick() },
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(14.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(
+            1.5.dp,
+            Brush.linearGradient(colors = accentColors)
         )
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp)
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            // Small floating blob 1
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .offset(x = blob1X.dp, y = (-10).dp)
-                    .graphicsLayer(
-                        scaleX = blob1Scale,
-                        scaleY = blob1Scale,
-                        alpha = 0.3f
-                    )
-                    .align(Alignment.CenterStart)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.scoop_png),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            // Small floating blob 2
-            Box(
-                modifier = Modifier
-                    .size(50.dp)
-                    .offset(x = blob2X.dp, y = 5.dp)
-                    .graphicsLayer(
-                        scaleX = blob2Scale,
-                        scaleY = blob2Scale,
-                        alpha = 0.25f
-                    )
-                    .align(Alignment.CenterEnd)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.scoop_png),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            // Content
+            // Row 1: Status & Count
             Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = if (usageInfo.isPremium) "Premium Active" else "Free Plan",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            brush = Brush.linearGradient(
-                                colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                            )
-                        ),
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = usageInfo.usageMessage,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = ScoopBlue
-                    )
-                }
-
-                if (!usageInfo.isPremium && usageInfo.hasReachedFreeLimit) {
-                    Button(
-                        onClick = onUpgradeClick,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent
-                        ),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                            horizontal = 16.dp,
-                            vertical = 8.dp
-                        ),
-                        shape = RoundedCornerShape(12.dp),
-                        border = androidx.compose.foundation.BorderStroke(
-                            1.dp,
-                            Brush.linearGradient(
-                                colors = listOf(ScoopPurple, ScoopCyan)
-                            )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (atLimit) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = Color(0xFFF59E0B),
+                            modifier = Modifier.size(18.dp)
                         )
-                    ) {
-                        Text(
-                            "Upgrade",
-                            fontWeight = FontWeight.Bold,
-                            style = LocalTextStyle.current.copy(
-                                brush = Brush.linearGradient(
-                                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                                )
-                            )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            tint = ScoopPurple,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = if (atLimit) "Free limit reached" else "Free plan",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = PrimaryText
+                    )
                 }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "${usageInfo.usedTranscriptions}/${usageInfo.totalFreeTranscriptions} used",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Medium,
+                        color = SecondaryText
+                    )
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = SecondaryText,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Row 2: Progress Bar
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(Color(0xFFE5E7EB))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(animatedProgress)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(
+                            Brush.horizontalGradient(colors = accentColors)
+                        )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Row 3: Message & CTA
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (atLimit) "Upgrade to Premium for unlimited" else "${usageInfo.remainingFreeTranscriptions} transcription${if (usageInfo.remainingFreeTranscriptions != 1) "s" else ""} remaining",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = SecondaryText,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = if (atLimit) "Upgrade" else "View plans",
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        brush = Brush.linearGradient(colors = accentColors)
+                    ),
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

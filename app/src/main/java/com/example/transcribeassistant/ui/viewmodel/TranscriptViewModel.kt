@@ -31,6 +31,42 @@ class TranscriptViewModel @Inject constructor(
     val transcript: StateFlow<Transcript?> = _transcript
     private val _transcriptsByCategory = MutableStateFlow<List<Transcript>>(emptyList())
     val transcriptsByCategory: StateFlow<List<Transcript>> = _transcriptsByCategory
+    private val _isSavingNotes = MutableStateFlow(false)
+    val isSavingNotes: StateFlow<Boolean> = _isSavingNotes
+
+    private val _saveNotesError = MutableStateFlow<String?>(null)
+    val saveNotesError: StateFlow<String?> = _saveNotesError
+
+    private val _saveNotesSuccess = MutableStateFlow(false)
+    val saveNotesSuccess: StateFlow<Boolean> = _saveNotesSuccess
+
+    fun saveNotes(transcriptId: String, notes: String?) {
+        viewModelScope.launch {
+            _isSavingNotes.value = true
+            _saveNotesError.value = null
+            _saveNotesSuccess.value = false
+            try {
+                val updated = repository.updateNotes(transcriptId, notes)
+                _transcript.value = updated
+                _saveNotesSuccess.value = true
+                Log.d("TranscriptVM", "Notes saved for $transcriptId")
+            } catch (e: Exception) {
+                Log.e("TranscriptVM", "Error saving notes: ${e.message}")
+                _saveNotesError.value = e.message ?: "Failed to save notes"
+            } finally {
+                _isSavingNotes.value = false
+            }
+        }
+    }
+
+    fun dismissSaveNotesSuccess() {
+        _saveNotesSuccess.value = false
+    }
+
+    fun dismissSaveNotesError() {
+        _saveNotesError.value = null
+    }
+
     // For initial video submission
     fun submitNewVideo(videoUrl: String) {
         viewModelScope.launch {
