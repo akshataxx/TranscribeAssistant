@@ -26,5 +26,5 @@ interface TranscriptRepository {
 
     suspend fun upsertAlias(categoryId: String, newAlias: String)
 
-    suspend fun updateNotes(transcriptId: String, notes: String?): Transcript
+    suspend fun updateNotes(transcriptId: String, notes: String?)
 }

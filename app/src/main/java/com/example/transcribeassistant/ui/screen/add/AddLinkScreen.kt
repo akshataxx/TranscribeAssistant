@@ -57,6 +57,7 @@ fun AddLinkScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val createdTranscript by viewModel.createdTranscript.collectAsState()
+    val isValidUrl by viewModel.isValidUrl.collectAsState()
 
     AnimatedBlobsBackground {
         Column(
@@ -131,7 +132,7 @@ fun AddLinkScreen(
             // Submit Button
             Button(
                 onClick = { viewModel.submit() },
-                enabled = viewModel.isValidUrl && !isLoading,
+                enabled = isValidUrl && !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -147,7 +148,7 @@ fun AddLinkScreen(
                         .fillMaxSize()
                         .background(
                             brush = Brush.horizontalGradient(
-                                colors = if (viewModel.isValidUrl && !isLoading)
+                                colors = if (isValidUrl && !isLoading)
                                     listOf(ScoopPurple, ScoopBlue, ScoopCyan)
                                 else
                                     listOf(

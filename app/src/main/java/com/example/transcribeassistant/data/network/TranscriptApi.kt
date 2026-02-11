@@ -4,6 +4,7 @@ import com.example.transcribeassistant.data.dto.CategoryAliasDto
 import com.example.transcribeassistant.data.dto.RenameAliasRequest
 import com.example.transcribeassistant.data.dto.TranscriptDto
 import com.example.transcribeassistant.data.dto.UpdateNotesRequest
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.PATCH
@@ -48,5 +49,5 @@ interface TranscriptApi {
     suspend fun updateNotes(
         @Path("id") transcriptId: String,
         @Body request: UpdateNotesRequest
-    ): TranscriptDto
+    ): Response<Unit>
 }

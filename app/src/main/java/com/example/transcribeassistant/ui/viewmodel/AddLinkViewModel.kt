@@ -10,7 +10,10 @@ import com.example.transcribeassistant.domain.repository.TranscriptRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,11 +35,11 @@ class AddLinkViewModel @Inject constructor(
     private val _createdTranscript = MutableStateFlow<Transcript?>(null)
     val createdTranscript: StateFlow<Transcript?> = _createdTranscript
 
-    val isValidUrl: Boolean
-        get() {
-            val url = _urlText.value.trim()
-            return url.startsWith("http://") || url.startsWith("https://")
-        }
+    // Reactive: recomposes when urlText changes
+    val isValidUrl: StateFlow<Boolean> = _urlText.map { url ->
+        val trimmed = url.trim()
+        trimmed.startsWith("http://") || trimmed.startsWith("https://")
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     fun onUrlChanged(url: String) {
         _urlText.value = url
@@ -55,7 +58,7 @@ class AddLinkViewModel @Inject constructor(
 
     fun submit() {
         val url = _urlText.value.trim()
-        if (!isValidUrl) {
+        if (!isValidUrl.value) {
             _errorMessage.value = "Please enter a valid URL starting with http:// or https://"
             return
         }

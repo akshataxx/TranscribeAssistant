@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -39,14 +40,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import android.app.Application
 import com.example.transcribeassistant.R
+import com.example.transcribeassistant.di.JwtManagerEntryPoint
 import com.example.transcribeassistant.navigation.Screen
 import com.example.transcribeassistant.ui.viewmodel.CategoryGroup
 import com.example.transcribeassistant.ui.viewmodel.DashboardViewModel
+import dagger.hilt.android.EntryPointAccessors
+import kotlinx.coroutines.runBlocking
 
 // ============================================================================
 // CHANGED: New light theme colors matching Scoop login design
@@ -76,6 +82,7 @@ val scoopCardColors = listOf(
     Color(0xFF8B5CF6)
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     navController: NavHostController,
@@ -85,9 +92,31 @@ fun DashboardScreen(
     val usageInfo by viewModel.usageInfo.collectAsState()
     var showRenameDialog by remember { mutableStateOf(false) }
     var renamingCategoryGroup by remember { mutableStateOf<CategoryGroup?>(null) }
+    var showProfileSheet by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
+    // Profile data
+    val context = LocalContext.current
+    val jwtManager = remember {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext as Application,
+            JwtManagerEntryPoint::class.java
+        ).jwtManager()
+    }
+    val profileName = jwtManager.getProfileName()
+    val profileEmail = jwtManager.getProfileEmail()
+    val profileInitials = remember(profileName) {
+        val parts = (profileName ?: "").trim().split("\\s+".toRegex())
+        when {
+            parts.size >= 2 -> "${parts[0].first().uppercaseChar()}${parts[1].first().uppercaseChar()}"
+            parts.isNotEmpty() && parts[0].isNotEmpty() -> "${parts[0].first().uppercaseChar()}"
+            else -> "?"
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.fetchTranscripts()
+        viewModel.fetchUsageInfo()
     }
 
     if (showRenameDialog && renamingCategoryGroup != null) {
@@ -99,6 +128,146 @@ fun DashboardScreen(
                 showRenameDialog = false
             }
         )
+    }
+
+    // Logout confirmation dialog
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Logout", color = PrimaryText) },
+            text = { Text("Are you sure you want to logout?", color = SecondaryText) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showLogoutDialog = false
+                    runBlocking { jwtManager.clearTokens() }
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }) {
+                    Text("Logout", color = Color(0xFFEF4444))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("Cancel", color = SecondaryText)
+                }
+            },
+            containerColor = Color.White
+        )
+    }
+
+    // Profile Bottom Sheet (matching iOS .sheet with .presentationDetents([.medium]))
+    if (showProfileSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showProfileSheet = false },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Avatar Circle
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(ScoopPurple, ScoopCyan)
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = profileInitials,
+                        color = Color.White,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (!profileName.isNullOrBlank()) {
+                    Text(
+                        text = profileName,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryText
+                    )
+                }
+
+                if (!profileEmail.isNullOrBlank() && !profileEmail.contains("privaterelay")) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = profileEmail,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = SecondaryText
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Action Rows
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FAFB)),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column {
+                        // Subscription
+                        ProfileSheetRow(
+                            icon = Icons.Default.Star,
+                            iconTint = ScoopPurple,
+                            title = "Subscription",
+                            subtitle = if (usageInfo?.isPremium == true) "Premium" else "Free Plan",
+                            onClick = {
+                                showProfileSheet = false
+                                navController.navigate(Screen.Subscription.route)
+                            }
+                        )
+                        HorizontalDivider(
+                            color = Color(0xFFF3F4F6),
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+
+                        // Settings
+                        ProfileSheetRow(
+                            icon = Icons.Default.Settings,
+                            iconTint = SecondaryText,
+                            title = "Settings",
+                            onClick = {
+                                showProfileSheet = false
+                                navController.navigate(Screen.Settings.route)
+                            }
+                        )
+                        HorizontalDivider(
+                            color = Color(0xFFF3F4F6),
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+
+                        // Logout
+                        ProfileSheetRow(
+                            icon = Icons.AutoMirrored.Filled.ExitToApp,
+                            iconTint = Color(0xFFEF4444),
+                            title = "Logout",
+                            titleColor = Color(0xFFEF4444),
+                            onClick = {
+                                showProfileSheet = false
+                                showLogoutDialog = true
+                            }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
     }
 
     // ============================================================================
@@ -260,7 +429,7 @@ fun DashboardScreen(
                     modifier = Modifier.height(36.dp)
                 )
 
-                // Profile icon — navigates to Profile screen
+                // Profile icon — opens bottom sheet (matching iOS)
                 Box(
                     modifier = Modifier
                         .size(44.dp)
@@ -271,7 +440,7 @@ fun DashboardScreen(
                             )
                         )
                         .padding(2.dp)
-                        .clickable { navController.navigate(Screen.Profile.route) }
+                        .clickable { showProfileSheet = true }
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_profile),
@@ -508,6 +677,56 @@ private fun UsageTrackingCard(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ProfileSheetRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconTint: Color,
+    title: String,
+    subtitle: String? = null,
+    titleColor: Color = PrimaryText,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = iconTint,
+            modifier = Modifier.size(24.dp)
+        )
+
+        Spacer(modifier = Modifier.width(14.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = titleColor
+            )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = SecondaryText
+                )
+            }
+        }
+
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowRight,
+            contentDescription = null,
+            tint = SecondaryText.copy(alpha = 0.5f),
+            modifier = Modifier.size(20.dp)
+        )
     }
 }
 

@@ -184,104 +184,6 @@ fun TranscribeDetailsScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Notes Card
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    shape = RoundedCornerShape(14.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                "Notes",
-                                fontWeight = FontWeight.Bold,
-                                color = PrimaryText
-                            )
-                            Button(
-                                onClick = {
-                                    viewModel.saveNotes(transcriptId, notes.ifBlank { null })
-                                    initialNotes = notes
-                                },
-                                enabled = notesChanged && !isSavingNotes,
-                                shape = RoundedCornerShape(20.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = ScoopPurple,
-                                    disabledContainerColor = ScoopPurple.copy(alpha = 0.3f)
-                                ),
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp)
-                            ) {
-                                if (isSavingNotes) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(16.dp),
-                                        color = Color.White,
-                                        strokeWidth = 2.dp
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Saving...", color = Color.White, style = MaterialTheme.typography.labelMedium)
-                                } else {
-                                    Text("Save", color = Color.White, style = MaterialTheme.typography.labelMedium)
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        OutlinedTextField(
-                            value = notes,
-                            onValueChange = { notes = it },
-                            placeholder = { Text("Write your thoughts or action points here...") },
-                            modifier = Modifier.fillMaxWidth(),
-                            minLines = 3,
-                            colors = TextFieldDefaults.colors(
-                                focusedIndicatorColor = ScoopPurple,
-                                unfocusedIndicatorColor = SecondaryText.copy(alpha = 0.3f),
-                                focusedTextColor = PrimaryText,
-                                unfocusedTextColor = PrimaryText,
-                                cursorColor = ScoopPurple,
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent
-                            )
-                        )
-
-                        // Success message
-                        if (saveNotesSuccess) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                "Notes saved",
-                                color = Color(0xFF10B981),
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-
-                        // Error message with retry
-                        if (saveNotesError != null) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    saveNotesError ?: "Error",
-                                    color = Color(0xFFEF4444),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                TextButton(onClick = {
-                                    viewModel.dismissSaveNotesError()
-                                    viewModel.saveNotes(transcriptId, notes.ifBlank { null })
-                                }) {
-                                    Text("Retry", color = ScoopPurple, style = MaterialTheme.typography.labelSmall)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 // Transcript Summary with Read Aloud button
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -364,7 +266,103 @@ fun TranscribeDetailsScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Notes Card (at bottom, matching iOS layout)
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(14.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Notes",
+                                fontWeight = FontWeight.Bold,
+                                color = PrimaryText
+                            )
+                            Button(
+                                onClick = {
+                                    viewModel.saveNotes(transcriptId, notes.ifBlank { null })
+                                    initialNotes = notes
+                                },
+                                enabled = notesChanged && !isSavingNotes,
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = ScoopPurple,
+                                    disabledContainerColor = ScoopPurple.copy(alpha = 0.3f)
+                                ),
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp)
+                            ) {
+                                if (isSavingNotes) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        color = Color.White,
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Saving...", color = Color.White, style = MaterialTheme.typography.labelMedium)
+                                } else {
+                                    Text("Save", color = Color.White, style = MaterialTheme.typography.labelMedium)
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        OutlinedTextField(
+                            value = notes,
+                            onValueChange = { notes = it },
+                            placeholder = { Text("Add your notes here...") },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 3,
+                            colors = TextFieldDefaults.colors(
+                                focusedIndicatorColor = ScoopPurple,
+                                unfocusedIndicatorColor = SecondaryText.copy(alpha = 0.3f),
+                                focusedTextColor = PrimaryText,
+                                unfocusedTextColor = PrimaryText,
+                                cursorColor = ScoopPurple,
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent
+                            )
+                        )
+
+                        if (saveNotesSuccess) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                "Notes saved",
+                                color = Color(0xFF10B981),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        if (saveNotesError != null) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    saveNotesError ?: "Error",
+                                    color = Color(0xFFEF4444),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                TextButton(onClick = {
+                                    viewModel.dismissSaveNotesError()
+                                    viewModel.saveNotes(transcriptId, notes.ifBlank { null })
+                                }) {
+                                    Text("Retry", color = ScoopPurple, style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }

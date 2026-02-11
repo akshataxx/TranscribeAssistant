@@ -46,8 +46,9 @@ class TranscriptViewModel @Inject constructor(
             _saveNotesError.value = null
             _saveNotesSuccess.value = false
             try {
-                val updated = repository.updateNotes(transcriptId, notes)
-                _transcript.value = updated
+                repository.updateNotes(transcriptId, notes)
+                // Update the local transcript state with the new notes
+                _transcript.value = _transcript.value?.copy(notes = notes)
                 _saveNotesSuccess.value = true
                 Log.d("TranscriptVM", "Notes saved for $transcriptId")
             } catch (e: Exception) {

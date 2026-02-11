@@ -74,10 +74,10 @@ class TranscriptRepositoryImpl (
         dao.updateAlias(categoryId, newAlias)
     }
 
-    override suspend fun updateNotes(transcriptId: String, notes: String?): Transcript {
-        val dto = api.updateNotes(transcriptId, UpdateNotesRequest(notes))
-        val model = dto.toDomain()
-        model.toEntity().let { dao.insert(it) }
-        return model
+    override suspend fun updateNotes(transcriptId: String, notes: String?) {
+        val response = api.updateNotes(transcriptId, UpdateNotesRequest(notes))
+        if (!response.isSuccessful) {
+            throw Exception("Failed to save notes: ${response.code()}")
+        }
     }
 }
