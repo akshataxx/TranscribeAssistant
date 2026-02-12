@@ -14,10 +14,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -27,6 +26,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +46,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import android.app.Application
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.transcribeassistant.R
 import com.example.transcribeassistant.di.JwtManagerEntryPoint
 import com.example.transcribeassistant.navigation.Screen
@@ -90,6 +93,7 @@ fun DashboardScreen(
 ) {
     val categoryGroups by viewModel.categoryGroups.collectAsState()
     val usageInfo by viewModel.usageInfo.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
     var showRenameDialog by remember { mutableStateOf(false) }
     var renamingCategoryGroup by remember { mutableStateOf<CategoryGroup?>(null) }
     var showProfileSheet by remember { mutableStateOf(false) }
@@ -114,9 +118,31 @@ fun DashboardScreen(
         }
     }
 
+    // Initial fetch
     LaunchedEffect(Unit) {
         viewModel.fetchTranscripts()
         viewModel.fetchUsageInfo()
+    }
+
+    // Lifecycle-aware polling: start on resume, stop on pause
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> {
+                    viewModel.startPolling()
+                    viewModel.fetchTranscripts()
+                    viewModel.fetchUsageInfo()
+                }
+                Lifecycle.Event.ON_PAUSE -> viewModel.stopPolling()
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            viewModel.stopPolling()
+        }
     }
 
     if (showRenameDialog && renamingCategoryGroup != null) {
@@ -408,87 +434,94 @@ fun DashboardScreen(
             )
         }
 
-        // Main content layer
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
+        // Main content layer with pull-to-refresh
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { viewModel.refresh() },
+            modifier = Modifier.fillMaxSize()
         ) {
-            // ============================================================================
-            // CHANGED: Header with Scoop logo instead of "Categories" text
-            // ============================================================================
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
-                // Scoop Logo (static, not floating)
-                Image(
-                    painter = painterResource(id = R.drawable.scoop_logo),
-                    contentDescription = "Scoop Logo",
-                    modifier = Modifier.height(36.dp)
-                )
-
-                // Profile icon — opens bottom sheet (matching iOS)
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                            )
-                        )
-                        .padding(2.dp)
-                        .clickable { showProfileSheet = true }
+                // Header with Scoop logo
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_profile),
-                        contentDescription = "Profile",
+                        painter = painterResource(id = R.drawable.scoop_logo),
+                        contentDescription = "Scoop Logo",
+                        modifier = Modifier.height(36.dp)
+                    )
+
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+                                )
+                            )
+                            .padding(2.dp)
+                            .clickable { showProfileSheet = true }
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_profile),
+                            contentDescription = "Profile",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // ============================================================================
-            // CHANGED: Updated usage tracking card design
-            // ============================================================================
-            usageInfo
-                ?.takeIf { !it.isPremium } // Show free tier usage only for non-premium users
-                ?.let { usage ->
-                    UsageTrackingCard(
-                        usageInfo = usage,
-                        onUpgradeClick = { navController.navigate(Screen.Subscription.route) }
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
+                // Usage tracking card (free tier only)
+                usageInfo
+                    ?.takeIf { !it.isPremium }
+                    ?.let { usage ->
+                        UsageTrackingCard(
+                            usageInfo = usage,
+                            onUpgradeClick = { navController.navigate(Screen.Subscription.route) }
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
 
-            // ============================================================================
-            // Category grid - no header needed, content is self-explanatory
-            // ============================================================================
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                itemsIndexed(categoryGroups) { index, group ->
-                    CategoryCard(
-                        categoryGroup = group,
-                        backgroundColor = scoopCardColors[index % scoopCardColors.size],
-                        onClick = {
-                            navigateToTranscriptsScreen(navController, group.categoryId)
-                        },
-                        onLongClick = {
-                            renamingCategoryGroup = group
-                            showRenameDialog = true
+                // Category grid (non-lazy for pull-to-refresh compatibility)
+                val chunkedGroups = categoryGroups.chunked(2)
+                chunkedGroups.forEachIndexed { rowIndex, rowItems ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        rowItems.forEachIndexed { colIndex, group ->
+                            val index = rowIndex * 2 + colIndex
+                            Box(modifier = Modifier.weight(1f)) {
+                                CategoryCard(
+                                    categoryGroup = group,
+                                    backgroundColor = scoopCardColors[index % scoopCardColors.size],
+                                    onClick = {
+                                        navigateToTranscriptsScreen(navController, group.categoryId)
+                                    },
+                                    onLongClick = {
+                                        renamingCategoryGroup = group
+                                        showRenameDialog = true
+                                    }
+                                )
+                            }
                         }
-                    )
+                        if (rowItems.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
@@ -832,20 +865,28 @@ fun DashboardScreenPreview() {
             )
 
             // Category grid
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                itemsIndexed(mockCategories) { index, group ->
-                    CategoryCard(
-                        categoryGroup = group,
-                        backgroundColor = scoopCardColors[index % scoopCardColors.size],
-                        onClick = { },
-                        onLongClick = { }
-                    )
+            val chunkedMock = mockCategories.chunked(2)
+            chunkedMock.forEachIndexed { rowIndex, rowItems ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    rowItems.forEachIndexed { colIndex, group ->
+                        val index = rowIndex * 2 + colIndex
+                        Box(modifier = Modifier.weight(1f)) {
+                            CategoryCard(
+                                categoryGroup = group,
+                                backgroundColor = scoopCardColors[index % scoopCardColors.size],
+                                onClick = { },
+                                onLongClick = { }
+                            )
+                        }
+                    }
+                    if (rowItems.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
                 }
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

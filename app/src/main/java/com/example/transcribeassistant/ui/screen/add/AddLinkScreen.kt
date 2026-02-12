@@ -38,6 +38,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.transcribeassistant.ui.screen.components.AnimatedBlobsBackground
@@ -56,7 +58,7 @@ fun AddLinkScreen(
     val urlText by viewModel.urlText.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
-    val createdTranscript by viewModel.createdTranscript.collectAsState()
+    val submissionAccepted by viewModel.submissionAccepted.collectAsState()
     val isValidUrl by viewModel.isValidUrl.collectAsState()
 
     AnimatedBlobsBackground {
@@ -170,7 +172,7 @@ fun AddLinkScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                "Transcribing...",
+                                "Submitting...",
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold
                             )
@@ -186,16 +188,6 @@ fun AddLinkScreen(
                 }
             }
 
-            // Loading hint
-            if (isLoading) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "This may take a few minutes depending on the video length...",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = SecondaryText
-                )
-            }
-
             // Error message
             if (errorMessage != null) {
                 Spacer(modifier = Modifier.height(12.dp))
@@ -206,8 +198,8 @@ fun AddLinkScreen(
                 )
             }
 
-            // Success Card
-            if (createdTranscript != null) {
+            // Success Card — async submission accepted
+            if (submissionAccepted) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -229,7 +221,7 @@ fun AddLinkScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = "Transcript Created",
+                            text = "Video Submitted",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF065F46)
@@ -238,25 +230,21 @@ fun AddLinkScreen(
                         Spacer(modifier = Modifier.height(4.dp))
 
                         Text(
-                            text = createdTranscript?.title ?: "",
+                            text = "Your video is being transcribed. It will appear in your feed shortly.",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = SecondaryText
+                            color = SecondaryText,
+                            textAlign = TextAlign.Center
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Button(
-                            onClick = {
-                                createdTranscript?.let {
-                                    onViewTranscript(it.id)
-                                    viewModel.dismissSuccess()
-                                }
-                            },
+                            onClick = { viewModel.dismissSuccess() },
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
                         ) {
                             Text(
-                                "View Transcript",
+                                "Submit Another",
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold
                             )

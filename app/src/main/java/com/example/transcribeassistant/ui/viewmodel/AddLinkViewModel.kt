@@ -35,6 +35,9 @@ class AddLinkViewModel @Inject constructor(
     private val _createdTranscript = MutableStateFlow<Transcript?>(null)
     val createdTranscript: StateFlow<Transcript?> = _createdTranscript
 
+    private val _submissionAccepted = MutableStateFlow(false)
+    val submissionAccepted: StateFlow<Boolean> = _submissionAccepted
+
     // Reactive: recomposes when urlText changes
     val isValidUrl: StateFlow<Boolean> = _urlText.map { url ->
         val trimmed = url.trim()
@@ -67,12 +70,22 @@ class AddLinkViewModel @Inject constructor(
             _isLoading.value = true
             _errorMessage.value = null
             try {
-                val transcript = repository.transcribeVideo(url)
-                _createdTranscript.value = transcript
-                Log.d("AddLinkVM", "Transcript created: ${transcript.title}")
+                val accepted = repository.transcribeVideoAsync(url)
+                if (accepted) {
+                    _submissionAccepted.value = true
+                    Log.d("AddLinkVM", "Async transcription accepted for: $url")
+                } else {
+                    _errorMessage.value = "Server could not accept the request. Please try again."
+                }
             } catch (e: Exception) {
-                Log.e("AddLinkVM", "Error transcribing: ${e.message}")
-                _errorMessage.value = e.message ?: "Failed to transcribe video"
+                Log.e("AddLinkVM", "Error submitting: ${e.message}")
+                _errorMessage.value = when {
+                    e.message?.contains("Unable to resolve host") == true ->
+                        "No internet connection. Please check your network."
+                    e.message?.contains("timeout", ignoreCase = true) == true ->
+                        "Request timed out. Please try again."
+                    else -> e.message ?: "Failed to submit video"
+                }
             } finally {
                 _isLoading.value = false
             }
@@ -80,6 +93,7 @@ class AddLinkViewModel @Inject constructor(
     }
 
     fun dismissSuccess() {
+        _submissionAccepted.value = false
         _createdTranscript.value = null
         _urlText.value = ""
     }

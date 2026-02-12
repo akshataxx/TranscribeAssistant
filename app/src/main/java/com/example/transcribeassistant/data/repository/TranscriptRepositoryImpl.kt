@@ -29,6 +29,11 @@ class TranscriptRepositoryImpl (
         return model
     }
 
+    override suspend fun transcribeVideoAsync(videoUrl: String): Boolean {
+        val response = api.transcribeVideoAsync(mapOf("videoUrl" to videoUrl))
+        return response.isSuccessful
+    }
+
     override suspend fun getAllTranscripts(
         categories: List<String>?,
         account: String?,

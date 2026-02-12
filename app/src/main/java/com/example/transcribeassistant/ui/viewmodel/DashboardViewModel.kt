@@ -9,8 +9,11 @@ import com.example.transcribeassistant.domain.model.UsageInfo
 import com.example.transcribeassistant.domain.repository.TranscriptRepository
 import com.example.transcribeassistant.domain.repository.SubscriptionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,17 +42,64 @@ class DashboardViewModel @Inject constructor(
     private val _usageInfo = MutableStateFlow<UsageInfo?>(null)
     val usageInfo: StateFlow<UsageInfo?> = _usageInfo
 
+    private val _isInitialLoading = MutableStateFlow(true)
+    val isInitialLoading: StateFlow<Boolean> = _isInitialLoading
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
+    private var pollingJob: Job? = null
+
     fun fetchTranscripts() {
         viewModelScope.launch {
-            try{
+            try {
                 val response = repository.getAllTranscripts()
                 _transcripts.value = response
                 _categoryGroups.value = groupTranscripts(response)
                 Log.d("DashboardVM", "Transcripts fetched and grouped: ${_categoryGroups.value}")
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 Log.e("DashboardVM", "Error fetching transcripts: ${e.message}")
+            } finally {
+                _isInitialLoading.value = false
             }
         }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            try {
+                val response = repository.getAllTranscripts()
+                _transcripts.value = response
+                _categoryGroups.value = groupTranscripts(response)
+                fetchUsageInfo()
+            } catch (e: Exception) {
+                Log.e("DashboardVM", "Error refreshing: ${e.message}")
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
+    }
+
+    fun startPolling() {
+        if (pollingJob?.isActive == true) return
+        pollingJob = viewModelScope.launch {
+            while (isActive) {
+                delay(20_000)
+                try {
+                    val response = repository.getAllTranscripts()
+                    _transcripts.value = response
+                    _categoryGroups.value = groupTranscripts(response)
+                } catch (e: Exception) {
+                    Log.d("DashboardVM", "Poll failed (silent): ${e.message}")
+                }
+            }
+        }
+    }
+
+    fun stopPolling() {
+        pollingJob?.cancel()
+        pollingJob = null
     }
     
     fun fetchUsageInfo() {

@@ -11,6 +11,8 @@ import java.time.Instant
 interface TranscriptRepository {
     suspend fun transcribeVideo(videoUrl: String): Transcript
 
+    suspend fun transcribeVideoAsync(videoUrl: String): Boolean
+
     suspend fun getAllTranscripts(
         categories: List<String>? = null,
         account: String? = null,

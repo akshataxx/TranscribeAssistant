@@ -22,14 +22,20 @@ fun ShareScreen(
     var isSaving by remember { mutableStateOf(false) }
     val showUpgradePrompt by viewModel.showUpgradePrompt.collectAsState()
     val usageInfo by viewModel.usageInfo.collectAsState()
+    val submissionAccepted by viewModel.submissionAccepted.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     LaunchedEffect(sharedLink) {
         isSaving = true
-        // Fetch metadata, transcribe, categorize, save
-        processSharedLink(sharedLink, viewModel)
+        viewModel.submitNewVideo(sharedLink)
         isSaving = false
-        if (!showUpgradePrompt) {
-            onDone() // Notify that saving is done only if no upgrade prompt
+    }
+
+    // Auto-close after successful submission
+    LaunchedEffect(submissionAccepted) {
+        if (submissionAccepted && !showUpgradePrompt) {
+            kotlinx.coroutines.delay(1500)
+            onDone()
         }
     }
 
@@ -47,10 +53,29 @@ fun ShareScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            if (isSaving) {
-                CircularProgressIndicator()
-            } else {
-                Text("Saved!")
+            when {
+                errorMessage != null -> {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = errorMessage ?: "Unknown error",
+                            color = Color(0xFFEF4444),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = { viewModel.submitNewVideo(sharedLink) }) {
+                            Text("Retry")
+                        }
+                    }
+                }
+                isSaving -> {
+                    CircularProgressIndicator()
+                }
+                submissionAccepted -> {
+                    Text(
+                        text = "Submitted! It will appear in your feed shortly.",
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
@@ -98,7 +123,3 @@ private fun UpgradePromptDialog(
     )
 }
 
-suspend fun processSharedLink(link: String, viewModel: ShareViewModel) {
-    println(link)
-    viewModel.submitNewVideo(link)
-}

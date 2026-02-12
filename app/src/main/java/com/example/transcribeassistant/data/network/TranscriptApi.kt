@@ -29,6 +29,9 @@ interface TranscriptApi {
     @POST("api/video/transcribe")
     suspend fun transcribeVideo(@Body request: Map<String, String>): TranscriptDto
 
+    @POST("api/video/transcribe-async")
+    suspend fun transcribeVideoAsync(@Body request: Map<String, String>): Response<Unit>
+
     @GET("transcript")
     suspend fun getAllTranscripts(
         @Query("categoryIds") categories: List<String>? = null,

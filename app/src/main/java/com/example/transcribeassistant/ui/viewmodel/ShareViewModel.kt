@@ -23,34 +23,44 @@ class ShareViewModel @Inject constructor(
 
     private val _transcript = MutableStateFlow<Transcript?>(null)
     val transcript: StateFlow<Transcript?> = _transcript
-    
+
     private val _usageInfo = MutableStateFlow<UsageInfo?>(null)
     val usageInfo: StateFlow<UsageInfo?> = _usageInfo
-    
+
     private val _showUpgradePrompt = MutableStateFlow(false)
     val showUpgradePrompt: StateFlow<Boolean> = _showUpgradePrompt
-    // For initial video submission when user shares a video with the app
+
+    private val _submissionAccepted = MutableStateFlow(false)
+    val submissionAccepted: StateFlow<Boolean> = _submissionAccepted
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
     fun submitNewVideo(videoUrl: String) {
         viewModelScope.launch {
             try {
-                // Check usage limits first
                 val usage = subscriptionRepository.getUsageInfo()
                 _usageInfo.value = usage
-                
+
                 if (usage.hasReachedFreeLimit) {
                     _showUpgradePrompt.value = true
                     return@launch
                 }
-                
-                val response = repository.transcribeVideo(videoUrl)
-                Log.d("TranscriptVM", "Transcript created: ${response.transcript}")
-                _transcript.value = response
-            } catch(e: Exception) {
-                Log.e("TranscriptVM", "Error: ${e.message}")
+
+                val accepted = repository.transcribeVideoAsync(videoUrl)
+                if (accepted) {
+                    _submissionAccepted.value = true
+                    Log.d("ShareVM", "Async transcription accepted for: $videoUrl")
+                } else {
+                    _errorMessage.value = "Server could not accept the request."
+                }
+            } catch (e: Exception) {
+                Log.e("ShareVM", "Error: ${e.message}")
+                _errorMessage.value = e.message ?: "Failed to submit video"
             }
         }
     }
-    
+
     fun dismissUpgradePrompt() {
         _showUpgradePrompt.value = false
     }
