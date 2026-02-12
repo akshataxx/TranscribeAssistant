@@ -7,7 +7,10 @@ import com.squareup.moshi.JsonClass
 data class UsageInfoDto(
     @Json(name = "isPremium")
     val isPremium: Boolean,
-    
+
     @Json(name = "remainingFreeTranscriptions")
-    val remainingFreeTranscriptions: Int
+    val remainingFreeTranscriptions: Int,
+
+    @Json(name = "totalFreeTranscriptions")
+    val totalFreeTranscriptions: Int = 10
 )

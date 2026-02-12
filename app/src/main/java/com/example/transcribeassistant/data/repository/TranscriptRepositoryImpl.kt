@@ -2,6 +2,7 @@ package com.example.transcribeassistant.data.repository
 
 import com.example.transcribeassistant.data.cache.dao.TranscriptDao
 import com.example.transcribeassistant.data.dto.RenameAliasRequest
+import com.example.transcribeassistant.data.dto.UpdateNotesRequest
 import com.example.transcribeassistant.data.network.TranscriptApi
 import com.example.transcribeassistant.domain.model.Transcript
 import com.example.transcribeassistant.domain.mapper.toDomain
@@ -71,8 +72,12 @@ class TranscriptRepositoryImpl (
         )
         // Update the local database with the new alias
         dao.updateAlias(categoryId, newAlias)
-        // Ensure the local cache reflects the updated alias
-        // This assumes you have a method in your DAO to update the alias
-        // If not, you need to implement it in your DAO and entity classes
+    }
+
+    override suspend fun updateNotes(transcriptId: String, notes: String?) {
+        val response = api.updateNotes(transcriptId, UpdateNotesRequest(notes))
+        if (!response.isSuccessful) {
+            throw Exception("Failed to save notes: ${response.code()}")
+        }
     }
 }

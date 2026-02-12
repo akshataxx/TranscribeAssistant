@@ -46,9 +46,6 @@ class DashboardViewModel @Inject constructor(
                 _transcripts.value = response
                 _categoryGroups.value = groupTranscripts(response)
                 Log.d("DashboardVM", "Transcripts fetched and grouped: ${_categoryGroups.value}")
-                
-                // Also fetch usage info
-                fetchUsageInfo()
             }catch(e: Exception) {
                 Log.e("DashboardVM", "Error fetching transcripts: ${e.message}")
             }
