@@ -124,25 +124,17 @@ fun DashboardScreen(
         viewModel.fetchUsageInfo()
     }
 
-    // Lifecycle-aware polling: start on resume, stop on pause
+    // Auto-refresh when screen resumes (e.g. returning from background or navigating back)
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> {
-                    viewModel.startPolling()
-                    viewModel.fetchTranscripts()
-                    viewModel.fetchUsageInfo()
-                }
-                Lifecycle.Event.ON_PAUSE -> viewModel.stopPolling()
-                else -> {}
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.fetchTranscripts()
+                viewModel.fetchUsageInfo()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            viewModel.stopPolling()
-        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     if (showRenameDialog && renamingCategoryGroup != null) {

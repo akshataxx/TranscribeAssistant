@@ -9,11 +9,8 @@ import com.example.transcribeassistant.domain.model.UsageInfo
 import com.example.transcribeassistant.domain.repository.TranscriptRepository
 import com.example.transcribeassistant.domain.repository.SubscriptionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -48,8 +45,6 @@ class DashboardViewModel @Inject constructor(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
-    private var pollingJob: Job? = null
-
     fun fetchTranscripts() {
         viewModelScope.launch {
             try {
@@ -81,27 +76,6 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    fun startPolling() {
-        if (pollingJob?.isActive == true) return
-        pollingJob = viewModelScope.launch {
-            while (isActive) {
-                delay(20_000)
-                try {
-                    val response = repository.getAllTranscripts()
-                    _transcripts.value = response
-                    _categoryGroups.value = groupTranscripts(response)
-                } catch (e: Exception) {
-                    Log.d("DashboardVM", "Poll failed (silent): ${e.message}")
-                }
-            }
-        }
-    }
-
-    fun stopPolling() {
-        pollingJob?.cancel()
-        pollingJob = null
-    }
-    
     fun fetchUsageInfo() {
         viewModelScope.launch {
             try {

@@ -60,28 +60,20 @@ fun FeedScreen(
         }
     }
 
-    // Lifecycle-aware polling: start on resume, stop on pause
+    // Auto-refresh when screen resumes (e.g. returning from background or navigating back)
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> {
-                    viewModel.startPolling()
-                    if (categoryId != null) {
-                        viewModel.fetchTranscriptsByCategory(categoryId)
-                    } else {
-                        viewModel.fetchTranscripts()
-                    }
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (categoryId != null) {
+                    viewModel.fetchTranscriptsByCategory(categoryId)
+                } else {
+                    viewModel.fetchTranscripts()
                 }
-                Lifecycle.Event.ON_PAUSE -> viewModel.stopPolling()
-                else -> {}
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            viewModel.stopPolling()
-        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     AnimatedBlobsBackground {
@@ -168,24 +160,16 @@ fun TranscriptsScreen(
         viewModel.fetchTranscriptsByCategory(categoryId)
     }
 
-    // Lifecycle-aware polling
+    // Auto-refresh when screen resumes
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> {
-                    viewModel.startPolling()
-                    viewModel.fetchTranscriptsByCategory(categoryId)
-                }
-                Lifecycle.Event.ON_PAUSE -> viewModel.stopPolling()
-                else -> {}
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.fetchTranscriptsByCategory(categoryId)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            viewModel.stopPolling()
-        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     AnimatedBlobsBackground {
