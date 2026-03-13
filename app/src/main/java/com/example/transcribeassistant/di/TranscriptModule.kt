@@ -4,10 +4,13 @@ import android.content.Context
 import androidx.room.Room
 import com.example.transcribeassistant.data.cache.AppDatabase
 import com.example.transcribeassistant.data.cache.dao.TranscriptDao
+import com.example.transcribeassistant.data.network.DeviceApi
 import com.example.transcribeassistant.data.network.SubscriptionApi
 import com.example.transcribeassistant.data.network.TranscriptApi
+import com.example.transcribeassistant.data.repository.DeviceRepositoryImpl
 import com.example.transcribeassistant.data.repository.SubscriptionRepositoryImpl
 import com.example.transcribeassistant.data.repository.TranscriptRepositoryImpl
+import com.example.transcribeassistant.domain.repository.DeviceRepository
 import com.example.transcribeassistant.domain.repository.SubscriptionRepository
 import com.example.transcribeassistant.domain.repository.TranscriptRepository
 import dagger.Module
@@ -54,5 +57,14 @@ object TranscriptModule {
         api: SubscriptionApi
     ): SubscriptionRepository {
         return SubscriptionRepositoryImpl(api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeviceRepository(
+        api: DeviceApi,
+        @ApplicationContext context: Context
+    ): DeviceRepository {
+        return DeviceRepositoryImpl(api, context)
     }
 }
