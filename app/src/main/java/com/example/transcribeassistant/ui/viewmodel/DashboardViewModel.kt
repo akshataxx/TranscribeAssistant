@@ -3,11 +3,13 @@ package com.example.transcribeassistant.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.transcribeassistant.common.AppEventBus
 import com.example.transcribeassistant.data.auth.JwtManager
 import com.example.transcribeassistant.domain.model.Transcript
 import com.example.transcribeassistant.domain.model.UsageInfo
-import com.example.transcribeassistant.domain.repository.TranscriptRepository
+import com.example.transcribeassistant.domain.repository.DeviceRepository
 import com.example.transcribeassistant.domain.repository.SubscriptionRepository
+import com.example.transcribeassistant.domain.repository.TranscriptRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,8 +27,17 @@ data class CategoryGroup(
 class DashboardViewModel @Inject constructor(
     private val repository: TranscriptRepository,
     private val subscriptionRepository: SubscriptionRepository,
-    private val jwtManager: JwtManager
+    private val jwtManager: JwtManager,
+    private val deviceRepository: DeviceRepository
 ): ViewModel() {
+    init {
+        viewModelScope.launch {
+            AppEventBus.transcriptRefresh.collect {
+                fetchTranscripts()
+            }
+        }
+    }
+
     private val _transcripts = MutableStateFlow<List<Transcript>>(emptyList())
     val transcripts: StateFlow<List<Transcript>> = _transcripts
 
@@ -109,9 +120,10 @@ class DashboardViewModel @Inject constructor(
 
     fun logout(){
         viewModelScope.launch {
-            try{
+            try {
+                runCatching { deviceRepository.unregisterDevice() }
                 jwtManager.clearTokens()
-            }catch(e: Exception) {
+            } catch(e: Exception) {
                 Log.e("DashboardVM", "Error logging out: ${e.message}")
             }
         }

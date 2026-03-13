@@ -6,10 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.transcribeassistant.data.auth.JwtManager
 import com.example.transcribeassistant.data.dto.JwtAuthResponse
 import com.example.transcribeassistant.data.network.AuthApi
+import com.example.transcribeassistant.domain.repository.DeviceRepository
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 
@@ -20,7 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val authApi: AuthApi,
-    private val jwtManager: JwtManager
+    private val jwtManager: JwtManager,
+    private val deviceRepository: DeviceRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
@@ -51,6 +55,12 @@ class LoginViewModel @Inject constructor(
                 } catch (profileError: Exception) {
                     Log.w("LoginViewModel", "Failed to fetch profile: ${profileError.message}")
                 }
+
+                // Register device for push notifications — non-fatal if it fails
+                runCatching {
+                    val fcmToken = FirebaseMessaging.getInstance().token.await()
+                    deviceRepository.registerDevice(fcmToken)
+                }.onFailure { Log.w("LoginViewModel", "FCM registration skipped: ${it.message}") }
 
                 _uiState.value = LoginUiState.Success(response.accessToken.takeLast(8))
             } catch (e: Exception) {
