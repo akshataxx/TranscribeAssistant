@@ -2,6 +2,7 @@ package com.example.transcribeassistant.ui.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import retrofit2.HttpException
 import androidx.lifecycle.viewModelScope
 import com.example.transcribeassistant.common.AppEventBus
 import com.example.transcribeassistant.domain.model.ActivityItem
@@ -64,6 +65,10 @@ class ActivityViewModel @Inject constructor(
                     _newJobIds.update { it + freshCompletions }
                 }
                 _items.value = jobs
+            } catch (e: HttpException) {
+                val errorBody = e.response()?.errorBody()?.string() ?: "no body"
+                Log.e("ActivityViewModel", "fetchJobs HTTP ${e.code()}: $errorBody")
+                _error.value = "Failed to load activity. Please try again."
             } catch (e: Exception) {
                 Log.e("ActivityViewModel", "fetchJobs error: ${e::class.simpleName}: ${e.message}", e)
                 _error.value = "Failed to load activity. Please try again."
