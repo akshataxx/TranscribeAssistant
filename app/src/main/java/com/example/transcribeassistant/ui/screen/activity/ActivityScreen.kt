@@ -1,8 +1,5 @@
 package com.example.transcribeassistant.ui.screen.activity
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -170,15 +167,13 @@ fun ActivityScreen(
                         }
 
                         // Floating NewContentPill
-                        AnimatedVisibility(
-                            visible = newJobIds.isNotEmpty(),
-                            enter = slideInVertically(initialOffsetY = { -it }),
-                            exit = slideOutVertically(targetOffsetY = { -it }),
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .padding(top = 8.dp)
-                        ) {
-                            NewContentPill(count = newJobIds.size) {
+                        if (newJobIds.isNotEmpty()) {
+                            NewContentPill(
+                                count = newJobIds.size,
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .padding(top = 8.dp)
+                            ) {
                                 viewModel.markAsViewed()
                                 viewModel.fetchJobs()
                                 scope.launch { listState.animateScrollToItem(0) }

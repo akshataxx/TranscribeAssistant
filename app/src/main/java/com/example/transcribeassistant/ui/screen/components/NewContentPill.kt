@@ -28,8 +28,8 @@ import androidx.compose.runtime.remember
 @Composable
 fun NewContentPill(
     count: Int,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     val displayCount = if (count > 9) "9+" else "$count"
     val interactionSource = remember { MutableInteractionSource() }
