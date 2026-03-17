@@ -9,6 +9,7 @@ import com.example.transcribeassistant.data.auth.JwtManager
 import com.example.transcribeassistant.data.auth.TokenAuthenticator
 import com.example.transcribeassistant.data.network.AuthApi
 import com.example.transcribeassistant.data.network.DeviceApi
+import com.example.transcribeassistant.data.network.JobApi
 import com.example.transcribeassistant.data.network.SubscriptionApi
 import com.example.transcribeassistant.data.network.TranscriptApi
 import com.example.transcribeassistant.data.network.adapter.InstantAdapter
@@ -127,6 +128,27 @@ object NetworkModule {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(DeviceApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideJobApi(
+        authApi: AuthApi,
+        jwtManager: JwtManager,
+        authStateManager: AuthStateManager
+    ): JobApi {
+        val client = OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(jwtManager, authApi))
+            .authenticator(TokenAuthenticator(authApi, jwtManager, authStateManager))
+            .addInterceptor(logging)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(JobApi::class.java)
     }
 
     @Provides

@@ -47,7 +47,10 @@ class TranscribeFirebaseMessagingService : FirebaseMessagingService() {
      */
     override fun onMessageReceived(message: RemoteMessage) {
         when (message.data["type"]) {
-            "TRANSCRIPT_COMPLETE" -> AppEventBus.emitRefresh()
+            "TRANSCRIPT_COMPLETE" -> {
+                AppEventBus.emitRefresh()
+                AppEventBus.incrementNewCompletion()
+            }
             "TRANSCRIPT_FAILED"   -> showFailureNotification(message.data["errorMessage"])
         }
     }

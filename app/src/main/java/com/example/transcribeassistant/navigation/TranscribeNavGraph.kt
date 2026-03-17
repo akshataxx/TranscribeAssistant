@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -33,8 +34,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.transcribeassistant.data.auth.AuthStateManager
+import com.example.transcribeassistant.common.AppEventBus
 import com.example.transcribeassistant.di.JwtManagerEntryPoint
+import com.example.transcribeassistant.ui.screen.activity.ActivityScreen
 import com.example.transcribeassistant.ui.screen.components.AnimatedBlobsBackground
 import com.example.transcribeassistant.ui.screen.components.BottomNavBar
 import com.example.transcribeassistant.ui.screen.add.AddLinkScreen
@@ -59,21 +61,23 @@ fun TranscribeNavGraph(
     navController: NavHostController = rememberNavController(),
     authViewModel: com.example.transcribeassistant.ui.viewmodel.AuthViewModel
 ) {
-    // Deep link URI for transcribe details used later
-    val uri = "transcribeassistant://transcript/"
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    // Observe badge count from AppEventBus
+    val activityBadgeCount by AppEventBus.newCompletionCount.collectAsState()
 
     Scaffold(
         containerColor = Color.Transparent,
         bottomBar = {
-            // Only show bottom bar when not on login screen
             if (currentRoute != "login") {
-                BottomNavBar(currentRoute = currentRoute ?: "") {
+                BottomNavBar(
+                    currentRoute = currentRoute ?: "",
+                    activityBadgeCount = activityBadgeCount
+                ) {
                     if (it != currentRoute) {
                         navController.navigate(it) {
-                            popUpTo(Screen.Feed.route) { inclusive = false }
+                            popUpTo(Screen.Dashboard.route) { inclusive = false }
                             launchSingleTop = true
                         }
                     }
@@ -84,13 +88,10 @@ fun TranscribeNavGraph(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(
-                        LightBackground,
-                        LightBackgroundEnd
-                    )
+                    colors = listOf(LightBackground, LightBackgroundEnd)
                 )
             )
-    ){ paddingValues ->
+    ) { paddingValues ->
         val context = LocalContext.current
         val jwtManager = EntryPointAccessors.fromApplication(
             context.applicationContext as Application,
@@ -109,7 +110,6 @@ fun TranscribeNavGraph(
             }
         }
 
-        // decide start destination based on logged in user or not
         val accessToken = runBlocking { jwtManager.getAccessToken() }
         val startDest = if (accessToken.isNullOrBlank()) "login" else Screen.Dashboard.route
 
@@ -135,20 +135,25 @@ fun TranscribeNavGraph(
                     }
                 )
             }
+
             composable(Screen.Dashboard.route) {
                 DashboardScreen(navController = navController, viewModel = hiltViewModel())
             }
-            composable(Screen.Notifications.route) {
-                UnderConstructionScreen(
-                    title = "Notifications",
-                    description = "We’re wiring up alerts so you never miss an update. Check back soon."
+
+            composable(Screen.Activity.route) {
+                ActivityScreen(
+                    onTranscriptClick = { transcriptId ->
+                        navController.navigate(Screen.TranscribeDetails.createRoute(transcriptId))
+                    }
                 )
             }
+
             composable(Screen.Subscription.route) {
                 SubscriptionScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
+
             composable(Screen.AddLink.route) {
                 AddLinkScreen(
                     onViewTranscript = { transcriptId ->
@@ -156,6 +161,7 @@ fun TranscribeNavGraph(
                     }
                 )
             }
+
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onSettingsClick = {
@@ -172,12 +178,14 @@ fun TranscribeNavGraph(
                     }
                 )
             }
+
             composable(Screen.Settings.route) {
                 UnderConstructionScreen(
                     title = "Settings",
                     description = "Settings will be available here soon."
                 )
             }
+
             composable(
                 route = Screen.TranscribeDetails.route,
                 arguments = listOf(navArgument("transcriptId") { type = NavType.StringType })
@@ -189,6 +197,7 @@ fun TranscribeNavGraph(
                     onBackClick = { navController.popBackStack() }
                 )
             }
+
             composable(
                 route = "transcripts/{categoryId}",
                 arguments = listOf(navArgument("categoryId") { type = NavType.StringType })
@@ -218,9 +227,7 @@ private fun UnderConstructionScreen(
                 .padding(horizontal = 24.dp),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     imageVector = Icons.Default.Build,
                     contentDescription = null,
