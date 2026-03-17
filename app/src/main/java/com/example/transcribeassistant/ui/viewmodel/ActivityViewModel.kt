@@ -1,5 +1,6 @@
 package com.example.transcribeassistant.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.transcribeassistant.common.AppEventBus
@@ -64,6 +65,7 @@ class ActivityViewModel @Inject constructor(
                 }
                 _items.value = jobs
             } catch (e: Exception) {
+                Log.e("ActivityViewModel", "fetchJobs error: ${e::class.simpleName}: ${e.message}", e)
                 _error.value = "Failed to load activity. Please try again."
             } finally {
                 _isLoading.value = false
