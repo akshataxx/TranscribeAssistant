@@ -22,6 +22,7 @@
         <activity
             android:name=".activity.MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:label="@string/app_name"
             android:theme="@style/Theme.TranscribeAssistant">
             <intent-filter>

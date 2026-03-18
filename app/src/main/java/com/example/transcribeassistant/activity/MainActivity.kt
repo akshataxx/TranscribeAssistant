@@ -1,15 +1,14 @@
 package com.example.transcribeassistant.activity
 
-import android.Manifest
-import android.os.Build
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.example.transcribeassistant.common.PendingDeepLinkManager
 import com.example.transcribeassistant.ui.screen.TranscribeAssistantApp
 import com.example.transcribeassistant.ui.theme.TranscribeAssistantTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -17,25 +16,41 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val requestNotificationPermission =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* no-op */ }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-
-        // Ensure window draws behind system bars
         window.statusBarColor = android.graphics.Color.TRANSPARENT
+
+        // Handle deep link from notification tap (cold start)
+        handleDeepLinkIntent(intent)
 
         setContent {
             TranscribeAssistantTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    TranscribeAssistantApp() // Your app root
+                    TranscribeAssistantApp()
                 }
+            }
+        }
+    }
+
+    /** Called when app is already running and a notification is tapped (warm start). */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleDeepLinkIntent(intent)
+    }
+
+    private fun handleDeepLinkIntent(intent: Intent?) {
+        val type = intent?.getStringExtra(PendingDeepLinkManager.EXTRA_DEEP_LINK_TYPE) ?: return
+
+        when (type) {
+            PendingDeepLinkManager.TYPE_TRANSCRIPT -> {
+                val transcriptId = intent.getStringExtra(PendingDeepLinkManager.EXTRA_TRANSCRIPT_ID)
+                if (!transcriptId.isNullOrBlank()) {
+                    PendingDeepLinkManager.set(PendingDeepLinkManager.DeepLink.Transcript(transcriptId))
+                }
+            }
+            PendingDeepLinkManager.TYPE_ACTIVITY -> {
+                PendingDeepLinkManager.set(PendingDeepLinkManager.DeepLink.ActivityTab)
             }
         }
     }

@@ -35,6 +35,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.transcribeassistant.common.AppEventBus
+import com.example.transcribeassistant.common.PendingDeepLinkManager
 import com.example.transcribeassistant.di.JwtManagerEntryPoint
 import com.example.transcribeassistant.ui.screen.activity.ActivityScreen
 import com.example.transcribeassistant.ui.screen.components.AnimatedBlobsBackground
@@ -107,6 +108,32 @@ fun TranscribeNavGraph(
                     popUpTo(0) { inclusive = true }
                     launchSingleTop = true
                 }
+            }
+        }
+
+        // Handle deep links from notification taps
+        LaunchedEffect(Unit) {
+            PendingDeepLinkManager.pendingDeepLink.collect { deepLink ->
+                deepLink ?: return@collect
+                // Only navigate if the user is past the login screen
+                if (currentRoute == "login") return@collect
+
+                when (deepLink) {
+                    is PendingDeepLinkManager.DeepLink.Transcript -> {
+                        navController.navigate(Screen.Feed.route) {
+                            popUpTo(Screen.Dashboard.route) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                        navController.navigate(Screen.TranscribeDetails.createRoute(deepLink.transcriptId))
+                    }
+                    is PendingDeepLinkManager.DeepLink.ActivityTab -> {
+                        navController.navigate(Screen.Activity.route) {
+                            popUpTo(Screen.Dashboard.route) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    }
+                }
+                PendingDeepLinkManager.clear()
             }
         }
 
