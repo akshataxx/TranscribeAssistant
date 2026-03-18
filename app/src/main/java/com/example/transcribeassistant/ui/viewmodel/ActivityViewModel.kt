@@ -55,14 +55,17 @@ class ActivityViewModel @Inject constructor(
             _error.value = null
             try {
                 val jobs = jobRepository.getJobs()
-                // Mark newly completed jobs that weren't in the previous list
+                // Mark newly completed jobs that weren't in the previous list.
+                // Skip on initial load (_items empty) to avoid flagging all existing jobs as new.
                 val previousIds = _items.value.map { it.id }.toSet()
-                val freshCompletions = jobs
-                    .filter { it.status.raw == "COMPLETED" && it.id !in previousIds }
-                    .map { it.id }
-                    .toSet()
-                if (freshCompletions.isNotEmpty()) {
-                    _newJobIds.update { it + freshCompletions }
+                if (previousIds.isNotEmpty()) {
+                    val freshCompletions = jobs
+                        .filter { it.status.raw == "COMPLETED" && it.id !in previousIds }
+                        .map { it.id }
+                        .toSet()
+                    if (freshCompletions.isNotEmpty()) {
+                        _newJobIds.update { it + freshCompletions }
+                    }
                 }
                 _items.value = jobs
             } catch (e: HttpException) {
