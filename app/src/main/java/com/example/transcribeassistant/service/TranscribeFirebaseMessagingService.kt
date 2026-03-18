@@ -40,9 +40,10 @@ class TranscribeFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         when (message.data["type"]) {
             "TRANSCRIPT_COMPLETE" -> {
-                // Silent push — refresh UI, increment badge
+                // Refresh UI, increment badge, and show a visible system notification
                 AppEventBus.emitRefresh()
                 AppEventBus.incrementNewCompletion()
+                showTranscriptReadyNotification(message.data["transcriptId"])
             }
 
             "TRANSCRIPT_READY" -> {
