@@ -55,8 +55,12 @@ import com.example.transcribeassistant.R
 import com.example.transcribeassistant.di.JwtManagerEntryPoint
 import com.example.transcribeassistant.ui.screen.subscription.SubscriptionScreen
 import com.example.transcribeassistant.navigation.Screen
+import com.example.transcribeassistant.ui.screen.components.CoachmarkOverlay
+import com.example.transcribeassistant.ui.screen.components.CoachmarkPosition
+import com.example.transcribeassistant.ui.screen.components.CoachmarkStep
 import com.example.transcribeassistant.ui.viewmodel.CategoryGroup
 import com.example.transcribeassistant.ui.viewmodel.DashboardViewModel
+import com.example.transcribeassistant.ui.viewmodel.OnboardingViewModel
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.runBlocking
 
@@ -92,10 +96,12 @@ val scoopCardColors = listOf(
 @Composable
 fun DashboardScreen(
     navController: NavHostController,
-    viewModel: DashboardViewModel = hiltViewModel()
+    viewModel: DashboardViewModel = hiltViewModel(),
+    onboardingViewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val categoryGroups by viewModel.categoryGroups.collectAsState()
     val usageInfo by viewModel.usageInfo.collectAsState()
+    val showCoachmarks by onboardingViewModel.showCoachmarks.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     var showRenameDialog by remember { mutableStateOf(false) }
     var renamingCategoryGroup by remember { mutableStateOf<CategoryGroup?>(null) }
@@ -475,6 +481,7 @@ fun DashboardScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+
             // ============================================================================
             // CHANGED: Header with Scoop logo instead of "Categories" text
             // ============================================================================
@@ -560,6 +567,40 @@ fun DashboardScreen(
                     }
                 }
             }
+        }
+
+        // First-time user coachmarks — rendered on top of all other content
+        if (showCoachmarks) {
+            CoachmarkOverlay(
+                steps = listOf(
+                    CoachmarkStep(
+                        title = "Welcome to Scoop!",
+                        message = "Your content is organized into categories. Tap any category to browse its transcripts.",
+                        tooltipPosition = CoachmarkPosition.Center
+                    ),
+                    CoachmarkStep(
+                        title = "Add Content",
+                        message = "Tap the + button in the navigation bar below to paste a link — we'll transcribe and categorize it for you.",
+                        tooltipPosition = CoachmarkPosition.Bottom
+                    ),
+                    CoachmarkStep(
+                        title = "Share from TikTok or Instagram",
+                        message = "No need to copy links! Open any video, tap Share, then choose Scoop from the list of apps.",
+                        tooltipPosition = CoachmarkPosition.Center
+                    ),
+                    CoachmarkStep(
+                        title = "Rename Categories",
+                        message = "Not a fan of the AI-generated category name? Long-press any category card to rename it.",
+                        tooltipPosition = CoachmarkPosition.Center
+                    ),
+                    CoachmarkStep(
+                        title = "Add Your Own Notes",
+                        message = "Open any transcript and scroll to the bottom — there's a notes field where you can jot down your own thoughts.",
+                        tooltipPosition = CoachmarkPosition.Center
+                    )
+                ),
+                onFinished = { onboardingViewModel.markSeen() }
+            )
         }
     }
 }
