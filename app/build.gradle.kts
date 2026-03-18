@@ -17,6 +17,16 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+// Load local.properties (gitignored) for dev overrides
+val localPropertiesFile = rootProject.file("local.properties")
+val localProperties = Properties()
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
+val vmUrl = "https://34-151-189-90.sslip.io"
+val localUrl = localProperties.getProperty("LOCAL_API_URL") ?: vmUrl
+
 android {
     namespace = "com.example.transcribeassistant"
     compileSdk = 35
@@ -44,8 +54,8 @@ android {
 
     buildTypes {
         debug {
-            // Local backend via emulator (10.0.2.2 = host machine)
-            buildConfigField("String", "API_BASE_URL", "\"https://34-151-189-90.sslip.io\"")
+            // Uses LOCAL_API_URL from local.properties if set, otherwise falls back to VM
+            buildConfigField("String", "API_BASE_URL", "\"$localUrl\"")
             buildConfigField("String", "GOOGLE_PLAY_PRODUCT_ID_MONTHLY", "\"premium_monthly\"")
         }
         release {
@@ -116,7 +126,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.messaging)
     implementation(libs.google.auth)
     implementation(libs.androidx.datastore.preferences)
 

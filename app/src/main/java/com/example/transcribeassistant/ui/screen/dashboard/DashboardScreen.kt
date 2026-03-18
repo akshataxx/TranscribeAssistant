@@ -23,7 +23,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -31,6 +34,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -48,6 +53,7 @@ import androidx.navigation.compose.rememberNavController
 import android.app.Application
 import com.example.transcribeassistant.R
 import com.example.transcribeassistant.di.JwtManagerEntryPoint
+import com.example.transcribeassistant.ui.screen.subscription.SubscriptionScreen
 import com.example.transcribeassistant.navigation.Screen
 import com.example.transcribeassistant.ui.viewmodel.CategoryGroup
 import com.example.transcribeassistant.ui.viewmodel.DashboardViewModel
@@ -90,9 +96,12 @@ fun DashboardScreen(
 ) {
     val categoryGroups by viewModel.categoryGroups.collectAsState()
     val usageInfo by viewModel.usageInfo.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     var showRenameDialog by remember { mutableStateOf(false) }
     var renamingCategoryGroup by remember { mutableStateOf<CategoryGroup?>(null) }
     var showProfileSheet by remember { mutableStateOf(false) }
+    var showSettingsSheet by remember { mutableStateOf(false) }
+    var showSubscriptionSheet by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
 
     // Profile data
@@ -228,7 +237,7 @@ fun DashboardScreen(
                             subtitle = if (usageInfo?.isPremium == true) "Premium" else "Free Plan",
                             onClick = {
                                 showProfileSheet = false
-                                navController.navigate(Screen.Subscription.route)
+                                showSubscriptionSheet = true
                             }
                         )
                         HorizontalDivider(
@@ -243,7 +252,7 @@ fun DashboardScreen(
                             title = "Settings",
                             onClick = {
                                 showProfileSheet = false
-                                navController.navigate(Screen.Settings.route)
+                                showSettingsSheet = true
                             }
                         )
                         HorizontalDivider(
@@ -267,6 +276,58 @@ fun DashboardScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
             }
+        }
+    }
+
+    // Settings Bottom Sheet
+    if (showSettingsSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showSettingsSheet = false },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Settings",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = PrimaryText
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = null,
+                    tint = SecondaryText,
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Settings coming soon",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = SecondaryText
+                )
+                Spacer(modifier = Modifier.height(48.dp))
+            }
+        }
+    }
+
+    // Subscription Bottom Sheet
+    if (showSubscriptionSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showSubscriptionSheet = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = Color.White,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+            modifier = Modifier.fillMaxHeight()
+        ) {
+            SubscriptionScreen(
+                onNavigateBack = { showSubscriptionSheet = false }
+            )
         }
     }
 
@@ -463,32 +524,40 @@ fun DashboardScreen(
                 ?.let { usage ->
                     UsageTrackingCard(
                         usageInfo = usage,
-                        onUpgradeClick = { navController.navigate(Screen.Subscription.route) }
+                        onUpgradeClick = { showSubscriptionSheet = true }
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                 }
 
             // ============================================================================
-            // Category grid - no header needed, content is self-explanatory
+            // Category grid or empty state
             // ============================================================================
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                itemsIndexed(categoryGroups) { index, group ->
-                    CategoryCard(
-                        categoryGroup = group,
-                        backgroundColor = scoopCardColors[index % scoopCardColors.size],
-                        onClick = {
-                            navigateToTranscriptsScreen(navController, group.categoryId)
-                        },
-                        onLongClick = {
-                            renamingCategoryGroup = group
-                            showRenameDialog = true
-                        }
+            if (categoryGroups.isEmpty() && !isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    GetStartedCard(
+                        onClick = { navController.navigate(Screen.AddLink.route) }
                     )
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    itemsIndexed(categoryGroups) { index, group ->
+                        CategoryCard(
+                            categoryGroup = group,
+                            backgroundColor = scoopCardColors[index % scoopCardColors.size],
+                            onClick = {
+                                navigateToTranscriptsScreen(navController, group.categoryId)
+                            },
+                            onLongClick = {
+                                renamingCategoryGroup = group
+                                showRenameDialog = true
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -727,6 +796,73 @@ private fun ProfileSheetRow(
             tint = SecondaryText.copy(alpha = 0.5f),
             modifier = Modifier.size(20.dp)
         )
+    }
+}
+
+@Composable
+private fun GetStartedCard(onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Gradient play icon
+        Icon(
+            imageVector = Icons.Default.PlayArrow,
+            contentDescription = null,
+            modifier = Modifier
+                .size(56.dp)
+                .graphicsLayer(alpha = 0.99f)
+                .drawWithCache {
+                    onDrawWithContent {
+                        drawContent()
+                        drawRect(
+                            brush = Brush.linearGradient(
+                                colors = listOf(ScoopPurple, ScoopCyan)
+                            ),
+                            blendMode = BlendMode.SrcAtop
+                        )
+                    }
+                },
+            tint = Color.White
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Share a video or paste a link to get started",
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+            color = SecondaryText,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            HintPill(icon = Icons.Default.Share, label = "Share")
+            HintPill(icon = Icons.Default.Link, label = "Paste link")
+        }
+    }
+}
+
+@Composable
+private fun HintPill(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String) {
+    Row(
+        modifier = Modifier
+            .background(ScoopPurple.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = ScoopPurple,
+            modifier = Modifier.size(14.dp)
+        )
+        Text(text = label, style = MaterialTheme.typography.labelMedium, color = ScoopPurple)
     }
 }
 
