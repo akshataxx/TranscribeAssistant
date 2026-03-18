@@ -38,6 +38,7 @@ import com.example.transcribeassistant.ui.screen.transcription.TranscribeDetails
 import com.example.transcribeassistant.ui.screen.dashboard.DashboardScreen
 import com.example.transcribeassistant.ui.screen.feed.FeedScreen
 import com.example.transcribeassistant.ui.screen.login.LoginScreen
+import com.example.transcribeassistant.ui.viewmodel.ActivityViewModel
 import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.runBlocking
@@ -52,6 +53,9 @@ fun TranscribeNavGraph(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    // Scoped to the nav graph (Activity-level) so state persists across tab switches
+    val activityViewModel: ActivityViewModel = hiltViewModel()
 
     // Observe badge count from AppEventBus
     val activityBadgeCount by AppEventBus.newCompletionCount.collectAsState()
@@ -176,7 +180,8 @@ fun TranscribeNavGraph(
                 ActivityScreen(
                     onTranscriptClick = { transcriptId ->
                         navController.navigate(Screen.TranscribeDetails.createRoute(transcriptId))
-                    }
+                    },
+                    viewModel = activityViewModel
                 )
             }
 

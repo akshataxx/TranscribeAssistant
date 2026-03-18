@@ -21,6 +21,7 @@ class JobRepositoryImpl(
                     status = status,
                     baseTranscriptId = dto.baseTranscriptId,
                     userTranscriptId = dto.userTranscriptId,
+                    transcriptTitle = dto.transcriptTitle,
                     errorMessage = dto.errorMessage,
                     retryCount = dto.retryCount,
                     updatedAt = dto.updatedAt

@@ -12,7 +12,8 @@ data class TranscriptionJobDto(
     val retryCount: Int,
     val updatedAt: String,
     val baseTranscriptId: String?,
-    val userTranscriptId: String?
+    val userTranscriptId: String?,
+    val transcriptTitle: String?
 )
 
 @JsonClass(generateAdapter = true)

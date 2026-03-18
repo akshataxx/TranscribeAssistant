@@ -28,20 +28,39 @@ data class ActivityItem(
     val status: ActivityStatus,
     val baseTranscriptId: String?,
     val userTranscriptId: String?,
+    val transcriptTitle: String?,
     val errorMessage: String?,
     val retryCount: Int,
     val updatedAt: String   // ISO 8601
 ) {
-    /** Last path component of the URL, falling back to host, then raw URL. */
+    /** Display title matching iOS logic:
+     *  1. Backend transcript title if available
+     *  2. Friendly label for known platforms
+     *  3. Filename without extension for direct file URLs
+     *  4. Cleaned-up domain
+     *  5. Raw URL fallback
+     */
     val displayTitle: String get() {
+        if (!transcriptTitle.isNullOrEmpty()) return transcriptTitle
         return try {
             val url = java.net.URL(videoUrl)
-            val path = url.path?.trimEnd('/')
-            if (!path.isNullOrEmpty()) {
-                val segment = path.substringAfterLast('/')
-                if (segment.isNotEmpty()) return segment
+            val host = url.host?.lowercase() ?: ""
+            when {
+                host.contains("youtube.com") || host.contains("youtu.be") -> "YouTube video"
+                host.contains("tiktok.com") -> "TikTok video"
+                host.contains("vimeo.com") -> "Vimeo video"
+                host.contains("instagram.com") -> "Instagram video"
+                host.contains("twitter.com") || host.contains("x.com") -> "X post"
+                host.contains("reddit.com") -> "Reddit post"
+                else -> {
+                    val lastSegment = url.path?.trimEnd('/')?.substringAfterLast('/') ?: ""
+                    if (lastSegment.isNotEmpty() && lastSegment.contains('.')) {
+                        lastSegment.substringBeforeLast('.')
+                    } else {
+                        host.removePrefix("www.")
+                    }
+                }
             }
-            url.host ?: videoUrl
         } catch (e: Exception) {
             videoUrl
         }
