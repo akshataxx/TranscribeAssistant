@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.sp
 fun NotificationPermissionSheet(
     onDismiss: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartialExpansion = true)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     // Launcher for Android 13+ POST_NOTIFICATIONS runtime permission
     val permissionLauncher = rememberLauncherForActivityResult(
