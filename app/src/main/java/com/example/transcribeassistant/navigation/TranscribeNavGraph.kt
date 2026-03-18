@@ -129,7 +129,6 @@ fun TranscribeNavGraph(
 
             composable(Screen.Feed.route) {
                 FeedScreen(
-                    viewModel = hiltViewModel(),
                     onTranscriptClick = { transcriptId ->
                         navController.navigate(Screen.TranscribeDetails.createRoute(transcriptId))
                     }
@@ -156,8 +155,11 @@ fun TranscribeNavGraph(
 
             composable(Screen.AddLink.route) {
                 AddLinkScreen(
-                    onViewTranscript = { transcriptId ->
-                        navController.navigate(Screen.TranscribeDetails.createRoute(transcriptId))
+                    onViewActivity = {
+                        navController.navigate(Screen.Activity.route) {
+                            popUpTo(Screen.Dashboard.route) { inclusive = false }
+                            launchSingleTop = true
+                        }
                     }
                 )
             }
@@ -204,7 +206,6 @@ fun TranscribeNavGraph(
             ) { backStackEntry ->
                 val categoryId = backStackEntry.arguments?.getString("categoryId")
                 FeedScreen(
-                    viewModel = hiltViewModel(),
                     onTranscriptClick = { transcriptId ->
                         navController.navigate(Screen.TranscribeDetails.createRoute(transcriptId))
                     },
