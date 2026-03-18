@@ -513,6 +513,21 @@ fun DashboardScreen(
                         title = "Add Content",
                         message = "Tap the + button in the navigation bar below to paste a link — we'll transcribe and categorize it for you.",
                         tooltipPosition = CoachmarkPosition.Bottom
+                    ),
+                    CoachmarkStep(
+                        title = "Share from TikTok or Instagram",
+                        message = "No need to copy links! Open any video, tap Share, then choose Scoop from the list of apps.",
+                        tooltipPosition = CoachmarkPosition.Center
+                    ),
+                    CoachmarkStep(
+                        title = "Rename Categories",
+                        message = "Not a fan of the AI-generated category name? Long-press any category card to rename it.",
+                        tooltipPosition = CoachmarkPosition.Center
+                    ),
+                    CoachmarkStep(
+                        title = "Add Your Own Notes",
+                        message = "Open any transcript and scroll to the bottom — there's a notes field where you can jot down your own thoughts.",
+                        tooltipPosition = CoachmarkPosition.Center
                     )
                 ),
                 onFinished = { onboardingViewModel.markSeen() }
