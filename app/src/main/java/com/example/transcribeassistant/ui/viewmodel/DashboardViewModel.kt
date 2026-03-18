@@ -44,6 +44,9 @@ class DashboardViewModel @Inject constructor(
     private val _categoryGroups = MutableStateFlow<List<CategoryGroup>>(emptyList())
     val categoryGroups: StateFlow<List<CategoryGroup>> = _categoryGroups
 
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
     private val _transcriptsByCategory = MutableStateFlow<List<Transcript>>(emptyList())
     val transcriptsByCategory: StateFlow<List<Transcript>> = _transcriptsByCategory
     
@@ -52,6 +55,7 @@ class DashboardViewModel @Inject constructor(
 
     fun fetchTranscripts() {
         viewModelScope.launch {
+            _isLoading.value = true
             try{
                 val response = repository.getAllTranscripts()
                 _transcripts.value = response
@@ -59,6 +63,8 @@ class DashboardViewModel @Inject constructor(
                 Log.d("DashboardVM", "Transcripts fetched and grouped: ${_categoryGroups.value}")
             }catch(e: Exception) {
                 Log.e("DashboardVM", "Error fetching transcripts: ${e.message}")
+            } finally {
+                _isLoading.value = false
             }
         }
     }

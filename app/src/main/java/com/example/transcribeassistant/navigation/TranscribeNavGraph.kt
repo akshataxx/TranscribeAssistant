@@ -6,11 +6,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -49,6 +56,26 @@ fun TranscribeNavGraph(
 
     // Observe badge count from AppEventBus
     val activityBadgeCount by AppEventBus.newCompletionCount.collectAsState()
+
+    // Foreground refresh: if app was backgrounded for 5+ minutes, trigger a full refresh
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var lastBackgroundedAt by remember { mutableStateOf<Long?>(null) }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_STOP -> lastBackgroundedAt = System.currentTimeMillis()
+                Lifecycle.Event.ON_START -> {
+                    val lastBg = lastBackgroundedAt
+                    if (lastBg != null && System.currentTimeMillis() - lastBg > 5 * 60 * 1000L) {
+                        AppEventBus.emitRefresh()
+                    }
+                }
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     Scaffold(
         containerColor = Color.Transparent,
