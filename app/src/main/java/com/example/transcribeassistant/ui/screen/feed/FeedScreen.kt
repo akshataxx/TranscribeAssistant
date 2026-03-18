@@ -128,7 +128,7 @@ fun FeedScreen(
                     ),
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .padding(top = 8.dp, bottom = 16.dp)
+                        .padding(top = 16.dp, bottom = 8.dp)
                 )
 
                 // Notifications banner only on the main feed tab
@@ -180,7 +180,7 @@ fun FeedScreen(
                                             .fillMaxWidth()
                                             .clickable { onTranscriptClick(transcript.id) }
                                             .padding(horizontal = 16.dp)
-                                            .padding(bottom = 12.dp)
+                                            .padding(bottom = 8.dp)
                                     )
                                 }
 

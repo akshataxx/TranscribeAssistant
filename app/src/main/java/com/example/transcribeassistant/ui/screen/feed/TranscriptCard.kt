@@ -20,8 +20,8 @@ fun TranscriptCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier) {
     Surface(
-        modifier = Modifier.fillMaxWidth()
-            .clickable (onClick = onClick),
+        modifier = modifier
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         tonalElevation = 4.dp,
         color = Color.White.copy(alpha = 0.9f)
