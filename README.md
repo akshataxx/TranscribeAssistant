@@ -1,4 +1,4 @@
-# Transcribe Assistant (Android App)
+# Scoop (Android App)
 
 This is the Android client for the Transcribe Assistant service. It lets you request transcripts for video URLs, view and cache past transcripts, and browse results—all in a clean, modular architecture.
 
