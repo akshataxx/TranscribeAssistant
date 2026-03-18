@@ -212,7 +212,8 @@ fun TranscribeNavGraph(
                     onTranscriptClick = { transcriptId ->
                         navController.navigate(Screen.TranscribeDetails.createRoute(transcriptId))
                     },
-                    categoryId = categoryId
+                    categoryId = categoryId,
+                    onBackClick = { navController.popBackStack() }
                 )
             }
         }

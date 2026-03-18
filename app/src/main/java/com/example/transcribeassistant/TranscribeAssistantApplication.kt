@@ -23,9 +23,9 @@ class TranscribeAssistantApplication : Application() {
         val channel = NotificationChannel(
             TRANSCRIPTION_CHANNEL_ID,
             "Transcription Status",
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Notifies you when a transcription fails"
+            description = "Notifies you when a transcription is ready or fails"
         }
         getSystemService(NotificationManager::class.java)
             .createNotificationChannel(channel)

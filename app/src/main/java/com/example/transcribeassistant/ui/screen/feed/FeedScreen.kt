@@ -12,10 +12,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -26,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,7 +55,8 @@ import kotlinx.coroutines.launch
 fun FeedScreen(
     onTranscriptClick: (String) -> Unit,
     viewModel: FeedViewModel = hiltViewModel(),
-    categoryId: String? = null
+    categoryId: String? = null,
+    onBackClick: (() -> Unit)? = null
 ) {
     val transcripts by viewModel.transcripts.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -81,8 +89,34 @@ fun FeedScreen(
 
     AnimatedBlobsBackground {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Header — only when not filtered by category
-            if (categoryId == null) {
+            if (categoryId != null && onBackClick != null) {
+                // Category drill-down: top bar with back button and category name
+                val categoryTitle = transcripts.firstOrNull()?.let { it.alias ?: it.category } ?: ""
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = categoryTitle,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                brush = Brush.linearGradient(
+                                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+                                )
+                            )
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = ScoopPurple
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
+            } else {
+                // Main feed tab: gradient "Your Feed" header
                 Text(
                     text = "Your Feed",
                     fontSize = 32.sp,
@@ -96,14 +130,14 @@ fun FeedScreen(
                         .padding(horizontal = 16.dp)
                         .padding(top = 8.dp, bottom = 16.dp)
                 )
-            }
 
-            // EnableNotificationsBanner
-            if (!notificationsEnabled && !bannerDismissed) {
-                EnableNotificationsBanner(
-                    onDismiss = { viewModel.dismissBanner() },
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+                // Notifications banner only on the main feed tab
+                if (!notificationsEnabled && !bannerDismissed) {
+                    EnableNotificationsBanner(
+                        onDismiss = { viewModel.dismissBanner() },
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
             }
 
             when {
