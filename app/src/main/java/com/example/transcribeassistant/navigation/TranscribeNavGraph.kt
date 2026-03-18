@@ -38,7 +38,6 @@ import com.example.transcribeassistant.ui.screen.transcription.TranscribeDetails
 import com.example.transcribeassistant.ui.screen.dashboard.DashboardScreen
 import com.example.transcribeassistant.ui.screen.feed.FeedScreen
 import com.example.transcribeassistant.ui.screen.login.LoginScreen
-import com.example.transcribeassistant.ui.screen.subscription.SubscriptionScreen
 import com.example.transcribeassistant.ui.viewmodel.LoginViewModel
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.runBlocking
@@ -178,12 +177,6 @@ fun TranscribeNavGraph(
                     onTranscriptClick = { transcriptId ->
                         navController.navigate(Screen.TranscribeDetails.createRoute(transcriptId))
                     }
-                )
-            }
-
-            composable(Screen.Subscription.route) {
-                SubscriptionScreen(
-                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 

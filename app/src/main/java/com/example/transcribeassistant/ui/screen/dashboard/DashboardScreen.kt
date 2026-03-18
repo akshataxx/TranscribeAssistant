@@ -53,6 +53,7 @@ import androidx.navigation.compose.rememberNavController
 import android.app.Application
 import com.example.transcribeassistant.R
 import com.example.transcribeassistant.di.JwtManagerEntryPoint
+import com.example.transcribeassistant.ui.screen.subscription.SubscriptionScreen
 import com.example.transcribeassistant.navigation.Screen
 import com.example.transcribeassistant.ui.viewmodel.CategoryGroup
 import com.example.transcribeassistant.ui.viewmodel.DashboardViewModel
@@ -100,6 +101,7 @@ fun DashboardScreen(
     var renamingCategoryGroup by remember { mutableStateOf<CategoryGroup?>(null) }
     var showProfileSheet by remember { mutableStateOf(false) }
     var showSettingsSheet by remember { mutableStateOf(false) }
+    var showSubscriptionSheet by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
 
     // Profile data
@@ -235,7 +237,7 @@ fun DashboardScreen(
                             subtitle = if (usageInfo?.isPremium == true) "Premium" else "Free Plan",
                             onClick = {
                                 showProfileSheet = false
-                                navController.navigate(Screen.Subscription.route)
+                                showSubscriptionSheet = true
                             }
                         )
                         HorizontalDivider(
@@ -311,6 +313,19 @@ fun DashboardScreen(
                 )
                 Spacer(modifier = Modifier.height(48.dp))
             }
+        }
+    }
+
+    // Subscription Bottom Sheet
+    if (showSubscriptionSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showSubscriptionSheet = false },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+        ) {
+            SubscriptionScreen(
+                onNavigateBack = { showSubscriptionSheet = false }
+            )
         }
     }
 
@@ -507,7 +522,7 @@ fun DashboardScreen(
                 ?.let { usage ->
                     UsageTrackingCard(
                         usageInfo = usage,
-                        onUpgradeClick = { navController.navigate(Screen.Subscription.route) }
+                        onUpgradeClick = { showSubscriptionSheet = true }
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                 }
