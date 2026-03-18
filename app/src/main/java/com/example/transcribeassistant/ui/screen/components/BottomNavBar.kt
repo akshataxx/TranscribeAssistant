@@ -2,17 +2,21 @@ package com.example.transcribeassistant.ui.screen.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.outlined.Article
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.transcribeassistant.navigation.Screen
 
 // Use SecondaryText, ScoopPurple, ScoopBlue, ScoopCyan from AnimatedBlobsBackground.kt (same package)
@@ -33,11 +38,12 @@ data class BottomNavItem(val label: String, val route: String, val icon: ImageVe
 @Composable
 fun BottomNavBar(
     currentRoute: String,
+    activityBadgeCount: Int = 0,
     onTabSelected: (String) -> Unit
 ) {
     val items = listOf(
-        BottomNavItem("Dashboard", Screen.Dashboard.route, Icons.Default.Home),
-        BottomNavItem("Notifications", Screen.Notifications.route, Icons.Default.Notifications),
+        BottomNavItem("Home", Screen.Dashboard.route, Icons.Default.Home),
+        BottomNavItem("Activity", Screen.Activity.route, Icons.Default.List),
         BottomNavItem("Add", "add", Icons.Default.Add, size = 28),
         BottomNavItem("Feed", Screen.Feed.route, Icons.Outlined.Article),
     )
@@ -49,6 +55,7 @@ fun BottomNavBar(
         items.forEach { item ->
             val isSelected = currentRoute == item.route
             val isAddButton = item.route == "add"
+            val showBadge = item.route == Screen.Activity.route && activityBadgeCount > 0
 
             NavigationBarItem(
                 icon = {
@@ -69,6 +76,35 @@ fun BottomNavBar(
                                 item.icon,
                                 contentDescription = item.label,
                                 modifier = Modifier.size(item.size.dp),
+                                tint = Color.White
+                            )
+                        }
+                    } else if (showBadge) {
+                        BadgedBox(badge = {
+                            Badge {
+                                Text(
+                                    text = if (activityBadgeCount > 9) "9+" else "$activityBadgeCount",
+                                    fontSize = 9.sp
+                                )
+                            }
+                        }) {
+                            Icon(
+                                item.icon,
+                                contentDescription = item.label,
+                                modifier = Modifier
+                                    .size(item.size.dp)
+                                    .graphicsLayer(alpha = 0.99f)
+                                    .drawWithCache {
+                                        onDrawWithContent {
+                                            drawContent()
+                                            drawRect(
+                                                brush = Brush.linearGradient(
+                                                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+                                                ),
+                                                blendMode = BlendMode.SrcAtop
+                                            )
+                                        }
+                                    },
                                 tint = Color.White
                             )
                         }
@@ -114,4 +150,3 @@ fun BottomNavBar(
         }
     }
 }
-

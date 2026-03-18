@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.transcribeassistant.ui.screen.components.AnimatedBlobsBackground
+import com.example.transcribeassistant.ui.screen.components.NotificationPermissionSheet
 import com.example.transcribeassistant.ui.screen.components.PrimaryText
 import com.example.transcribeassistant.ui.screen.components.SecondaryText
 import com.example.transcribeassistant.ui.screen.components.ScoopBlue
@@ -50,14 +53,21 @@ import com.example.transcribeassistant.ui.viewmodel.AddLinkViewModel
 
 @Composable
 fun AddLinkScreen(
-    onViewTranscript: (String) -> Unit,
+    onViewActivity: () -> Unit,
     viewModel: AddLinkViewModel = hiltViewModel()
 ) {
     val urlText by viewModel.urlText.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
-    val createdTranscript by viewModel.createdTranscript.collectAsState()
+    val jobSubmitted by viewModel.jobSubmitted.collectAsState()
     val isValidUrl by viewModel.isValidUrl.collectAsState()
+    val showNotificationSheet by viewModel.showNotificationSheet.collectAsState()
+
+    if (showNotificationSheet) {
+        NotificationPermissionSheet(
+            onDismiss = { viewModel.markNotificationPermissionShown() }
+        )
+    }
 
     AnimatedBlobsBackground {
         Column(
@@ -73,7 +83,7 @@ fun AddLinkScreen(
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.headlineLarge.copy(
                     brush = Brush.linearGradient(
-                        colors = listOf(ScoopPurple, ScoopCyan)
+                        colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
                     )
                 )
             )
@@ -147,18 +157,18 @@ fun AddLinkScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
-                            brush = Brush.horizontalGradient(
-                                colors = if (isValidUrl && !isLoading)
-                                    listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                                else
-                                    listOf(
-                                        ScoopPurple.copy(alpha = 0.3f),
-                                        ScoopBlue.copy(alpha = 0.3f),
-                                        ScoopCyan.copy(alpha = 0.3f)
-                                    )
-                            ),
-                            shape = RoundedCornerShape(14.dp)
+                        brush = Brush.horizontalGradient(
+                            colors = if (isValidUrl && !isLoading)
+                                listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+                            else
+                                listOf(
+                                    ScoopPurple.copy(alpha = 0.3f),
+                                    ScoopBlue.copy(alpha = 0.3f),
+                                    ScoopCyan.copy(alpha = 0.3f)
+                                )
                         ),
+                        shape = RoundedCornerShape(14.dp)
+                    ),
                     contentAlignment = Alignment.Center
                 ) {
                     if (isLoading) {
@@ -169,31 +179,12 @@ fun AddLinkScreen(
                                 strokeWidth = 2.dp
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                "Transcribing...",
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Text("Submitting...", color = Color.White, fontWeight = FontWeight.Bold)
                         }
                     } else {
-                        Text(
-                            "Transcribe Link",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
+                        Text("Transcribe Link", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }
-            }
-
-            // Loading hint
-            if (isLoading) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "This may take a few minutes depending on the video length...",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = SecondaryText
-                )
             }
 
             // Error message
@@ -206,60 +197,83 @@ fun AddLinkScreen(
                 )
             }
 
-            // Success Card
-            if (createdTranscript != null) {
+            // Success Card — matches iOS "Job Submitted" style
+            if (jobSubmitted) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF0FDF4)),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
                     shape = RoundedCornerShape(16.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            tint = Color(0xFF10B981),
-                            modifier = Modifier.size(48.dp)
-                        )
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = Color(0xFF10B981),
+                                modifier = Modifier.size(24.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Job Submitted",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = PrimaryText
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Your link is being transcribed. Track progress in Activity.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = SecondaryText
+                                )
+                            }
+
+                            IconButton(onClick = { viewModel.dismissSuccess() }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Dismiss",
+                                    tint = SecondaryText,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        Text(
-                            text = "Transcript Created",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF065F46)
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        Text(
-                            text = createdTranscript?.title ?: "",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = SecondaryText
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
                         Button(
                             onClick = {
-                                createdTranscript?.let {
-                                    onViewTranscript(it.id)
-                                    viewModel.dismissSuccess()
-                                }
+                                viewModel.dismissSuccess()
+                                onViewActivity()
                             },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(44.dp),
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+                            contentPadding = PaddingValues()
                         ) {
-                            Text(
-                                "View Transcript",
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        brush = Brush.horizontalGradient(
+                                            colors = listOf(ScoopPurple, ScoopBlue)
+                                        ),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    "View Activity",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 14.sp
+                                )
+                            }
                         }
                     }
                 }
@@ -269,3 +283,4 @@ fun AddLinkScreen(
         }
     }
 }
+
