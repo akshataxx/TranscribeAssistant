@@ -318,12 +318,12 @@ fun DashboardScreen(
 
     // Subscription Bottom Sheet
     if (showSubscriptionSheet) {
-        val subscriptionSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ModalBottomSheet(
             onDismissRequest = { showSubscriptionSheet = false },
-            sheetState = subscriptionSheetState,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             containerColor = Color.White,
-            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+            modifier = Modifier.fillMaxHeight()
         ) {
             SubscriptionScreen(
                 onNavigateBack = { showSubscriptionSheet = false }
