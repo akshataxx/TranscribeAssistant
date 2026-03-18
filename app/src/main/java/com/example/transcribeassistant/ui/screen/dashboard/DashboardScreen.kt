@@ -93,6 +93,7 @@ fun DashboardScreen(
     var showRenameDialog by remember { mutableStateOf(false) }
     var renamingCategoryGroup by remember { mutableStateOf<CategoryGroup?>(null) }
     var showProfileSheet by remember { mutableStateOf(false) }
+    var showSettingsSheet by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
 
     // Profile data
@@ -243,7 +244,7 @@ fun DashboardScreen(
                             title = "Settings",
                             onClick = {
                                 showProfileSheet = false
-                                navController.navigate(Screen.Settings.route)
+                                showSettingsSheet = true
                             }
                         )
                         HorizontalDivider(
@@ -266,6 +267,43 @@ fun DashboardScreen(
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
+    }
+
+    // Settings Bottom Sheet
+    if (showSettingsSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showSettingsSheet = false },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Settings",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = PrimaryText
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = null,
+                    tint = SecondaryText,
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Settings coming soon",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = SecondaryText
+                )
+                Spacer(modifier = Modifier.height(48.dp))
             }
         }
     }
