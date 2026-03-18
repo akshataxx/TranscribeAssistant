@@ -6,12 +6,13 @@
             <certificates src="system" />
         </trust-anchors>
     </base-config>
-    
-    <!-- Allow HTTP for local development (emulator + physical device on LAN) -->
+
+    <!-- Allow HTTP for local development -->
     <domain-config cleartextTrafficPermitted="true">
+        <!-- For Android Emulator: 10.0.2.2 maps to host machine's localhost -->
         <domain includeSubdomains="true">10.0.2.2</domain>
         <domain includeSubdomains="true">localhost</domain>
-        <domain includeSubdomains="true">192.168.0.0</domain>
-        <domain includeSubdomains="true">192.168.1.0</domain>
+        <!-- For physical device testing: Mac's local IP -->
+        <domain includeSubdomains="true">10.43.53.187</domain>
     </domain-config>
 </network-security-config>
