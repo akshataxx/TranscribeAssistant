@@ -36,23 +36,25 @@ fun TranscriptCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // TODO: add source to Transcript model
-            Text("Source TikTok • @${transcript.account}", style = MaterialTheme.typography.bodySmall)
+            Text("TikTok • @${transcript.account}", style = MaterialTheme.typography.bodySmall)
             Text("⏱ ${TimeUtils.formatDuration(transcript.duration.toInt())}   •   ${TimeUtils.timeAgo(transcript.uploadedAt)}", style = MaterialTheme.typography.bodySmall)
-
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = transcript.transcript.take(100) + "...",
                 fontStyle = FontStyle.Italic,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 2
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                CategoryChip(transcript.alias ?: transcript.category)
+                CategoryChip(transcript.category)
+                if (!transcript.alias.isNullOrEmpty()) {
+                    CategoryChip(transcript.alias)
+                }
             }
         }
     }
