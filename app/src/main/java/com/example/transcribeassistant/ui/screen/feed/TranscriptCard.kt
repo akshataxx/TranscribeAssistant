@@ -36,7 +36,7 @@ fun TranscriptCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text("TikTok • @${transcript.account}", style = MaterialTheme.typography.bodySmall)
+            Text("${TimeUtils.platformFromUrl(transcript.videoUrl)} • @${transcript.account}", style = MaterialTheme.typography.bodySmall)
             Text("⏱ ${TimeUtils.formatDuration(transcript.duration.toInt())}   •   ${TimeUtils.timeAgo(transcript.uploadedAt)}", style = MaterialTheme.typography.bodySmall)
 
             Spacer(modifier = Modifier.height(8.dp))

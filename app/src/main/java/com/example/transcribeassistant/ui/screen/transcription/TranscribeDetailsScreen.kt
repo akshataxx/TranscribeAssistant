@@ -189,7 +189,7 @@ fun TranscribeDetailsScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "TikTok • @${transcript.account}",
+                            text = "${TimeUtils.platformFromUrl(transcript.videoUrl)} • @${transcript.account}",
                             fontSize = 14.sp,
                             color = SecondaryText
                         )
