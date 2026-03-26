@@ -28,10 +28,9 @@ datastoreCoreAndroid = "1.1.7"
 play-services-auth = "20.7.0"
 billing = "7.0.0"
 emoji2 = "1.3.0"
-uiTextGoogleFonts = "1.10.5"
 
 [libraries]
-androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts" }
+androidx-compose-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -72,7 +71,6 @@ androidx-datastore-core-android = { group = "androidx.datastore", name = "datast
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
 billing = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
 androidx-emoji2-bundled = { group = "androidx.emoji2", name = "emoji2-bundled", version.ref = "emoji2" }
-androidx-compose-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

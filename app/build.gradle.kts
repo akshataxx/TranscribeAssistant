@@ -139,6 +139,4 @@ dependencies {
     // Emoji rendering on older Android versions
     implementation(libs.androidx.emoji2.bundled)
 
-    // Google Fonts (Inter)
-    implementation(libs.androidx.ui.text.google.fonts)
 }
