@@ -5,6 +5,7 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,7 +27,9 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.VolumeUp
-import androidx.compose.material3.Button
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.draw.shadow
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,11 +38,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.text.style.TextOverflow
@@ -169,8 +170,9 @@ fun TranscribeDetailsScreen(
         ) { paddingValues ->
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(paddingValues)
+                    .padding(top = 8.dp)
                     .verticalScroll(scroll)
             ) {
                 if (transcript == null) {
@@ -212,10 +214,16 @@ fun TranscribeDetailsScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = 16.dp)
+                            .shadow(
+                                elevation = 6.dp,
+                                shape = RoundedCornerShape(16.dp),
+                                ambientColor = Color.Black.copy(alpha = 0.05f),
+                                spotColor = Color.Black.copy(alpha = 0.05f)
+                            ),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
                         shape = RoundedCornerShape(16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
                             // Volume icon only (no label text), reads structured content
@@ -263,10 +271,16 @@ fun TranscribeDetailsScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = 16.dp)
+                            .shadow(
+                                elevation = 6.dp,
+                                shape = RoundedCornerShape(16.dp),
+                                ambientColor = Color.Black.copy(alpha = 0.05f),
+                                spotColor = Color.Black.copy(alpha = 0.05f)
+                            ),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
                         shape = RoundedCornerShape(16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
                             Row(
@@ -280,58 +294,62 @@ fun TranscribeDetailsScreen(
                                     fontWeight = FontWeight.SemiBold,
                                     color = PrimaryText
                                 )
-                                Button(
+                                Surface(
                                     onClick = {
                                         viewModel.saveNotes(transcriptId, notes.ifBlank { null })
                                         initialNotes = notes
                                     },
                                     enabled = notesChanged && !isSavingNotes,
                                     shape = RoundedCornerShape(6.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = ScoopPurple,
-                                        disabledContainerColor = Color.Gray
-                                    ),
-                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                                    color = if (notesChanged && !isSavingNotes) ScoopPurple else Color.Gray
                                 ) {
-                                    if (isSavingNotes) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(16.dp),
-                                            color = Color.White,
-                                            strokeWidth = 2.dp
-                                        )
-                                    } else {
-                                        Text(
-                                            "Save",
-                                            color = Color.White,
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Medium
-                                        )
+                                    Box(
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (isSavingNotes) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(16.dp),
+                                                color = Color.White,
+                                                strokeWidth = 2.dp
+                                            )
+                                        } else {
+                                            Text(
+                                                "Save",
+                                                color = Color.White,
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        }
                                     }
                                 }
                             }
 
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            OutlinedTextField(
-                                value = notes,
-                                onValueChange = { notes = it },
-                                placeholder = {
-                                    Text("Add your notes here...", fontSize = 16.sp, color = SecondaryText)
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                minLines = 3,
-                                textStyle = TextStyle(fontSize = 16.sp, color = PrimaryText),
-                                shape = RoundedCornerShape(8.dp),
-                                colors = TextFieldDefaults.colors(
-                                    focusedIndicatorColor = Color.Black.copy(alpha = 0.1f),
-                                    unfocusedIndicatorColor = Color.Black.copy(alpha = 0.1f),
-                                    focusedTextColor = PrimaryText,
-                                    unfocusedTextColor = PrimaryText,
-                                    cursorColor = ScoopPurple,
-                                    focusedContainerColor = Color.White,
-                                    unfocusedContainerColor = Color.White
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White, RoundedCornerShape(8.dp))
+                                    .border(1.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                                    .padding(12.dp)
+                            ) {
+                                if (notes.isEmpty()) {
+                                    Text(
+                                        "Add your notes here...",
+                                        fontSize = 16.sp,
+                                        color = SecondaryText.copy(alpha = 0.5f)
+                                    )
+                                }
+                                BasicTextField(
+                                    value = notes,
+                                    onValueChange = { notes = it },
+                                    textStyle = TextStyle(fontSize = 16.sp, color = PrimaryText),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    minLines = 3,
+                                    cursorBrush = SolidColor(ScoopPurple)
                                 )
-                            )
+                            }
 
                             if (saveNotesSuccess) {
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -376,7 +394,7 @@ fun TranscribeDetailsScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     // Copy + Share buttons (matching iOS layout)
                     Row(
@@ -441,7 +459,7 @@ fun TranscribeDetailsScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }

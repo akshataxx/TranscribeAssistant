@@ -3,6 +3,8 @@ package com.example.transcribeassistant
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import androidx.emoji2.bundled.BundledEmojiCompatConfig
+import androidx.emoji2.text.EmojiCompat
 import com.example.transcribeassistant.common.AppContextProvider
 import dagger.hilt.android.HiltAndroidApp
 
@@ -16,6 +18,7 @@ class TranscribeAssistantApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         AppContextProvider.init(this)
+        EmojiCompat.init(BundledEmojiCompatConfig(this))
         createNotificationChannels()
     }
 
