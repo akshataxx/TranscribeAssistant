@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -168,11 +169,16 @@ fun TranscribeDetailsScreen(
             },
             containerColor = Color.Transparent
         ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(paddingValues)
                     .padding(top = 8.dp)
+                    .padding(bottom = if (transcript != null) 72.dp else 0.dp)
                     .verticalScroll(scroll)
             ) {
                 if (transcript == null) {
@@ -395,72 +401,74 @@ fun TranscribeDetailsScreen(
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
 
-                    // Copy + Share buttons (matching iOS layout)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+            // Copy + Share buttons — fixed at the bottom of the content area, right above BottomNavBar
+            if (transcript != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            clipboardManager.setText(AnnotatedString(transcript.transcript))
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.5.dp, ScoopPurple),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ScoopPurple),
+                        contentPadding = PaddingValues(vertical = 12.dp)
                     ) {
-                        OutlinedButton(
-                            onClick = {
-                                clipboardManager.setText(AnnotatedString(transcript.transcript))
-                            },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.5.dp, ScoopPurple),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = ScoopPurple),
-                            contentPadding = PaddingValues(vertical = 12.dp)
-                        ) {
+                        Icon(
+                            Icons.Filled.ContentCopy,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Copy", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+                                )
+                            )
+                            .clickable {
+                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_TEXT, transcript.transcript)
+                                }
+                                context.startActivity(Intent.createChooser(shareIntent, "Share"))
+                            }
+                            .padding(vertical = 12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                Icons.Filled.ContentCopy,
+                                Icons.Filled.Share,
                                 contentDescription = null,
+                                tint = Color.White,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Copy", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(
-                                    Brush.linearGradient(
-                                        colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                                    )
-                                )
-                                .clickable {
-                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                        type = "text/plain"
-                                        putExtra(Intent.EXTRA_TEXT, transcript.transcript)
-                                    }
-                                    context.startActivity(Intent.createChooser(shareIntent, "Share"))
-                                }
-                                .padding(vertical = 12.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Filled.Share,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    "Share",
-                                    color = Color.White,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
+                            Text(
+                                "Share",
+                                color = Color.White,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
+            }
             }
         }
     }
