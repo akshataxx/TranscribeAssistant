@@ -6,7 +6,9 @@ import retrofit2.HttpException
 import androidx.lifecycle.viewModelScope
 import com.example.transcribeassistant.common.AppEventBus
 import com.example.transcribeassistant.domain.model.ActivityItem
+import com.example.transcribeassistant.domain.model.ActivityStatus
 import com.example.transcribeassistant.domain.repository.JobRepository
+import com.example.transcribeassistant.domain.repository.TranscriptRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,7 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ActivityViewModel @Inject constructor(
-    private val jobRepository: JobRepository
+    private val jobRepository: JobRepository,
+    private val transcriptRepository: TranscriptRepository
 ) : ViewModel() {
 
     private val _items = MutableStateFlow<List<ActivityItem>>(emptyList())
@@ -55,16 +58,31 @@ class ActivityViewModel @Inject constructor(
             _error.value = null
             try {
                 val jobs = jobRepository.getJobs()
+
+                // For completed items, fetch the real transcript title (cache-first, then API)
+                val enrichedJobs = jobs.map { item ->
+                    if (item.status == ActivityStatus.COMPLETED) {
+                        val transcriptId = item.userTranscriptId ?: item.baseTranscriptId
+                        val title = if (transcriptId != null) {
+                            try { transcriptRepository.getTranscriptById(transcriptId).title }
+                            catch (e: Exception) { null }
+                        } else null
+                        item.copy(title = title)
+                    } else {
+                        item
+                    }
+                }
+
                 // Mark newly completed jobs that weren't in the previous list
                 val previousIds = _items.value.map { it.id }.toSet()
-                val freshCompletions = jobs
+                val freshCompletions = enrichedJobs
                     .filter { it.status.raw == "COMPLETED" && it.id !in previousIds }
                     .map { it.id }
                     .toSet()
                 if (freshCompletions.isNotEmpty()) {
                     _newJobIds.update { it + freshCompletions }
                 }
-                _items.value = jobs
+                _items.value = enrichedJobs
             } catch (e: HttpException) {
                 val errorBody = e.response()?.errorBody()?.string() ?: "no body"
                 Log.e("ActivityViewModel", "fetchJobs HTTP ${e.code()}: $errorBody")

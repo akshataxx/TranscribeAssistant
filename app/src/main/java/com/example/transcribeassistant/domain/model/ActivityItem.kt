@@ -30,10 +30,15 @@ data class ActivityItem(
     val userTranscriptId: String?,
     val errorMessage: String?,
     val retryCount: Int,
-    val updatedAt: String   // ISO 8601
+    val updatedAt: String,   // ISO 8601
+    val title: String? = null
 ) {
-    /** Platform-based display title (e.g. "TikTok Video") matching iOS behaviour. */
+    /**
+     * For completed items: the real transcript title from the cache.
+     * For pending/processing: platform name derived from the URL (e.g. "TikTok Video").
+     */
     val displayTitle: String get() {
+        if (!title.isNullOrBlank()) return title
         val lower = videoUrl.lowercase()
         return when {
             "tiktok.com" in lower -> "TikTok Video"
