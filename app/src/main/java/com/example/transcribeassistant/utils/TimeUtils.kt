@@ -8,6 +8,21 @@ import java.time.temporal.ChronoUnit
 
 object TimeUtils {
 
+    fun platformFromUrl(url: String): String {
+        val lower = url.lowercase()
+        return when {
+            "tiktok.com" in lower         -> "TikTok"
+            "youtube.com" in lower ||
+            "youtu.be" in lower           -> "YouTube"
+            "instagram.com" in lower      -> "Instagram"
+            "twitter.com" in lower ||
+            "x.com" in lower              -> "X"
+            "facebook.com" in lower       -> "Facebook"
+            "reddit.com" in lower         -> "Reddit"
+            else                          -> "Web"
+        }
+    }
+
     fun timeAgo(instant: Instant): String {
         val today = LocalDate.now()
         val date = instant.atZone(ZoneId.systemDefault()).toLocalDate()

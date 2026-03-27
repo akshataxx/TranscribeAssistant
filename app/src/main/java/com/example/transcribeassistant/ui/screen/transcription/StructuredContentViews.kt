@@ -1,18 +1,19 @@
 package com.example.transcribeassistant.ui.screen.transcription
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.transcribeassistant.ui.screen.components.PrimaryText
 import com.example.transcribeassistant.ui.screen.components.SecondaryText
 import com.example.transcribeassistant.ui.screen.components.ScoopBlue
@@ -47,53 +48,78 @@ data class GeneralContent(
 )
 
 /**
+ * Gradient section header — matches iOS GradientText (18sp semibold)
+ */
+@Composable
+private fun SectionHeader(text: String) {
+    Text(
+        text = text,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.SemiBold,
+        style = androidx.compose.ui.text.TextStyle(
+            brush = Brush.linearGradient(colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan))
+        )
+    )
+}
+
+/**
  * Composable to display recipe content with ingredients and steps
  */
 @Composable
 fun RecipeContentView(content: RecipeContent) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Ingredients Section
-        Text(
-            text = "Ingredients",
-            style = MaterialTheme.typography.titleMedium.copy(
-                brush = Brush.linearGradient(
-                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                )
-            ),
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        content.ingredients.forEach { ingredient ->
-            Text(
-                text = "• $ingredient",
-                style = MaterialTheme.typography.bodyMedium,
-                color = PrimaryText,
-                modifier = Modifier.padding(vertical = 2.dp)
-            )
+        if (content.ingredients.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                SectionHeader("Ingredients")
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    content.ingredients.forEach { ingredient ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Text(text = "•", fontSize = 16.sp, color = SecondaryText)
+                            Text(
+                                text = ingredient,
+                                fontSize = 16.sp,
+                                color = SecondaryText,
+                                lineHeight = 22.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Steps Section
-        Text(
-            text = "Recipe Steps",
-            style = MaterialTheme.typography.titleMedium.copy(
-                brush = Brush.linearGradient(
-                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                )
-            ),
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        content.steps.forEachIndexed { index, step ->
-            Text(
-                text = "${index + 1}. $step",
-                style = MaterialTheme.typography.bodyMedium,
-                color = PrimaryText,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
+        if (content.steps.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                SectionHeader("Steps")
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    content.steps.forEachIndexed { index, step ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Text(
+                                text = "${index + 1}.",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = PrimaryText
+                            )
+                            Text(
+                                text = step,
+                                fontSize = 16.sp,
+                                color = SecondaryText,
+                                lineHeight = 22.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -104,48 +130,58 @@ fun RecipeContentView(content: RecipeContent) {
 @Composable
 fun BeautyContentView(content: BeautyContent) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Products Section
-        Text(
-            text = "Products Used",
-            style = MaterialTheme.typography.titleMedium.copy(
-                brush = Brush.linearGradient(
-                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                )
-            ),
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        content.products.forEach { product ->
-            Text(
-                text = "• $product",
-                style = MaterialTheme.typography.bodyMedium,
-                color = PrimaryText,
-                modifier = Modifier.padding(vertical = 2.dp)
-            )
+        if (content.products.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                SectionHeader("Products")
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    content.products.forEach { product ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Text(text = "•", fontSize = 16.sp, color = SecondaryText)
+                            Text(
+                                text = product,
+                                fontSize = 16.sp,
+                                color = SecondaryText,
+                                lineHeight = 22.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Steps Section
-        Text(
-            text = "Steps",
-            style = MaterialTheme.typography.titleMedium.copy(
-                brush = Brush.linearGradient(
-                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                )
-            ),
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        content.steps.forEachIndexed { index, step ->
-            Text(
-                text = "${index + 1}. $step",
-                style = MaterialTheme.typography.bodyMedium,
-                color = PrimaryText,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
+        if (content.steps.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                SectionHeader("Steps")
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    content.steps.forEachIndexed { index, step ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Text(
+                                text = "${index + 1}.",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = PrimaryText
+                            )
+                            Text(
+                                text = step,
+                                fontSize = 16.sp,
+                                color = SecondaryText,
+                                lineHeight = 22.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -156,25 +192,28 @@ fun BeautyContentView(content: BeautyContent) {
 @Composable
 fun BulletedContentView(content: GeneralContent) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = "Key Points",
-            style = MaterialTheme.typography.titleMedium.copy(
-                brush = Brush.linearGradient(
-                    colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                )
-            ),
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        content.keyPoints.forEach { point ->
-            Text(
-                text = "• $point",
-                style = MaterialTheme.typography.bodyMedium,
-                color = PrimaryText,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
+        SectionHeader("Key Points")
+        if (content.keyPoints.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                content.keyPoints.forEach { keyPoint ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Text(text = "•", fontSize = 16.sp, color = SecondaryText)
+                        Text(
+                            text = keyPoint,
+                            fontSize = 16.sp,
+                            color = SecondaryText,
+                            lineHeight = 22.sp,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -200,7 +239,6 @@ fun parseStructuredContent(structuredContentJson: String?): ParsedContent? {
     val moshi = Moshi.Builder().build()
 
     return try {
-        // First, parse with JSONObject to determine the type
         val jsonObject = JSONObject(structuredContentJson)
         val type = jsonObject.optString("type", "general")
 
@@ -221,7 +259,6 @@ fun parseStructuredContent(structuredContentJson: String?): ParsedContent? {
                 content?.let { ParsedContent.General(it) }
             }
             else -> {
-                // Fallback: try to display as general content
                 val adapter: JsonAdapter<GeneralContent> = moshi.adapter(GeneralContent::class.java)
                 val content = adapter.fromJson(structuredContentJson)
                 content?.let { ParsedContent.General(it) }
@@ -246,7 +283,7 @@ fun StructuredContentDisplay(structuredContentJson: String?) {
         is ParsedContent.Error -> {
             Text(
                 text = parsedContent.message,
-                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 16.sp,
                 color = SecondaryText
             )
         }

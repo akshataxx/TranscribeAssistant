@@ -114,6 +114,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.core.android)
     implementation (libs.play.services.auth)
+    implementation(libs.androidx.compose.ui.text.google.fonts)
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     kapt(libs.room.compiler)
@@ -134,4 +135,8 @@ dependencies {
 
     // Google Play Billing
     implementation(libs.billing)
+
+    // Emoji rendering on older Android versions
+    implementation(libs.androidx.emoji2.bundled)
+
 }

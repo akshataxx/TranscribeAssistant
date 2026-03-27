@@ -30,20 +30,28 @@ data class ActivityItem(
     val userTranscriptId: String?,
     val errorMessage: String?,
     val retryCount: Int,
-    val updatedAt: String   // ISO 8601
+    val updatedAt: String,   // ISO 8601
+    val title: String? = null
 ) {
-    /** Last path component of the URL, falling back to host, then raw URL. */
+    /**
+     * For completed items: the real transcript title from the cache.
+     * For pending/processing: platform name derived from the URL (e.g. "TikTok Video").
+     */
     val displayTitle: String get() {
-        return try {
-            val url = java.net.URL(videoUrl)
-            val path = url.path?.trimEnd('/')
-            if (!path.isNullOrEmpty()) {
-                val segment = path.substringAfterLast('/')
-                if (segment.isNotEmpty()) return segment
+        if (!title.isNullOrBlank()) return title
+        val lower = videoUrl.lowercase()
+        return when {
+            "tiktok.com" in lower -> "TikTok Video"
+            "youtube.com" in lower || "youtu.be" in lower -> "YouTube Video"
+            "instagram.com" in lower -> "Instagram Video"
+            "twitter.com" in lower || "x.com" in lower -> "X Video"
+            "facebook.com" in lower -> "Facebook Video"
+            "reddit.com" in lower -> "Reddit Video"
+            else -> try {
+                java.net.URL(videoUrl).host ?: "Video"
+            } catch (e: Exception) {
+                "Video"
             }
-            url.host ?: videoUrl
-        } catch (e: Exception) {
-            videoUrl
         }
     }
 

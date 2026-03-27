@@ -3,6 +3,7 @@ package com.example.transcribeassistant.ui.screen.activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,11 +13,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -25,7 +30,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -123,6 +131,14 @@ fun ActivityScreen(
                 }
 
                 else -> {
+                    val activeItems = items.filter {
+                        it.status == ActivityStatus.PENDING || it.status == ActivityStatus.PROCESSING
+                    }
+                    val recentItems = items.filter {
+                        it.status == ActivityStatus.COMPLETED || it.status == ActivityStatus.FAILED
+                    }
+                    var isRecentExpanded by remember { mutableStateOf(true) }
+
                     Box(modifier = Modifier.fillMaxSize()) {
                         PullToRefreshBox(
                             isRefreshing = isLoading,
@@ -137,29 +153,84 @@ fun ActivityScreen(
                                     item { Spacer(modifier = Modifier.height(44.dp)) }
                                 }
 
-                                items(items, key = { it.id }) { item ->
-                                    val transcriptId = item.userTranscriptId
-                                    val isClickable = item.status == ActivityStatus.COMPLETED &&
-                                            transcriptId != null
+                                // Active section (pending/processing)
+                                if (activeItems.isNotEmpty()) {
+                                    item {
+                                        Text(
+                                            text = "Active",
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = SecondaryText,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp, vertical = 10.dp)
+                                        )
+                                    }
+                                    items(activeItems, key = { it.id }) { item ->
+                                        ActivityItemRow(
+                                            item = item,
+                                            isNew = viewModel.isNew(item),
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                        Divider(
+                                            modifier = Modifier.padding(horizontal = 16.dp),
+                                            color = MaterialTheme.colorScheme.surfaceVariant
+                                        )
+                                    }
+                                }
 
-                                    ActivityItemRow(
-                                        item = item,
-                                        isNew = viewModel.isNew(item),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .then(
-                                                if (isClickable) {
-                                                    Modifier.clickable { onTranscriptClick(transcriptId!!) }
-                                                } else {
-                                                    Modifier
-                                                }
+                                // Recent section header — collapsible
+                                if (recentItems.isNotEmpty()) {
+                                    item {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable { isRecentExpanded = !isRecentExpanded }
+                                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = "Recent",
+                                                style = MaterialTheme.typography.labelLarge,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = SecondaryText,
+                                                modifier = Modifier.weight(1f)
                                             )
-                                    )
+                                            Icon(
+                                                imageVector = if (isRecentExpanded)
+                                                    Icons.Default.KeyboardArrowUp
+                                                else
+                                                    Icons.Default.KeyboardArrowDown,
+                                                contentDescription = null,
+                                                tint = SecondaryText,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    }
 
-                                    Divider(
-                                        modifier = Modifier.padding(horizontal = 16.dp),
-                                        color = MaterialTheme.colorScheme.surfaceVariant
-                                    )
+                                    if (isRecentExpanded) {
+                                        items(recentItems, key = { it.id }) { item ->
+                                            val transcriptId = item.userTranscriptId
+                                            val isClickable = item.status == ActivityStatus.COMPLETED &&
+                                                    transcriptId != null
+
+                                            ActivityItemRow(
+                                                item = item,
+                                                isNew = viewModel.isNew(item),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .then(
+                                                        if (isClickable) Modifier.clickable {
+                                                            onTranscriptClick(transcriptId!!)
+                                                        } else Modifier
+                                                    )
+                                            )
+                                            Divider(
+                                                modifier = Modifier.padding(horizontal = 16.dp),
+                                                color = MaterialTheme.colorScheme.surfaceVariant
+                                            )
+                                        }
+                                    }
                                 }
 
                                 item { Spacer(modifier = Modifier.height(20.dp)) }
