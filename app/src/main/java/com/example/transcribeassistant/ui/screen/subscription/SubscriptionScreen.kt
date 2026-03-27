@@ -38,7 +38,6 @@ import com.example.transcribeassistant.ui.screen.components.ScoopPurple
 import com.example.transcribeassistant.ui.viewmodel.SubscriptionUiState
 import com.example.transcribeassistant.ui.viewmodel.SubscriptionViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SubscriptionScreen(
     onNavigateBack: () -> Unit,
@@ -54,36 +53,16 @@ fun SubscriptionScreen(
     }
 
     AnimatedBlobsBackground {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {},
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                Icons.Default.ArrowBack,
-                                contentDescription = "Back",
-                                tint = PrimaryText
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    )
-                )
-            },
-            containerColor = Color.Transparent,
-            contentWindowInsets = WindowInsets(0)
-        ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .statusBarsPadding()
                     .padding(horizontal = 24.dp)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(48.dp))
 
                 // Logo
                 Image(
@@ -237,6 +216,21 @@ fun SubscriptionScreen(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Back button overlaid at top-start
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(4.dp)
+                    .align(Alignment.TopStart)
+            ) {
+                Icon(
+                    Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = PrimaryText
+                )
             }
         }
     }
