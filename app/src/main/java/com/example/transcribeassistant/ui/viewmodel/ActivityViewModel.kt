@@ -73,14 +73,16 @@ class ActivityViewModel @Inject constructor(
                     }
                 }
 
-                // Mark newly completed jobs that weren't in the previous list
+                // Mark newly completed jobs — only when we already have a baseline (not the initial load)
                 val previousIds = _items.value.map { it.id }.toSet()
-                val freshCompletions = enrichedJobs
-                    .filter { it.status.raw == "COMPLETED" && it.id !in previousIds }
-                    .map { it.id }
-                    .toSet()
-                if (freshCompletions.isNotEmpty()) {
-                    _newJobIds.update { it + freshCompletions }
+                if (previousIds.isNotEmpty()) {
+                    val freshCompletions = enrichedJobs
+                        .filter { it.status.raw == "COMPLETED" && it.id !in previousIds }
+                        .map { it.id }
+                        .toSet()
+                    if (freshCompletions.isNotEmpty()) {
+                        _newJobIds.update { it + freshCompletions }
+                    }
                 }
                 _items.value = enrichedJobs
             } catch (e: HttpException) {
