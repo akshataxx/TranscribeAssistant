@@ -83,16 +83,16 @@ fun SubscriptionScreen(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 // Logo
                 Image(
-                    painter = painterResource(id = R.drawable.scoop_logo_svg),
+                    painter = painterResource(id = R.drawable.scoop_logo),
                     contentDescription = "Scoop",
                     modifier = Modifier.height(32.dp)
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 // "Premium" gradient heading
                 Text(
