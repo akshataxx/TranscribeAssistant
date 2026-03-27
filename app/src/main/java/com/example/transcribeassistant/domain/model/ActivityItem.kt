@@ -32,18 +32,21 @@ data class ActivityItem(
     val retryCount: Int,
     val updatedAt: String   // ISO 8601
 ) {
-    /** Last path component of the URL, falling back to host, then raw URL. */
+    /** Platform-based display title (e.g. "TikTok Video") matching iOS behaviour. */
     val displayTitle: String get() {
-        return try {
-            val url = java.net.URL(videoUrl)
-            val path = url.path?.trimEnd('/')
-            if (!path.isNullOrEmpty()) {
-                val segment = path.substringAfterLast('/')
-                if (segment.isNotEmpty()) return segment
+        val lower = videoUrl.lowercase()
+        return when {
+            "tiktok.com" in lower -> "TikTok Video"
+            "youtube.com" in lower || "youtu.be" in lower -> "YouTube Video"
+            "instagram.com" in lower -> "Instagram Video"
+            "twitter.com" in lower || "x.com" in lower -> "X Video"
+            "facebook.com" in lower -> "Facebook Video"
+            "reddit.com" in lower -> "Reddit Video"
+            else -> try {
+                java.net.URL(videoUrl).host ?: "Video"
+            } catch (e: Exception) {
+                "Video"
             }
-            url.host ?: videoUrl
-        } catch (e: Exception) {
-            videoUrl
         }
     }
 
