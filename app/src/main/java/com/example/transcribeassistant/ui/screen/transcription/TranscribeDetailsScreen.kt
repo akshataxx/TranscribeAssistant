@@ -70,6 +70,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.transcribeassistant.ui.screen.components.AnimatedBlobsBackground
 import com.example.transcribeassistant.ui.screen.components.CategoryChip
+import com.example.transcribeassistant.ui.screen.components.PlatformLabel
 import com.example.transcribeassistant.ui.screen.components.PrimaryText
 import com.example.transcribeassistant.ui.screen.components.SecondaryText
 import com.example.transcribeassistant.ui.screen.components.ScoopBlue
@@ -146,7 +147,7 @@ fun TranscribeDetailsScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = transcript?.title ?: "",
+                            text = transcript?.let { it.generatedTitle ?: it.title } ?: "",
                             fontWeight = FontWeight.Bold,
                             color = PrimaryText,
                             maxLines = 1,
@@ -192,11 +193,18 @@ fun TranscribeDetailsScreen(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = "${TimeUtils.platformFromUrl(transcript.videoUrl)} • @${transcript.account}",
-                            fontSize = 14.sp,
-                            color = SecondaryText
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            PlatformLabel(platformRaw = transcript.platform, fontSize = 14.sp)
+                            if (!transcript.account.isNullOrEmpty()) {
+                                Text(
+                                    text = " • @${transcript.account}",
+                                    fontSize = 14.sp,
+                                    color = SecondaryText
+                                )
+                            }
+                        }
                         Text(
                             text = "⏱ ${TimeUtils.formatDuration(transcript.duration.toInt())}   •   ${TimeUtils.timeAgo(transcript.uploadedAt)}",
                             fontSize = 14.sp,
