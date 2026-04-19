@@ -3,8 +3,10 @@ package com.example.transcribeassistant.ui.screen.feed
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
@@ -12,6 +14,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import com.example.transcribeassistant.domain.model.Transcript
 import com.example.transcribeassistant.ui.screen.components.CategoryChip
+import com.example.transcribeassistant.ui.screen.components.PlatformLabel
 import com.example.transcribeassistant.utils.TimeUtils
 
 @Composable
@@ -28,7 +31,7 @@ fun TranscriptCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = transcript.title,
+                text = transcript.generatedTitle ?: transcript.title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 maxLines = 2
@@ -36,7 +39,15 @@ fun TranscriptCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text("${TimeUtils.platformFromUrl(transcript.videoUrl)} • @${transcript.account}", style = MaterialTheme.typography.bodySmall)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                PlatformLabel(platformRaw = transcript.platform, fontSize = 12.sp)
+                if (!transcript.account.isNullOrEmpty()) {
+                    Text(
+                        text = " • @${transcript.account}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
             Text("⏱ ${TimeUtils.formatDuration(transcript.duration.toInt())}   •   ${TimeUtils.timeAgo(transcript.uploadedAt)}", style = MaterialTheme.typography.bodySmall)
 
             Spacer(modifier = Modifier.height(8.dp))

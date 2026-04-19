@@ -17,7 +17,8 @@ import com.example.transcribeassistant.domain.model.Transcript
     fun TranscriptDto.toDomain() = Transcript(
         id, videoUrl, transcript, structuredContent, description, title,
         duration, uploadedAt, accountId, account,
-        identifierId, identifier, categoryId, category, alias, notes, createdAt
+        identifierId, identifier, categoryId, category, alias, notes, createdAt,
+        platform, generatedTitle
     )
 
     /**
@@ -30,7 +31,7 @@ import com.example.transcribeassistant.domain.model.Transcript
         id, videoUrl, transcript, structuredContent, description, title,
         duration, uploadedAt, accountId, account,
         identifierId, identifier, categoryId, category, alias, notes,
-        createdAt
+        createdAt, platform, generatedTitle
     )
 
 
@@ -42,5 +43,6 @@ import com.example.transcribeassistant.domain.model.Transcript
     fun TranscriptEntity.toDomain() = Transcript(
         id, videoUrl, transcript, structuredContent, description, title,
         duration, uploadedAt, accountId, account,
-        identifierId, identifier, categoryId, category, alias, notes, createdAt
+        identifierId, identifier, categoryId, category, alias, notes, createdAt,
+        platform, generatedTitle
     )

@@ -23,7 +23,9 @@ class JobRepositoryImpl(
                     userTranscriptId = dto.userTranscriptId,
                     errorMessage = dto.errorMessage,
                     retryCount = dto.retryCount,
-                    updatedAt = dto.updatedAt
+                    updatedAt = dto.updatedAt,
+                    title = dto.transcriptTitle,
+                    platform = dto.platform
                 )
             }
             .sortedByDescending { it.updatedAt }

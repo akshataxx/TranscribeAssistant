@@ -32,6 +32,7 @@ object TimeUtils {
         val years = ChronoUnit.YEARS.between(date, today)
 
         return when {
+            days == 0L -> "Today"
             days < 30 -> "$days day${if (days == 1L) "" else "s"} ago"
             months < 12 -> "$months month${if (months == 1L) "" else "s"} ago"
             else -> "$years year${if (years == 1L) "" else "s"} ago"

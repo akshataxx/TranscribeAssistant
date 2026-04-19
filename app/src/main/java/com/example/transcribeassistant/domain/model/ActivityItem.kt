@@ -31,24 +31,43 @@ data class ActivityItem(
     val errorMessage: String?,
     val retryCount: Int,
     val updatedAt: String,   // ISO 8601
-    val title: String? = null
+    val title: String? = null,
+    val platform: String? = null
 ) {
     /**
-     * For completed items: the real transcript title from the cache.
-     * For pending/processing: platform name derived from the URL (e.g. "TikTok Video").
+     * Priority: transcript title (from backend join) → platform field → friendly domain label → URL fallback.
      */
     val displayTitle: String get() {
         if (!title.isNullOrBlank()) return title
+
+        if (!platform.isNullOrBlank()) {
+            val label = when (platform.uppercase()) {
+                "YOUTUBE"     -> "YouTube video"
+                "TIKTOK"      -> "TikTok video"
+                "INSTAGRAM"   -> "Instagram video"
+                "VIMEO"       -> "Vimeo video"
+                "TWITTER"     -> "X post"
+                "FACEBOOK"    -> "Facebook video"
+                "REDDIT"      -> "Reddit post"
+                "TWITCH"      -> "Twitch clip"
+                "DAILYMOTION" -> "Dailymotion video"
+                else          -> null
+            }
+            if (label != null) return label
+        }
+
         val lower = videoUrl.lowercase()
         return when {
-            "tiktok.com" in lower -> "TikTok Video"
-            "youtube.com" in lower || "youtu.be" in lower -> "YouTube Video"
-            "instagram.com" in lower -> "Instagram Video"
-            "twitter.com" in lower || "x.com" in lower -> "X Video"
-            "facebook.com" in lower -> "Facebook Video"
-            "reddit.com" in lower -> "Reddit Video"
+            "tiktok.com" in lower -> "TikTok video"
+            "youtube.com" in lower || "youtu.be" in lower -> "YouTube video"
+            "instagram.com" in lower -> "Instagram video"
+            "twitter.com" in lower || "x.com" in lower -> "X post"
+            "facebook.com" in lower -> "Facebook video"
+            "reddit.com" in lower -> "Reddit post"
+            "vimeo.com" in lower -> "Vimeo video"
+            "twitch.tv" in lower -> "Twitch clip"
             else -> try {
-                java.net.URL(videoUrl).host ?: "Video"
+                java.net.URL(videoUrl).host?.removePrefix("www.") ?: "Video"
             } catch (e: Exception) {
                 "Video"
             }
