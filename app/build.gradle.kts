@@ -35,8 +35,8 @@ android {
         applicationId = "com.contentcategorise.transcribeassistant"
         minSdk = 26
         targetSdk = 35
-        versionCode = 11
-        versionName = "1.0.11"
+        versionCode = 13
+        versionName = "1.0.13"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -49,6 +49,10 @@ android {
                 storeFile = File(rootProject.projectDir, keystoreProperties["storeFile"] as String)
                 storePassword = keystoreProperties["storePassword"] as String
                 storeType = "PKCS12"
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = true
             }
         }
     }
