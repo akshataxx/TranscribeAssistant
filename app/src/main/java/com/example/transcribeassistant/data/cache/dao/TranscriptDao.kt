@@ -24,4 +24,7 @@ interface TranscriptDao {
 
     @Query("UPDATE transcripts SET alias = :newAlias WHERE categoryId = :categoryId")
     suspend fun updateAlias(categoryId: String, newAlias: String)
+
+    @Query("DELETE FROM transcripts WHERE id IN (:transcriptIds)")
+    suspend fun deleteByIds(transcriptIds: List<String>)
 }

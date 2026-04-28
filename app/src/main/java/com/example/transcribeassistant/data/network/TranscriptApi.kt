@@ -1,12 +1,14 @@
 package com.example.transcribeassistant.data.network
 
 import com.example.transcribeassistant.data.dto.CategoryAliasDto
+import com.example.transcribeassistant.data.dto.BulkDeleteRequest
 import com.example.transcribeassistant.data.dto.RenameAliasRequest
 import com.example.transcribeassistant.data.dto.TranscriptDto
 import com.example.transcribeassistant.data.dto.UpdateNotesRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -49,5 +51,10 @@ interface TranscriptApi {
     suspend fun updateNotes(
         @Path("id") transcriptId: String,
         @Body request: UpdateNotesRequest
+    ): Response<Unit>
+
+    @HTTP(method = "DELETE", path = "transcript", hasBody = true)
+    suspend fun bulkDeleteTranscripts(
+        @Body request: BulkDeleteRequest
     ): Response<Unit>
 }

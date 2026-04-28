@@ -6,6 +6,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.transcribeassistant.common.AppEventBus
+import com.example.transcribeassistant.domain.model.BulkDeleteSummary
 import com.example.transcribeassistant.domain.model.Transcript
 import com.example.transcribeassistant.domain.repository.TranscriptRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,6 +32,18 @@ class FeedViewModel @Inject constructor(
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _isSelectionMode = MutableStateFlow(false)
+    val isSelectionMode: StateFlow<Boolean> = _isSelectionMode.asStateFlow()
+
+    private val _selectedTranscriptIds = MutableStateFlow<Set<String>>(emptySet())
+    val selectedTranscriptIds: StateFlow<Set<String>> = _selectedTranscriptIds.asStateFlow()
+
+    private val _isDeleting = MutableStateFlow(false)
+    val isDeleting: StateFlow<Boolean> = _isDeleting.asStateFlow()
+
+    private val _deleteSummary = MutableStateFlow<BulkDeleteSummary?>(null)
+    val deleteSummary: StateFlow<BulkDeleteSummary?> = _deleteSummary.asStateFlow()
 
     private val _showNewContentPill = MutableStateFlow(false)
     val showNewContentPill: StateFlow<Boolean> = _showNewContentPill.asStateFlow()
@@ -89,8 +102,87 @@ class FeedViewModel @Inject constructor(
     }
 
     fun refresh(categoryId: String? = null) {
+        if (_isDeleting.value) return
         if (categoryId != null) fetchTranscriptsByCategory(categoryId)
         else fetchTranscripts()
+    }
+
+    fun beginSelection(transcriptId: String) {
+        if (_isDeleting.value) return
+        _isSelectionMode.value = true
+        _selectedTranscriptIds.value = setOf(transcriptId)
+    }
+
+    fun toggleSelection(transcriptId: String) {
+        if (_isDeleting.value) return
+
+        if (!_isSelectionMode.value) {
+            beginSelection(transcriptId)
+            return
+        }
+
+        _selectedTranscriptIds.update { selectedIds ->
+            if (transcriptId in selectedIds) selectedIds - transcriptId else selectedIds + transcriptId
+        }
+
+        if (_selectedTranscriptIds.value.isEmpty()) {
+            _isSelectionMode.value = false
+        }
+    }
+
+    fun cancelSelection() {
+        if (_isDeleting.value) return
+        _isSelectionMode.value = false
+        _selectedTranscriptIds.value = emptySet()
+    }
+
+    fun toggleSelectAllTranscripts() {
+        if (_isDeleting.value) return
+
+        val allIds = _transcripts.value.map { it.id }.toSet()
+        if (allIds.isNotEmpty() && _selectedTranscriptIds.value == allIds) {
+            cancelSelection()
+        } else {
+            _isSelectionMode.value = true
+            _selectedTranscriptIds.value = allIds
+        }
+    }
+
+    fun isSelected(transcriptId: String): Boolean {
+        return transcriptId in _selectedTranscriptIds.value
+    }
+
+    fun deleteSelectedTranscripts() {
+        val requestedIds = _selectedTranscriptIds.value.toList()
+        if (requestedIds.isEmpty() || _isDeleting.value) return
+
+        viewModelScope.launch {
+            _isDeleting.value = true
+            try {
+                val summary = repository.deleteTranscripts(requestedIds)
+                val deletedIds = requestedIds.toSet()
+                _transcripts.update { transcripts ->
+                    transcripts.filterNot { it.id in deletedIds }
+                }
+                _selectedTranscriptIds.value = emptySet()
+                _isSelectionMode.value = false
+                _deleteSummary.value = summary
+            } catch (e: Exception) {
+                Log.e("FeedViewModel", "deleteSelectedTranscripts error: ${e.message}")
+                _deleteSummary.value = BulkDeleteSummary(
+                    requestedCount = requestedIds.size,
+                    deletedCount = 0,
+                    failedCount = requestedIds.size,
+                    failureMessages = listOf("We couldn't delete the selected transcripts. Please try again.")
+                )
+            } finally {
+                _isDeleting.value = false
+            }
+        }
+    }
+
+    fun clearDeleteSummary() {
+        _deleteSummary.value = null
     }
 
     fun clearNewContentIndicator() {

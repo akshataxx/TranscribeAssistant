@@ -1,9 +1,11 @@
 package com.example.transcribeassistant.data.repository
 
 import com.example.transcribeassistant.data.cache.dao.TranscriptDao
+import com.example.transcribeassistant.data.dto.BulkDeleteRequest
 import com.example.transcribeassistant.data.dto.RenameAliasRequest
 import com.example.transcribeassistant.data.dto.UpdateNotesRequest
 import com.example.transcribeassistant.data.network.TranscriptApi
+import com.example.transcribeassistant.domain.model.BulkDeleteSummary
 import com.example.transcribeassistant.domain.model.Transcript
 import com.example.transcribeassistant.domain.mapper.toDomain
 import com.example.transcribeassistant.domain.mapper.toEntity
@@ -79,5 +81,27 @@ class TranscriptRepositoryImpl (
         if (!response.isSuccessful) {
             throw Exception("Failed to save notes: ${response.code()}")
         }
+    }
+
+    override suspend fun deleteTranscripts(transcriptIds: List<String>): BulkDeleteSummary {
+        if (transcriptIds.isEmpty()) {
+            return BulkDeleteSummary(
+                requestedCount = 0,
+                deletedCount = 0,
+                failedCount = 0
+            )
+        }
+
+        val response = api.bulkDeleteTranscripts(BulkDeleteRequest(transcriptIds))
+        if (!response.isSuccessful) {
+            throw Exception("Failed to delete transcripts: ${response.code()}")
+        }
+
+        dao.deleteByIds(transcriptIds)
+        return BulkDeleteSummary(
+            requestedCount = transcriptIds.size,
+            deletedCount = transcriptIds.size,
+            failedCount = 0
+        )
     }
 }

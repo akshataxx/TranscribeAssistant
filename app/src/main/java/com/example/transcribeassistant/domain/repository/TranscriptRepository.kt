@@ -1,5 +1,6 @@
 package com.example.transcribeassistant.domain.repository
 
+import com.example.transcribeassistant.domain.model.BulkDeleteSummary
 import com.example.transcribeassistant.domain.model.Transcript
 import java.time.Instant
 
@@ -27,4 +28,6 @@ interface TranscriptRepository {
     suspend fun upsertAlias(categoryId: String, newAlias: String)
 
     suspend fun updateNotes(transcriptId: String, notes: String?)
+
+    suspend fun deleteTranscripts(transcriptIds: List<String>): BulkDeleteSummary
 }
