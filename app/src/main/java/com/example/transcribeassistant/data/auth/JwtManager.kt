@@ -69,9 +69,15 @@ class JwtManager(private val context: Context) {
     }
 
     /**
-     * Clears both tokens and profile (e.g. on logout).
+     * Clears only auth tokens and profile (e.g. on logout).
+     * Does NOT clear other DataStore keys like onboarding flags.
      */
     suspend fun clearTokens() {
-        context.dataStore.edit { it.clear() }
+        context.dataStore.edit { prefs ->
+            prefs.remove(ACCESS_KEY)
+            prefs.remove(REFRESH_KEY)
+            prefs.remove(PROFILE_NAME_KEY)
+            prefs.remove(PROFILE_EMAIL_KEY)
+        }
     }
 }

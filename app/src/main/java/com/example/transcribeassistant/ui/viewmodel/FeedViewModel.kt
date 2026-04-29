@@ -33,6 +33,9 @@ class FeedViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     private val _isSelectionMode = MutableStateFlow(false)
     val isSelectionMode: StateFlow<Boolean> = _isSelectionMode.asStateFlow()
 
@@ -103,8 +106,19 @@ class FeedViewModel @Inject constructor(
 
     fun refresh(categoryId: String? = null) {
         if (_isDeleting.value) return
-        if (categoryId != null) fetchTranscriptsByCategory(categoryId)
-        else fetchTranscripts()
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            try {
+                _transcripts.value = if (categoryId != null)
+                    repository.getTranscriptsByCategoryId(categoryId)
+                else
+                    repository.getAllTranscripts()
+            } catch (e: Exception) {
+                Log.e("FeedViewModel", "refresh error: ${e.message}")
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
     }
 
     fun beginSelection(transcriptId: String) {
