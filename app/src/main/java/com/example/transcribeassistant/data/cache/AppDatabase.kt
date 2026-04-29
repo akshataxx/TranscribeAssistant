@@ -12,7 +12,7 @@ import com.example.transcribeassistant.data.cache.entity.TranscriptEntity
 
 @Database(
     entities = [TranscriptEntity::class, Category::class],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -47,6 +47,13 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE transcripts ADD COLUMN platform TEXT")
                 database.execSQL("ALTER TABLE transcripts ADD COLUMN generatedTitle TEXT")
+            }
+        }
+
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE transcripts ADD COLUMN subcategoryId TEXT")
+                database.execSQL("ALTER TABLE transcripts ADD COLUMN subcategoryName TEXT")
             }
         }
     }
