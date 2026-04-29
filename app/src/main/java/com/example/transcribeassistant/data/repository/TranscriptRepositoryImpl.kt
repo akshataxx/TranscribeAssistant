@@ -3,6 +3,7 @@ package com.example.transcribeassistant.data.repository
 import com.example.transcribeassistant.data.cache.dao.TranscriptDao
 import com.example.transcribeassistant.data.dto.BulkDeleteRequest
 import com.example.transcribeassistant.data.dto.RenameAliasRequest
+import com.example.transcribeassistant.data.dto.SetSubcategoryRequest
 import com.example.transcribeassistant.data.dto.UpdateNotesRequest
 import com.example.transcribeassistant.data.network.TranscriptApi
 import com.example.transcribeassistant.domain.model.BulkDeleteSummary
@@ -103,5 +104,12 @@ class TranscriptRepositoryImpl (
             deletedCount = transcriptIds.size,
             failedCount = 0
         )
+    }
+
+    override suspend fun setTranscriptSubcategory(transcriptId: String, subcategoryId: String): Transcript {
+        val dto = api.setSubcategory(transcriptId, SetSubcategoryRequest(subcategoryId))
+        val model = dto.toDomain()
+        dao.updateSubcategoryById(transcriptId, model.subcategoryId, model.subcategoryName)
+        return model
     }
 }

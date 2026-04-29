@@ -30,4 +30,6 @@ interface TranscriptRepository {
     suspend fun updateNotes(transcriptId: String, notes: String?)
 
     suspend fun deleteTranscripts(transcriptIds: List<String>): BulkDeleteSummary
+
+    suspend fun setTranscriptSubcategory(transcriptId: String, subcategoryId: String): Transcript
 }
