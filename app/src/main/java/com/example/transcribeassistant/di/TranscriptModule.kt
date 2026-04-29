@@ -4,14 +4,17 @@ import android.content.Context
 import androidx.room.Room
 import com.example.transcribeassistant.data.cache.AppDatabase
 import com.example.transcribeassistant.data.cache.dao.TranscriptDao
+import com.example.transcribeassistant.data.network.CategoryApi
 import com.example.transcribeassistant.data.network.DeviceApi
 import com.example.transcribeassistant.data.network.JobApi
 import com.example.transcribeassistant.data.network.SubscriptionApi
 import com.example.transcribeassistant.data.network.TranscriptApi
+import com.example.transcribeassistant.data.repository.CategoryRepositoryImpl
 import com.example.transcribeassistant.data.repository.DeviceRepositoryImpl
 import com.example.transcribeassistant.data.repository.JobRepositoryImpl
 import com.example.transcribeassistant.data.repository.SubscriptionRepositoryImpl
 import com.example.transcribeassistant.data.repository.TranscriptRepositoryImpl
+import com.example.transcribeassistant.domain.repository.CategoryRepository
 import com.example.transcribeassistant.domain.repository.DeviceRepository
 import com.example.transcribeassistant.domain.repository.JobRepository
 import com.example.transcribeassistant.domain.repository.SubscriptionRepository
@@ -35,7 +38,7 @@ object TranscriptModule {
             AppDatabase::class.java,
             "transcribe_db"
         )
-            .addMigrations(AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8)
+            .addMigrations(AppDatabase.MIGRATION_5_6, AppDatabase.MIGRATION_6_7, AppDatabase.MIGRATION_7_8, AppDatabase.MIGRATION_8_9)
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -55,6 +58,9 @@ object TranscriptModule {
         return TranscriptRepositoryImpl(api, dao)
     }
     
+    @Provides
+    fun provideCategoryRepository(api: CategoryApi): CategoryRepository = CategoryRepositoryImpl(api)
+
     @Provides
     fun provideSubscriptionRepository(
         api: SubscriptionApi

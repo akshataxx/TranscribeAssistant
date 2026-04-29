@@ -3,6 +3,7 @@ package com.example.transcribeassistant.data.network
 import com.example.transcribeassistant.data.dto.CategoryAliasDto
 import com.example.transcribeassistant.data.dto.BulkDeleteRequest
 import com.example.transcribeassistant.data.dto.RenameAliasRequest
+import com.example.transcribeassistant.data.dto.SetSubcategoryRequest
 import com.example.transcribeassistant.data.dto.TranscriptDto
 import com.example.transcribeassistant.data.dto.UpdateNotesRequest
 import retrofit2.Response
@@ -57,4 +58,10 @@ interface TranscriptApi {
     suspend fun bulkDeleteTranscripts(
         @Body request: BulkDeleteRequest
     ): Response<Unit>
+
+    @PATCH("transcript/{id}/subcategory")
+    suspend fun setSubcategory(
+        @Path("id") transcriptId: String,
+        @Body request: SetSubcategoryRequest
+    ): TranscriptDto
 }

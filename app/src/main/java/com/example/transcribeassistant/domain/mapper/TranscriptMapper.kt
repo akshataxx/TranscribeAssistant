@@ -18,7 +18,7 @@ import com.example.transcribeassistant.domain.model.Transcript
         id, videoUrl, transcript, structuredContent, description, title,
         duration, uploadedAt, accountId, account,
         identifierId, identifier, categoryId, category, alias, notes, createdAt,
-        platform, generatedTitle
+        platform, generatedTitle, subcategoryId, subcategory
     )
 
     /**
@@ -31,7 +31,7 @@ import com.example.transcribeassistant.domain.model.Transcript
         id, videoUrl, transcript, structuredContent, description, title,
         duration, uploadedAt, accountId, account,
         identifierId, identifier, categoryId, category, alias, notes,
-        createdAt, platform, generatedTitle
+        createdAt, platform, generatedTitle, subcategoryId, subcategoryName
     )
 
 
@@ -44,5 +44,5 @@ import com.example.transcribeassistant.domain.model.Transcript
         id, videoUrl, transcript, structuredContent, description, title,
         duration, uploadedAt, accountId, account,
         identifierId, identifier, categoryId, category, alias, notes, createdAt,
-        platform, generatedTitle
+        platform, generatedTitle, subcategoryId, subcategoryName
     )

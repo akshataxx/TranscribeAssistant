@@ -7,7 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.transcribeassistant.common.AppEventBus
 import com.example.transcribeassistant.domain.model.BulkDeleteSummary
+import com.example.transcribeassistant.domain.model.Subcategory
 import com.example.transcribeassistant.domain.model.Transcript
+import com.example.transcribeassistant.domain.repository.CategoryRepository
 import com.example.transcribeassistant.domain.repository.TranscriptRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -24,6 +26,7 @@ private const val KEY_BANNER_DISMISSED = "notificationBannerDismissed"
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     private val repository: TranscriptRepository,
+    private val categoryRepository: CategoryRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -54,16 +57,27 @@ class FeedViewModel @Inject constructor(
     private val _newTranscriptCount = MutableStateFlow(0)
     val newTranscriptCount: StateFlow<Int> = _newTranscriptCount.asStateFlow()
 
-    /** Whether the "notifications off" banner has been dismissed this session. */
     private val _bannerDismissed = MutableStateFlow(
         context.getSharedPreferences(FEED_PREF_NAME, Context.MODE_PRIVATE)
             .getBoolean(KEY_BANNER_DISMISSED, false)
     )
     val bannerDismissed: StateFlow<Boolean> = _bannerDismissed.asStateFlow()
 
-    /** Re-checked every time the screen calls checkNotificationsEnabled(). */
     private val _notificationsEnabled = MutableStateFlow(true)
     val notificationsEnabled: StateFlow<Boolean> = _notificationsEnabled.asStateFlow()
+
+    // Subcategory picker state
+    private val _subcategoryPickerOpen = MutableStateFlow(false)
+    val subcategoryPickerOpen: StateFlow<Boolean> = _subcategoryPickerOpen.asStateFlow()
+
+    private val _subcategories = MutableStateFlow<List<Subcategory>>(emptyList())
+    val subcategories: StateFlow<List<Subcategory>> = _subcategories.asStateFlow()
+
+    private val _isLoadingSubcategories = MutableStateFlow(false)
+    val isLoadingSubcategories: StateFlow<Boolean> = _isLoadingSubcategories.asStateFlow()
+
+    private val _isSavingSubcategory = MutableStateFlow(false)
+    val isSavingSubcategory: StateFlow<Boolean> = _isSavingSubcategory.asStateFlow()
 
     init {
         observeRefreshEvents()
@@ -138,16 +152,14 @@ class FeedViewModel @Inject constructor(
         _selectedTranscriptIds.update { selectedIds ->
             if (transcriptId in selectedIds) selectedIds - transcriptId else selectedIds + transcriptId
         }
-
-        if (_selectedTranscriptIds.value.isEmpty()) {
-            _isSelectionMode.value = false
-        }
+        // Selection mode stays active even when count reaches 0 (per spec)
     }
 
     fun cancelSelection() {
         if (_isDeleting.value) return
         _isSelectionMode.value = false
         _selectedTranscriptIds.value = emptySet()
+        _subcategoryPickerOpen.value = false
     }
 
     fun toggleSelectAllTranscripts() {
@@ -155,7 +167,7 @@ class FeedViewModel @Inject constructor(
 
         val allIds = _transcripts.value.map { it.id }.toSet()
         if (allIds.isNotEmpty() && _selectedTranscriptIds.value == allIds) {
-            cancelSelection()
+            _selectedTranscriptIds.value = emptySet()
         } else {
             _isSelectionMode.value = true
             _selectedTranscriptIds.value = allIds
@@ -212,8 +224,58 @@ class FeedViewModel @Inject constructor(
             .apply()
     }
 
-    /** Call on screen resume to get the latest permission state. */
     fun checkNotificationsEnabled() {
         _notificationsEnabled.value = NotificationManagerCompat.from(context).areNotificationsEnabled()
+    }
+
+    fun openCategorizePicker(categoryId: String) {
+        viewModelScope.launch {
+            _subcategoryPickerOpen.value = true
+            _isLoadingSubcategories.value = true
+            try {
+                _subcategories.value = categoryRepository.getSubcategoriesForCategory(categoryId)
+            } catch (e: Exception) {
+                Log.e("FeedViewModel", "loadSubcategories error: ${e.message}")
+                _subcategories.value = emptyList()
+            } finally {
+                _isLoadingSubcategories.value = false
+            }
+        }
+    }
+
+    fun dismissCategorizePicker() {
+        _subcategoryPickerOpen.value = false
+    }
+
+    fun createSubcategory(categoryId: String, name: String) {
+        viewModelScope.launch {
+            try {
+                val newSub = categoryRepository.createSubcategory(categoryId, name)
+                _subcategories.update { it + newSub }
+            } catch (e: Exception) {
+                Log.e("FeedViewModel", "createSubcategory error: ${e.message}")
+            }
+        }
+    }
+
+    fun applySubcategoryToSelected(subcategoryId: String) {
+        val ids = _selectedTranscriptIds.value.toList()
+        if (ids.isEmpty()) return
+
+        viewModelScope.launch {
+            _isSavingSubcategory.value = true
+            try {
+                ids.forEach { transcriptId ->
+                    val updated = repository.setTranscriptSubcategory(transcriptId, subcategoryId)
+                    _transcripts.update { list -> list.map { if (it.id == transcriptId) updated else it } }
+                }
+                _subcategoryPickerOpen.value = false
+                cancelSelection()
+            } catch (e: Exception) {
+                Log.e("FeedViewModel", "applySubcategory error: ${e.message}")
+            } finally {
+                _isSavingSubcategory.value = false
+            }
+        }
     }
 }

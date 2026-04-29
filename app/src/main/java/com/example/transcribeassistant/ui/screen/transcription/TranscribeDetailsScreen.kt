@@ -45,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -76,6 +77,8 @@ import com.example.transcribeassistant.ui.screen.components.SecondaryText
 import com.example.transcribeassistant.ui.screen.components.ScoopBlue
 import com.example.transcribeassistant.ui.screen.components.ScoopCyan
 import com.example.transcribeassistant.ui.screen.components.ScoopPurple
+import com.example.transcribeassistant.ui.screen.feed.SubcategoryPickerSheet
+import com.example.transcribeassistant.ui.screen.feed.SubcategoryPill
 import com.example.transcribeassistant.ui.viewmodel.TranscriptViewModel
 import com.example.transcribeassistant.utils.TimeUtils
 import org.json.JSONObject
@@ -93,6 +96,11 @@ fun TranscribeDetailsScreen(
     val isSavingNotes by viewModel.isSavingNotes.collectAsState()
     val saveNotesError by viewModel.saveNotesError.collectAsState()
     val saveNotesSuccess by viewModel.saveNotesSuccess.collectAsState()
+    val subcategories by viewModel.subcategories.collectAsState()
+    val isLoadingSubcategories by viewModel.isLoadingSubcategories.collectAsState()
+    val isSavingSubcategory by viewModel.isSavingSubcategory.collectAsState()
+
+    var showSubcategoryPicker by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
@@ -120,6 +128,11 @@ fun TranscribeDetailsScreen(
         }
     }
 
+    // Load subcategories when transcript category is known
+    LaunchedEffect(transcript?.categoryId) {
+        transcript?.categoryId?.let { viewModel.loadSubcategoriesForCategory(it) }
+    }
+
     // setup for TextToSpeech
     val textToSpeech = remember {
         TextToSpeech(context, null).apply {
@@ -139,6 +152,30 @@ fun TranscribeDetailsScreen(
             Log.d("TranscribeDetails", "Fetching transcript for video URL: $videoUrl")
             viewModel.submitNewVideo(videoUrl)
         }
+    }
+
+    val pickerSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    if (showSubcategoryPicker && transcript != null) {
+        SubcategoryPickerSheet(
+            categoryName = transcript.alias ?: transcript.category,
+            subcategories = subcategories,
+            currentSubcategoryId = transcript.subcategoryId,
+            isBulkMode = false,
+            bulkCount = 1,
+            isLoading = isLoadingSubcategories,
+            isSaving = isSavingSubcategory,
+            sheetState = pickerSheetState,
+            onDismiss = { showSubcategoryPicker = false },
+            onSave = { subcategoryId ->
+                viewModel.setSubcategoryForTranscript(transcriptId, subcategoryId)
+                showSubcategoryPicker = false
+            },
+            onCreateSubcategory = { name ->
+                transcript.categoryId.let { catId ->
+                    viewModel.createSubcategory(catId, name, transcriptId)
+                }
+            }
+        )
     }
 
     AnimatedBlobsBackground {
@@ -214,6 +251,61 @@ fun TranscribeDetailsScreen(
                             CategoryChip(transcript.category)
                             if (transcript.alias != null && transcript.alias.isNotEmpty()) {
                                 CategoryChip(transcript.alias)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Subcategory card
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .shadow(
+                                elevation = 6.dp,
+                                shape = RoundedCornerShape(16.dp),
+                                ambientColor = Color.Black.copy(alpha = 0.04f),
+                                spotColor = Color.Black.copy(alpha = 0.06f)
+                            ),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Text(
+                                text = "SUBCATEGORIES",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = SecondaryText,
+                                letterSpacing = 0.04.sp
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (!transcript.subcategoryName.isNullOrEmpty()) {
+                                    SubcategoryPill(transcript.subcategoryName)
+                                }
+                                // Dashed add/edit button
+                                Surface(
+                                    onClick = { showSubcategoryPicker = true },
+                                    shape = RoundedCornerShape(9999.dp),
+                                    color = Color.Transparent,
+                                    border = androidx.compose.foundation.BorderStroke(
+                                        width = 1.dp,
+                                        color = ScoopPurple.copy(alpha = 0.6f)
+                                    )
+                                ) {
+                                    Text(
+                                        text = if (transcript.subcategoryName.isNullOrEmpty()) "+ Add subcategory" else "+ Edit",
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = ScoopPurple
+                                    )
+                                }
                             }
                         }
                     }

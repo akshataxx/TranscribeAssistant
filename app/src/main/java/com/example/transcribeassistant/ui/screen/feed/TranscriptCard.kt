@@ -19,7 +19,24 @@ import com.example.transcribeassistant.ui.screen.components.CategoryChip
 import com.example.transcribeassistant.ui.screen.components.PlatformLabel
 import com.example.transcribeassistant.ui.screen.components.ScoopPurple
 import com.example.transcribeassistant.ui.screen.components.SecondaryText
+import com.example.transcribeassistant.ui.theme.pastelCyan
 import com.example.transcribeassistant.utils.TimeUtils
+
+@Composable
+fun SubcategoryPill(label: String) {
+    Surface(
+        color = Color(0xFFE0F7FA),
+        shape = RoundedCornerShape(9999.dp)
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF1F2937)
+        )
+    }
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -86,6 +103,9 @@ fun TranscriptCard(
                     CategoryChip(transcript.category)
                     if (!transcript.alias.isNullOrEmpty()) {
                         CategoryChip(transcript.alias)
+                    }
+                    if (!transcript.subcategoryName.isNullOrEmpty()) {
+                        SubcategoryPill(transcript.subcategoryName)
                     }
                 }
             }

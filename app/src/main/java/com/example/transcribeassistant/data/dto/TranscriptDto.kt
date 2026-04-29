@@ -44,6 +44,8 @@ data class TranscriptDto(
     @Json(name = "notes")              val notes: String? = null,
     @Json(name = "createdAt")          val createdAt: Instant,
     @Json(name = "platform")           val platform: String? = null,
-    @Json(name = "generatedTitle")     val generatedTitle: String? = null
+    @Json(name = "generatedTitle")     val generatedTitle: String? = null,
+    @Json(name = "subcategoryId")      val subcategoryId: String? = null,
+    @Json(name = "subcategory")        val subcategory: String? = null
 )
 

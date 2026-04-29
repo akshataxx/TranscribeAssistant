@@ -1,5 +1,8 @@
 package com.example.transcribeassistant.ui.screen.feed
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -25,12 +29,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -60,6 +65,9 @@ import com.example.transcribeassistant.ui.screen.components.ScoopPurple
 import com.example.transcribeassistant.ui.screen.components.SecondaryText
 import com.example.transcribeassistant.ui.viewmodel.FeedViewModel
 import kotlinx.coroutines.launch
+
+private val DockBg = Color(0xFF1F2937)
+private val DangerRed = Color(0xF2EF4444)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,12 +88,31 @@ fun FeedScreen(
     val selectedTranscriptIds by viewModel.selectedTranscriptIds.collectAsState()
     val isDeleting by viewModel.isDeleting.collectAsState()
     val deleteSummary by viewModel.deleteSummary.collectAsState()
+    val subcategoryPickerOpen by viewModel.subcategoryPickerOpen.collectAsState()
+    val subcategories by viewModel.subcategories.collectAsState()
+    val isLoadingSubcategories by viewModel.isLoadingSubcategories.collectAsState()
+    val isSavingSubcategory by viewModel.isSavingSubcategory.collectAsState()
 
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     val selectedCount = selectedTranscriptIds.size
     val hasSelectedAll = transcripts.isNotEmpty() && selectedTranscriptIds == transcripts.map { it.id }.toSet()
+
+    // Determine which category context applies for the subcategory picker.
+    // In drill-down mode use the passed categoryId; in bulk from main feed, derive from selected.
+    val effectiveCategoryId: String? = categoryId
+        ?: run {
+            val selectedCategoryIds = transcripts
+                .filter { it.id in selectedTranscriptIds }
+                .map { it.categoryId }
+                .toSet()
+            if (selectedCategoryIds.size == 1) selectedCategoryIds.first() else null
+        }
+
+    // The category name shown in the picker subtitle
+    val categoryName = transcripts.firstOrNull { it.categoryId == effectiveCategoryId }
+        ?.let { it.alias ?: it.category } ?: ""
 
     // Initial fetch
     LaunchedEffect(categoryId) {
@@ -94,7 +121,6 @@ fun FeedScreen(
         else viewModel.fetchTranscripts()
     }
 
-    // Recheck notification status when screen resumes (user may have changed in Settings)
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -106,64 +132,102 @@ fun FeedScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    // Subcategory picker sheet
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    if (subcategoryPickerOpen && effectiveCategoryId != null) {
+        SubcategoryPickerSheet(
+            categoryName = categoryName,
+            subcategories = subcategories,
+            currentSubcategoryId = null,
+            isBulkMode = true,
+            bulkCount = selectedCount,
+            isLoading = isLoadingSubcategories,
+            isSaving = isSavingSubcategory,
+            sheetState = sheetState,
+            onDismiss = { viewModel.dismissCategorizePicker() },
+            onSave = { subcategoryId -> viewModel.applySubcategoryToSelected(subcategoryId) },
+            onCreateSubcategory = { name ->
+                effectiveCategoryId.let { catId -> viewModel.createSubcategory(catId, name) }
+            }
+        )
+    }
+
     AnimatedBlobsBackground {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
-                if (categoryId != null && onBackClick != null) {
-                    // Category drill-down: top bar with back button and category name
-                    val categoryTitle = transcripts.firstOrNull()?.let { it.alias ?: it.category } ?: ""
-                    TopAppBar(
-                        title = {
-                            Text(
-                                text = categoryTitle,
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    brush = Brush.linearGradient(
-                                        colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
-                                    )
-                                )
-                            )
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = onBackClick) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back",
-                                    tint = ScoopPurple
-                                )
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-                    )
-                } else {
-                    if (isSelectionMode) {
+                when {
+                    // Actions mode header (replaces both normal and category headers)
+                    isSelectionMode -> {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .background(Color.White.copy(alpha = 0.70f))
                                 .padding(horizontal = 16.dp)
-                                .padding(top = 8.dp, bottom = 16.dp),
+                                .padding(top = 8.dp, bottom = 12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             TextButton(
                                 onClick = { viewModel.cancelSelection() },
                                 enabled = !isDeleting
                             ) {
-                                Text("Cancel", color = SecondaryText)
+                                Text("✕  Cancel", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = SecondaryText)
                             }
 
                             Spacer(modifier = Modifier.weight(1f))
 
                             Text(
-                                text = "$selectedCount Selected",
-                                fontSize = 22.sp,
+                                text = "$selectedCount selected",
+                                fontSize = 17.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
 
                             Spacer(modifier = Modifier.weight(1f))
+
+                            TextButton(
+                                onClick = { viewModel.toggleSelectAllTranscripts() },
+                                enabled = !isDeleting
+                            ) {
+                                Text(
+                                    text = if (hasSelectedAll) "Deselect all" else "Select all",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = ScoopPurple
+                                )
+                            }
                         }
-                    } else {
-                        // Main feed tab: gradient "Your Feed" header
+                    }
+
+                    // Category drill-down header
+                    categoryId != null && onBackClick != null -> {
+                        val categoryTitle = transcripts.firstOrNull()?.let { it.alias ?: it.category } ?: ""
+                        TopAppBar(
+                            title = {
+                                Text(
+                                    text = categoryTitle,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        brush = Brush.linearGradient(
+                                            colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan)
+                                        )
+                                    )
+                                )
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = onBackClick) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "Back",
+                                        tint = ScoopPurple
+                                    )
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                        )
+                    }
+
+                    // Main feed header
+                    else -> {
                         Text(
                             text = "Your Feed",
                             fontSize = 32.sp,
@@ -178,7 +242,6 @@ fun FeedScreen(
                                 .padding(top = 8.dp, bottom = 16.dp)
                         )
 
-                        // Notifications banner only on the main feed tab
                         if (!notificationsEnabled && !bannerDismissed) {
                             EnableNotificationsBanner(
                                 onDismiss = { viewModel.dismissBanner() },
@@ -215,7 +278,6 @@ fun FeedScreen(
                                     state = listState,
                                     modifier = Modifier.fillMaxSize()
                                 ) {
-                                    // Spacer so pill doesn't cover the first card
                                     if (showNewContentPill) {
                                         item { Spacer(modifier = Modifier.height(44.dp)) }
                                     }
@@ -242,12 +304,11 @@ fun FeedScreen(
                                     }
 
                                     item {
-                                        Spacer(modifier = Modifier.height(if (isSelectionMode) 96.dp else 20.dp))
+                                        Spacer(modifier = Modifier.height(if (isSelectionMode) 120.dp else 20.dp))
                                     }
                                 }
                             }
 
-                            // Floating NewContentPill
                             if (showNewContentPill) {
                                 NewContentPill(
                                     count = newTranscriptCount,
@@ -265,15 +326,24 @@ fun FeedScreen(
                 }
             }
 
-            if (isSelectionMode) {
-                BulkDeleteBottomBar(
+            // Floating Actions dock — visible in selection mode when items are selected
+            AnimatedVisibility(
+                visible = isSelectionMode && selectedCount > 0,
+                enter = slideInVertically(initialOffsetY = { it }),
+                exit = slideOutVertically(targetOffsetY = { it }),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 18.dp)
+            ) {
+                ActionsDock(
                     selectedCount = selectedCount,
-                    hasSelectedAll = hasSelectedAll,
                     isDeleting = isDeleting,
-                    onCancel = { viewModel.cancelSelection() },
-                    onToggleSelectAll = { viewModel.toggleSelectAllTranscripts() },
-                    onDelete = { showDeleteConfirmation = true },
-                    modifier = Modifier.align(Alignment.BottomCenter)
+                    canCategorize = effectiveCategoryId != null,
+                    onCategorize = {
+                        effectiveCategoryId?.let { viewModel.openCategorizePicker(it) }
+                    },
+                    onDelete = { showDeleteConfirmation = true }
                 )
             }
         }
@@ -285,11 +355,8 @@ fun FeedScreen(
             title = { Text("Delete transcripts?") },
             text = {
                 Text(
-                    if (selectedCount == 1) {
-                        "This will permanently delete the selected transcript."
-                    } else {
-                        "This will permanently delete the selected transcripts."
-                    }
+                    if (selectedCount == 1) "This will permanently delete the selected transcript."
+                    else "This will permanently delete the selected transcripts."
                 )
             },
             confirmButton = {
@@ -330,60 +397,90 @@ fun FeedScreen(
 }
 
 @Composable
-private fun BulkDeleteBottomBar(
+private fun ActionsDock(
     selectedCount: Int,
-    hasSelectedAll: Boolean,
     isDeleting: Boolean,
-    onCancel: () -> Unit,
-    onToggleSelectAll: () -> Unit,
+    canCategorize: Boolean,
+    onCategorize: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
-            .fillMaxWidth()
-            .background(Color.White.copy(alpha = 0.96f))
-            .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .clip(RoundedCornerShape(9999.dp))
+            .background(DockBg)
+            .padding(horizontal = 8.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        OutlinedButton(
-            onClick = onCancel,
-            enabled = !isDeleting,
-            modifier = Modifier.weight(1f),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = SecondaryText)
+        // Categorize — primary gradient
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(9999.dp))
+                .background(
+                    if (canCategorize) {
+                        Brush.linearGradient(colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan))
+                    } else {
+                        Brush.linearGradient(colors = listOf(Color.Gray, Color.Gray))
+                    }
+                )
+                .let {
+                    if (canCategorize && !isDeleting) it.padding(0.dp) else it
+                }
+                .padding(0.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Text("Cancel")
+            TextButton(
+                onClick = onCategorize,
+                enabled = canCategorize && !isDeleting
+            ) {
+                Text(
+                    "Categorize",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
 
-        OutlinedButton(
-            onClick = onToggleSelectAll,
-            enabled = !isDeleting,
-            modifier = Modifier.weight(1f),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = ScoopPurple)
-        ) {
-            Text(if (hasSelectedAll) "Deselect All" else "Select All")
-        }
-
-        Button(
-            onClick = onDelete,
-            enabled = selectedCount > 0 && !isDeleting,
-            modifier = Modifier.weight(1f),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Red,
-                disabledContainerColor = Color.Red.copy(alpha = 0.5f)
-            )
+        // Delete — danger
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(9999.dp))
+                .background(if (isDeleting) DangerRed.copy(alpha = 0.5f) else DangerRed),
+            contentAlignment = Alignment.Center
         ) {
             if (isDeleting) {
                 CircularProgressIndicator(
                     color = Color.White,
                     strokeWidth = 2.dp,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 9.dp)
+                        .size(14.dp)
                 )
             } else {
-                Text("Delete $selectedCount")
+                TextButton(
+                    onClick = onDelete,
+                    enabled = !isDeleting
+                ) {
+                    Text(
+                        "Delete",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
+        }
+
+        // Share — transparent
+        TextButton(onClick = { /* TODO: share */ }) {
+            Text("Share", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        }
+
+        // More
+        TextButton(onClick = { /* TODO: more */ }) {
+            Text("More ⋯", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         }
     }
 }

@@ -3,34 +3,29 @@ package com.example.transcribeassistant.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.transcribeassistant.domain.model.Subcategory
 import com.example.transcribeassistant.domain.model.Transcript
+import com.example.transcribeassistant.domain.repository.CategoryRepository
 import com.example.transcribeassistant.domain.repository.TranscriptRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-/**
- * ViewModel for managing the transcript data.
- * This ViewModel fetches the transcript from a video URL using Retrofit.
- * Calls the API service to get the transcript and exposes it as a StateFlow.
- * On error, it updates the StateFlow with an error message.
- *
- * Use submitVideo(videoUrl) when user first shares the video
- * Use getTranscriptById(transcriptId) in TranscribeDetailsScreen to fetch the stored transcript
- */
-
 @HiltViewModel
 class TranscriptViewModel @Inject constructor(
-    private val repository: TranscriptRepository
-): ViewModel() {
+    private val repository: TranscriptRepository,
+    private val categoryRepository: CategoryRepository
+) : ViewModel() {
 
     private val _transcript = MutableStateFlow<Transcript?>(null)
     val transcript: StateFlow<Transcript?> = _transcript
+
     private val _transcriptsByCategory = MutableStateFlow<List<Transcript>>(emptyList())
     val transcriptsByCategory: StateFlow<List<Transcript>> = _transcriptsByCategory
+
     private val _isSavingNotes = MutableStateFlow(false)
     val isSavingNotes: StateFlow<Boolean> = _isSavingNotes
 
@@ -40,6 +35,16 @@ class TranscriptViewModel @Inject constructor(
     private val _saveNotesSuccess = MutableStateFlow(false)
     val saveNotesSuccess: StateFlow<Boolean> = _saveNotesSuccess
 
+    // Subcategory state
+    private val _subcategories = MutableStateFlow<List<Subcategory>>(emptyList())
+    val subcategories: StateFlow<List<Subcategory>> = _subcategories
+
+    private val _isLoadingSubcategories = MutableStateFlow(false)
+    val isLoadingSubcategories: StateFlow<Boolean> = _isLoadingSubcategories
+
+    private val _isSavingSubcategory = MutableStateFlow(false)
+    val isSavingSubcategory: StateFlow<Boolean> = _isSavingSubcategory
+
     fun saveNotes(transcriptId: String, notes: String?) {
         viewModelScope.launch {
             _isSavingNotes.value = true
@@ -47,7 +52,6 @@ class TranscriptViewModel @Inject constructor(
             _saveNotesSuccess.value = false
             try {
                 repository.updateNotes(transcriptId, notes)
-                // Update the local transcript state with the new notes
                 _transcript.value = _transcript.value?.copy(notes = notes)
                 _saveNotesSuccess.value = true
                 Log.d("TranscriptVM", "Notes saved for $transcriptId")
@@ -68,33 +72,30 @@ class TranscriptViewModel @Inject constructor(
         _saveNotesError.value = null
     }
 
-    // For initial video submission
     fun submitNewVideo(videoUrl: String) {
         viewModelScope.launch {
             try {
                 val response = repository.transcribeVideo(videoUrl)
                 Log.d("TranscriptVM", "Transcript created: ${response.transcript}")
                 _transcript.value = response
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 Log.e("TranscriptVM", "Error: ${e.message}")
             }
         }
     }
 
-    // For For fetching existing transcript by ID and displaying it on TranscribeDetailsScreen
     fun loadExistingTranscript(transcriptId: String) {
         viewModelScope.launch {
             try {
                 val response = repository.getTranscriptById(transcriptId)
                 Log.d("TranscriptVM", "Transcript fetched by ID: ${response.transcript}")
                 _transcript.value = response
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 Log.e("TranscriptVM", "Error: ${e.message}")
             }
         }
     }
 
-    // Fetch transcripts by category ID
     fun fetchTranscriptsByCategory(categoryId: String) {
         viewModelScope.launch {
             try {
@@ -102,6 +103,46 @@ class TranscriptViewModel @Inject constructor(
                 _transcriptsByCategory.value = transcripts
             } catch (e: Exception) {
                 Log.e("TranscriptVM", "Error fetching transcripts by category: ${e.message}")
+            }
+        }
+    }
+
+    fun loadSubcategoriesForCategory(categoryId: String) {
+        viewModelScope.launch {
+            _isLoadingSubcategories.value = true
+            try {
+                _subcategories.value = categoryRepository.getSubcategoriesForCategory(categoryId)
+            } catch (e: Exception) {
+                Log.e("TranscriptVM", "Error loading subcategories: ${e.message}")
+                _subcategories.value = emptyList()
+            } finally {
+                _isLoadingSubcategories.value = false
+            }
+        }
+    }
+
+    fun setSubcategoryForTranscript(transcriptId: String, subcategoryId: String) {
+        viewModelScope.launch {
+            _isSavingSubcategory.value = true
+            try {
+                val updated = repository.setTranscriptSubcategory(transcriptId, subcategoryId)
+                _transcript.value = updated
+            } catch (e: Exception) {
+                Log.e("TranscriptVM", "Error setting subcategory: ${e.message}")
+            } finally {
+                _isSavingSubcategory.value = false
+            }
+        }
+    }
+
+    fun createSubcategory(categoryId: String, name: String, transcriptId: String) {
+        viewModelScope.launch {
+            try {
+                val newSub = categoryRepository.createSubcategory(categoryId, name)
+                _subcategories.update { it + newSub }
+                setSubcategoryForTranscript(transcriptId, newSub.id)
+            } catch (e: Exception) {
+                Log.e("TranscriptVM", "Error creating subcategory: ${e.message}")
             }
         }
     }
