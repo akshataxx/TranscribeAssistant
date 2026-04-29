@@ -71,6 +71,7 @@ fun FeedScreen(
 ) {
     val transcripts by viewModel.transcripts.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
     val showNewContentPill by viewModel.showNewContentPill.collectAsState()
     val newTranscriptCount by viewModel.newTranscriptCount.collectAsState()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
@@ -207,7 +208,7 @@ fun FeedScreen(
                     else -> {
                         Box(modifier = Modifier.fillMaxSize()) {
                             PullToRefreshBox(
-                                isRefreshing = isLoading,
+                                isRefreshing = isRefreshing,
                                 onRefresh = { viewModel.refresh(categoryId) }
                             ) {
                                 LazyColumn(
