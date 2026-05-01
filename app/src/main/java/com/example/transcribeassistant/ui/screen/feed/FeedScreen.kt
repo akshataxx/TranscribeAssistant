@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -413,73 +414,60 @@ private fun ActionsDock(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Categorize — primary gradient
+        // Categorize — gradient pill
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(9999.dp))
                 .background(
-                    if (canCategorize) {
+                    if (canCategorize && !isDeleting)
                         Brush.linearGradient(colors = listOf(ScoopPurple, ScoopBlue, ScoopCyan))
-                    } else {
+                    else
                         Brush.linearGradient(colors = listOf(Color.Gray, Color.Gray))
-                    }
                 )
-                .let {
-                    if (canCategorize && !isDeleting) it.padding(0.dp) else it
-                }
-                .padding(0.dp),
+                .clickable(enabled = canCategorize && !isDeleting, onClick = onCategorize)
+                .padding(horizontal = 13.dp, vertical = 9.dp),
             contentAlignment = Alignment.Center
         ) {
-            TextButton(
-                onClick = onCategorize,
-                enabled = canCategorize && !isDeleting
-            ) {
-                Text(
-                    "Categorize",
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+            Text("Categorize", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         }
 
-        // Delete — danger
+        // Delete — danger pill
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(9999.dp))
-                .background(if (isDeleting) DangerRed.copy(alpha = 0.5f) else DangerRed),
+                .background(if (isDeleting) DangerRed.copy(alpha = 0.5f) else DangerRed)
+                .clickable(enabled = !isDeleting, onClick = onDelete)
+                .padding(horizontal = 13.dp, vertical = 9.dp),
             contentAlignment = Alignment.Center
         ) {
             if (isDeleting) {
                 CircularProgressIndicator(
                     color = Color.White,
                     strokeWidth = 2.dp,
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 9.dp)
-                        .size(14.dp)
+                    modifier = Modifier.size(14.dp)
                 )
             } else {
-                TextButton(
-                    onClick = onDelete,
-                    enabled = !isDeleting
-                ) {
-                    Text(
-                        "Delete",
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
+                Text("Delete", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
             }
         }
 
-        // Share — transparent
-        TextButton(onClick = { /* TODO: share */ }) {
+        // Share — ghost pill
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(9999.dp))
+                .clickable { /* TODO */ }
+                .padding(horizontal = 13.dp, vertical = 9.dp)
+        ) {
             Text("Share", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         }
 
-        // More
-        TextButton(onClick = { /* TODO: more */ }) {
+        // More — ghost pill
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(9999.dp))
+                .clickable { /* TODO */ }
+                .padding(horizontal = 13.dp, vertical = 9.dp)
+        ) {
             Text("More ⋯", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         }
     }

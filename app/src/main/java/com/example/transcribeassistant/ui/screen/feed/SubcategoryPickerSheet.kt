@@ -30,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,10 +52,7 @@ import com.example.transcribeassistant.domain.model.Subcategory
 import com.example.transcribeassistant.ui.screen.components.ScoopBlue
 import com.example.transcribeassistant.ui.screen.components.ScoopCyan
 import com.example.transcribeassistant.ui.screen.components.ScoopPurple
-import com.example.transcribeassistant.ui.screen.components.SecondaryText
 
-private val SubPillBg = Color(0xFFE0F7FA)
-private val SubPillFg = Color(0xFF1F2937)
 private val Hairline = Color(0xFFE5E7EB)
 private val Fg1 = Color(0xFF1F2937)
 private val Fg2 = Color(0xFF6B7280)
@@ -81,6 +79,10 @@ fun SubcategoryPickerSheet(
     var showCreateRow by remember { mutableStateOf(false) }
     var newSubName by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(showCreateRow) {
+        if (showCreateRow) focusRequester.requestFocus()
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
